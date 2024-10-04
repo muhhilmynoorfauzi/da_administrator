@@ -652,6 +652,7 @@ class _DetailToPageState extends State<DetailToPage> {
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
             style: TextStyle(color: Colors.black, fontSize: h4),
+            inputFormatters: [TextInputFormatter.withFunction((oldValue, newValue) => TextEditingValue(text: newValue.text.toUpperCase(), selection: newValue.selection))],
           ),
           actionsPadding: const EdgeInsets.all(10),
           actions: [
