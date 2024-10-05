@@ -1,9 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
+import 'package:da_administrator/pages_user/detail_tryout_user_page.dart';
+import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class TryoutPublicUserPage extends StatefulWidget {
   const TryoutPublicUserPage({super.key});
@@ -14,6 +18,7 @@ class TryoutPublicUserPage extends StatefulWidget {
 
 class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
   var found = false;
+  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,17 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
     }
   }
 
-  Widget cardTryout({required String imageUrl, required String title, required String desk, required bool readyOnFree}) {
+  void selengkapnya(BuildContext context) {
+    Navigator.push(context, FadeRoute1(const TryoutSelengkapnyaUserPage()));
+  }
+
+  Widget cardTryout({
+    required String imageUrl,
+    required String title,
+    required String desk,
+    required bool readyOnFree,
+    required VoidCallback onTap,
+  }) {
     return SizedBox(
       width: 495,
       height: 170,
@@ -34,7 +49,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
         surfaceTintColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: InkWell(
-          onTap: () {},
+          onTap: () => onTap(),
           borderRadius: BorderRadius.circular(10),
           child: Container(
             padding: const EdgeInsets.all(10),
@@ -92,7 +107,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 50),
-                  Text('Try Out Kerjasama', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                  Text('TryOut Kerjasama', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                   //Cari Kode
                   Row(
                     children: [
@@ -136,15 +151,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                     ],
                   ),
                   if (found)
-                    cardTryout(
-                      imageUrl: 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp',
-                      title: 'Try Out UTBK 2024 #11 - SNBT',
-                      desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
-                      readyOnFree: true,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: cardTryout(
+                        imageUrl: urlImage,
+                        title: 'TryOut UTBK 2024 #11 - SNBT',
+                        desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
+                        readyOnFree: true,
+                        onTap: () {},
+                      ),
                     ),
                   const SizedBox(height: 50),
                   //Tryout Sedang berlangsung
-                  Text('Try Out Sedang Berlangsung', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                  Text('TryOut Sedang Berlangsung', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 10,
@@ -152,10 +171,13 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                     children: List.generate(
                       3,
                       (index) => cardTryout(
-                        imageUrl: 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp',
-                        title: 'Try Out UTBK 2024 #11 - SNBT',
+                        imageUrl: urlImage,
+                        title: 'TryOut UTBK 2024 #11 - SNBT',
                         desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
                         readyOnFree: true,
+                        onTap: () {
+                          Navigator.push(context, FadeRoute1(const DetailTryoutUserPage()));
+                        },
                       ),
                     ),
                   ),
@@ -165,11 +187,11 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Try Out Tersedia', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                      Text('TryOut Tersedia', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                       SizedBox(
                         height: 30,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () => selengkapnya(context),
                           style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                           iconAlignment: IconAlignment.end,
                           icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -178,7 +200,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                       ),
                     ],
                   ),
-                  Text('Butuh tantangan? Ikuti Try Out ini!', style: TextStyle(fontSize: h4, color: Colors.black)),
+                  Text('Butuh tantangan? Ikuti TryOut ini!', style: TextStyle(fontSize: h4, color: Colors.black)),
                   const SizedBox(height: 5),
                   Wrap(
                     spacing: 10,
@@ -186,10 +208,11 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                     children: List.generate(
                       2,
                       (index) => cardTryout(
-                        imageUrl: 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp',
-                        title: 'Try Out UTBK 2024 #11 - SNBT',
+                        imageUrl: urlImage,
+                        title: 'TryOut UTBK 2024 #11 - SNBT',
                         desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
                         readyOnFree: false,
+                        onTap: () {},
                       ),
                     ),
                   ),

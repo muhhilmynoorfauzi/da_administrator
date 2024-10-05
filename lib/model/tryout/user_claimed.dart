@@ -3,7 +3,7 @@ import 'package:da_administrator/model/tryout/test_model.dart';
 
 class UserClaimed {
   String userUID;
-  int payment;
+  String payment;
   DateTime created;
   String tryoutID;
   bool approval;

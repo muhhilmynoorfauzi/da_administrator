@@ -1157,7 +1157,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                 child: Text(
                                                   '${tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute} Menit',
-                                                  // ' | Soal $questionLength',
+                                                  // 'Dream Academy - Soal $questionLength',
                                                   style: TextStyle(color: Colors.white, fontSize: h4),
                                                 ),
                                               ),
@@ -1747,7 +1747,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                               child: Text(
                                                 '${tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute} Menit',
-                                                // ' | Soal $questionLength',
+                                                // 'Dream Academy - Soal $questionLength',
                                                 style: TextStyle(color: Colors.white, fontSize: h4),
                                               ),
                                             ),

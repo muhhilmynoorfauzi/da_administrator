@@ -36,8 +36,8 @@ class _AboutUserPageState extends State<AboutUserPage> {
       body: ListView(
         children: [
           Container(
-            height: tinggi(context) - 200,
             padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(vertical: 100),
             alignment: Alignment.center,
             child: SizedBox(
               width: 700,
@@ -49,7 +49,7 @@ class _AboutUserPageState extends State<AboutUserPage> {
                       'Tentang',
                       style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 30),
                     ),
-                    SvgPicture.asset('assets/logo2.svg', height: 300),
+                    SvgPicture.asset('assets/logo2.svg', height: 200),
                     Text(
                       'Dream Academy',
                       style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1),

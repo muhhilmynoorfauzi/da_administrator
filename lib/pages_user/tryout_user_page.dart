@@ -32,7 +32,7 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
-    var listHeaders = ['Try Out Saya', 'Try Out Dream Academy', 'Bundling Try Out Dream Academy'];
+    var listHeaders = ['TryOut Saya', 'TryOut Dream Academy', 'Bundling TryOut Dream Academy'];
     var listPage = [const TryoutSayaUserPage(), const TryoutPublicUserPage(), const BundlingUserPage()];
     return Scaffold(
       backgroundColor: Colors.white,
@@ -52,6 +52,7 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                       (index) {
                         return InkWell(
                           onTap: () {
+                            context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listHeaders[index]}');
                             idHeader = index;
                             setState(() {});
                           },

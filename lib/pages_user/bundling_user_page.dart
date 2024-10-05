@@ -1,8 +1,10 @@
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class BundlingUserPage extends StatefulWidget {
   const BundlingUserPage({super.key});

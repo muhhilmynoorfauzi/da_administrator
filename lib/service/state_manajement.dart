@@ -59,6 +59,14 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
     notifyListeners();
   }
 
+  String _titleUserPage = 'Dream Academy';
+
+  String? get getTitleUserPage => _titleUserPage;
+
+  void setTitleUserPage(String value) {
+    _titleUserPage = value;
+    notifyListeners();
+  }
 /*
 
 //-------------------------------------------------

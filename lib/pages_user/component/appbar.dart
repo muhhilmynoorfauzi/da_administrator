@@ -5,10 +5,13 @@ import 'package:da_administrator/pages_user/rekomendasi_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:html' as html;
+
+import 'package:provider/provider.dart';
 
 AppBar appbarDesk({
   required BuildContext context,
@@ -37,7 +40,10 @@ AppBar appbarDesk({
         height: 40,
         child: TextButton(
           style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          onPressed: () => Navigator.pushReplacement(context, FadeRoute1(const HomeUserPage())),
+          onPressed: () {
+            context.read<CounterProvider>().setTitleUserPage('Dream Academy - Home');
+            Navigator.pushReplacement(context, FadeRoute1(const HomeUserPage()));
+          },
           child: Text('Home', style: TextStyle(color: homeActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
         ),
       ),
@@ -55,15 +61,17 @@ AppBar appbarDesk({
           hint: Text('Feature', style: TextStyle(color: featureActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
           onChanged: (String? newValue) {
             if (newValue == 'Bank Soal') {
+              context.read<CounterProvider>().setTitleUserPage('Dream Academy - Bank Soal');
               Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
             } else if (newValue == 'Tryout') {
+              context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Dream Academy');
               Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
             } else if (newValue == 'Rekomendasi Belajar') {
+              context.read<CounterProvider>().setTitleUserPage('Dream Academy - Rekomendasi Belajar');
               Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
             }
           },
           icon: const SizedBox(),
-          // Icon(Icons.arrow_drop_down_rounded, color: Colors.black.withOpacity(.3)),
           underline: const SizedBox(),
           items: _options.map((String option) {
             return DropdownMenuItem(value: option, child: Text(option, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)));
@@ -75,7 +83,10 @@ AppBar appbarDesk({
         height: 40,
         child: TextButton(
           style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          onPressed: () => Navigator.pushReplacement(context, FadeRoute1(const AboutUserPage())),
+          onPressed: () {
+            context.read<CounterProvider>().setTitleUserPage('Dream Academy - About');
+            Navigator.pushReplacement(context, FadeRoute1(const AboutUserPage()));
+          },
           child: Text('About', style: TextStyle(color: aboutActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
         ),
       ),

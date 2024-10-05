@@ -1,6 +1,7 @@
 import 'package:da_administrator/pages/home_page.dart';
 import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
+import 'package:da_administrator/pages_user/detail_tryout_user_page.dart';
 import 'package:da_administrator/pages_user/home_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
@@ -20,18 +21,18 @@ Future<void> main() async {
   runApp(MultiProvider(providers: [ChangeNotifierProvider(create: (_) => CounterProvider())], child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
   Widget build(BuildContext context) {
-    var id = [
-      'about1',
-      'about2',
-      'about3',
-    ];
     return MaterialApp(
-      title: 'Dream Academy',
+      title: '${context.watch<CounterProvider>().getTitleUserPage}',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: primary, brightness: Brightness.light),
@@ -57,7 +58,8 @@ class MyApp extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return const Text('Error');
                 } else {
-                  return const LoginPage();
+                  return const HomePage();
+                  // return const LoginPage();
                 }
               },
             ),
@@ -65,7 +67,8 @@ class MyApp extends StatelessWidget {
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 final user = FirebaseAuth.instance.currentUser;
-                return const TryoutUserPage();
+                return const DetailTryoutUserPage();
+                // return const TryoutUserPage();
               },
             ),
       },

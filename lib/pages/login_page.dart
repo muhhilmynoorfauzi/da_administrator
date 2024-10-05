@@ -95,11 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 child: (isLoading)
-                    ? Center(
-                        child: AspectRatio(
-                        aspectRatio: 1,
-                        child: CircularProgressIndicator(color: primary),
-                      ))
+                    ? Center(child: Padding(padding: const EdgeInsets.all(5), child: AspectRatio(aspectRatio: 1, child: CircularProgressIndicator(color: primary))))
                     : Stack(
                         alignment: Alignment.centerLeft,
                         children: [

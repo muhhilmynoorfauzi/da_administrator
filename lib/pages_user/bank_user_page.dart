@@ -9,12 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class BankUserPage extends StatefulWidget {
-  // final String id;
-
-  const BankUserPage({
-    super.key,
-    // required this.id,
-  });
+  const BankUserPage({super.key});
 
   @override
   State<BankUserPage> createState() => _BankUserPageState();
