@@ -10,14 +10,14 @@ import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class DetailTryoutUserPage extends StatefulWidget {
-  const DetailTryoutUserPage({super.key});
+class DetailMytryoutUserPage extends StatefulWidget {
+  const DetailMytryoutUserPage({super.key});
 
   @override
-  State<DetailTryoutUserPage> createState() => _DetailTryoutUserPageState();
+  State<DetailMytryoutUserPage> createState() => _DetailMytryoutUserPageState();
 }
 
-class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
+class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
   var isLogin = true;
 
@@ -272,11 +272,12 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
           ),
           //Image dan deskripsi
           Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(10),
             alignment: Alignment.center,
-            child: SizedBox(
+            child: Container(
               width: 1000,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -300,31 +301,64 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Try Out UTBK 2024 #9 - SNBT', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                            Text('20 Desember 2024 12:00 WITA s.d. 24 Desember 2024', style: TextStyle(fontSize: h4, color: Colors.black)),
-                            const SizedBox(height: 30),
-                            Text(
-                              "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy"
-                              " text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. "
-                              "It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. "
-                              "It was popularised in the 1960s w",
-                              style: TextStyle(fontSize: h4, color: Colors.black),
-                              textAlign: TextAlign.justify,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 6,
-                            ),
-                          ],
+                        child: SizedBox(
+                          height: 250,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Try Out UTBK 2024 #9 - SNBT', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                              Text('20 Desember 2024 12:00 WITA s.d. 24 Desember 2024', style: TextStyle(fontSize: h4, color: Colors.black)),
+                              const SizedBox(height: 30),
+                              Text(
+                                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy"
+                                " text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. "
+                                "It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. "
+                                "It was popularised in the 1960s w",
+                                style: TextStyle(fontSize: h4, color: Colors.black),
+                                textAlign: TextAlign.justify,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 6,
+                              ),
+                              const Expanded(child: SizedBox()),
+                              SizedBox(
+                                height: 30,
+                                child: OutlinedButton(
+                                  onPressed: () {},
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(color: (false) ? Colors.transparent : primary),
+                                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                                    backgroundColor: (false) ? Colors.transparent : primary,
+                                  ),
+                                  child: Text(
+                                    (false) ? 'Detail Pengerjaan' : 'Mulai Mengerjakan',
+                                    style: TextStyle(fontSize: h4, color: (false) ? Colors.black : Colors.white),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       )
                     ],
                   ),
+                ],
+              ),
+            ),
+          ),
+          //Rincian Test
+          Container(
+            margin: const EdgeInsets.all(10),
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 1000,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //fase
                   Container(
                     height: 200,
                     width: 300,
-                    margin: const EdgeInsets.symmetric(vertical: 20),
+                    margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -357,209 +391,79 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          //Rincian Test
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(20),
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 1000,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.circle, color: primary, size: 15),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text('TPS', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    children: List.generate(
-                      4,
-                      (index) {
-                        var title = ['Kemampuan Penalaran Umum', 'Pengetahuan dan Pemahaman Umum', 'Kemampuan Memahami Bacaan dan Menulis', 'Pengetahuan Kuantitatif'];
-                        var time = ['30 Menit', '30 Menit', '30 Menit', '30 Menit'];
-                        var quest = ['30 Soal', '30 Soal', '30 Soal', '30 Soal'];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(title[index], style: TextStyle(fontSize: h4, color: Colors.black)),
-                              Text('${time[index]} | ${quest[index]}', style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: primary))
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(Icons.circle, color: primary, size: 15),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text('Test Literasi', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    children: List.generate(
-                      4,
-                      (index) {
-                        var title = ['Kemampuan Penalaran Umum', 'Pengetahuan dan Pemahaman Umum', 'Kemampuan Memahami Bacaan dan Menulis', 'Pengetahuan Kuantitatif'];
-                        var time = ['30 Menit', '30 Menit', '30 Menit', '30 Menit'];
-                        var quest = ['30 Soal', '30 Soal', '30 Soal', '30 Soal'];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(title[index], style: TextStyle(fontSize: h4, color: Colors.black)),
-                              Text('${time[index]} | ${quest[index]}', style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: primary))
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                ],
-              ),
-            ),
-          ),
-          //Rincian Test
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(20),
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 1000,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 300,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                    child: Row(
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: CachedNetworkImage(
-                              imageUrl: urlImage,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                            ),
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.circle, color: primary, size: 15),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text('TPS', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                            )
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                children: List.generate(
-                                  4,
-                                  (index) {
-                                    var jurusan = ['Teknik Informatika', 'Matematika', 'Sasta Inggris', 'Desain Komunikasi Visual'];
-                                    var univ = ['Universitas Hasanudin', 'Universitas Hasanudin', 'Universitas Muslim Indonesia', 'Universitas Muslim Indonesia'];
-                                    return Container(
-                                      width: 300,
-                                      padding: const EdgeInsets.all(3),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.check_circle, color: primary, size: 30),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  jurusan[index],
-                                                  style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                                Text(
-                                                  univ[index],
-                                                  style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              Container(
-                                width: 450,
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                        const SizedBox(height: 10),
+                        Column(
+                          children: List.generate(
+                            4,
+                            (index) {
+                              var title = ['Kemampuan Penalaran Umum', 'Pengetahuan dan Pemahaman Umum', 'Kemampuan Memahami Bacaan dan Menulis', 'Pengetahuan Kuantitatif'];
+                              var time = ['30 Menit', '30 Menit', '30 Menit', '30 Menit'];
+                              var quest = ['30 Soal', '30 Soal', '30 Soal', '30 Soal'];
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(Icons.info, color: primary),
-                                    const SizedBox(width: 10),
-                                    Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                                    Text(title[index], style: TextStyle(fontSize: h4, color: Colors.black)),
+                                    Text('${time[index]} | ${quest[index]}', style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: primary))
                                   ],
                                 ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              Column(
-                                children: [
-                                  Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                  const SizedBox(height: 10),
-                                  SizedBox(
-                                    height: 30,
-                                    width: double.infinity,
-                                    child: OutlinedButton(
-                                      onPressed: () {},
-                                      style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                      child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ),
+                        const SizedBox(height: 50),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.circle, color: primary, size: 15),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text('Test Literasi', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Column(
+                          children: List.generate(
+                            4,
+                            (index) {
+                              var title = ['Kemampuan Penalaran Umum', 'Pengetahuan dan Pemahaman Umum', 'Kemampuan Memahami Bacaan dan Menulis', 'Pengetahuan Kuantitatif'];
+                              var time = ['30 Menit', '30 Menit', '30 Menit', '30 Menit'];
+                              var quest = ['30 Soal', '30 Soal', '30 Soal', '30 Soal'];
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(title[index], style: TextStyle(fontSize: h4, color: Colors.black)),
+                                    Text('${time[index]} | ${quest[index]}', style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: primary))
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 50),
                       ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: TextButton(
-                      onPressed: () => showDaftarSekarang(context: context),
-                      style: TextButton.styleFrom(backgroundColor: primary),
-                      child: Text('Daftar Sekarang', style: TextStyle(fontSize: h4, color: Colors.white)),
                     ),
                   ),
                 ],

@@ -28,6 +28,7 @@ AppBar appbarDesk({
     shadowColor: Colors.black,
     scrolledUnderElevation: elevation,
     leadingWidth: 200,
+    toolbarHeight: 40,
     leading: InkWell(
       onTap: () => html.window.location.reload(),
       hoverColor: Colors.transparent,
@@ -57,7 +58,6 @@ AppBar appbarDesk({
           isExpanded: true,
           alignment: Alignment.center,
           padding: EdgeInsets.zero,
-
           hint: Text('Feature', style: TextStyle(color: featureActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
           onChanged: (String? newValue) {
             if (newValue == 'Bank Soal') {
@@ -98,17 +98,15 @@ AppBar appbarDesk({
               child: Container(
                 height: 40,
                 width: 130,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(.1),
-                  borderRadius: BorderRadius.circular(100),
-                ),
+                margin: const EdgeInsets.all(3),
+                decoration: BoxDecoration(color: Colors.black.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
                 padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
                 child: Row(
                   children: [
                     const Icon(CupertinoIcons.money_dollar_circle_fill, color: Colors.orange),
                     Text('120', style: TextStyle(color: Colors.black, fontSize: h4)),
                     const Expanded(child: SizedBox()),
-                    const Icon(CupertinoIcons.person_crop_circle_fill, size: 30, color: Colors.black),
+                    const Icon(CupertinoIcons.person_crop_circle_fill, color: Colors.black),
                   ],
                 ),
               ),
@@ -117,10 +115,7 @@ AppBar appbarDesk({
               height: 50,
               // width: 200,
               margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                border: Border.all(color: primary, width: 2),
-                borderRadius: BorderRadius.circular(10),
-              ),
+              decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(10)),
               child: Row(
                 children: [
                   TextButton(

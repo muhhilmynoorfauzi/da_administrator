@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/pages/example.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
+import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -205,7 +206,9 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         title: 'Try Out UTBK 2024 #11 - SNBT',
                         desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
                         readyOnFree: false,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                        },
                       ),
                     ),
                   ),
@@ -251,7 +254,9 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         title: 'Try Out UTBK 2024 #11 - SNBT',
                         desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
                         readyOnFree: false,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                        },
                       ),
                     ),
                   ),

@@ -12,7 +12,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class TryoutUserPage extends StatefulWidget {
-  const TryoutUserPage({super.key});
+  final int idPage;
+
+  const TryoutUserPage({super.key, this.idPage = 1});
 
   @override
   State<TryoutUserPage> createState() => _TryoutUserPageState();
@@ -20,7 +22,7 @@ class TryoutUserPage extends StatefulWidget {
 
 class _TryoutUserPageState extends State<TryoutUserPage> {
   var isLogin = true;
-  var idHeader = 1;
+  var idPage = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,13 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
     } else {
       return onDesk(context);
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() => idPage = widget.idPage);
   }
 
   Widget onDesk(BuildContext context) {
@@ -41,7 +50,7 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
           ? Column(
               children: [
                 Container(
-                  height: 40,
+                  height: 30,
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))),
                   child: Row(
@@ -53,16 +62,16 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                         return InkWell(
                           onTap: () {
                             context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listHeaders[index]}');
-                            idHeader = index;
+                            idPage = index;
                             setState(() {});
                           },
                           hoverColor: Colors.transparent,
                           highlightColor: Colors.transparent,
-                          child: AnimatedContainer(
+                          child: Container(
                             height: 30,
-                            duration: const Duration(milliseconds: 300),
+                            // duration: const Duration(milliseconds: 300),
                             margin: const EdgeInsets.symmetric(horizontal: 30),
-                            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idHeader) ? Colors.black : Colors.transparent, width: 2))),
+                            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2))),
                             child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
                           ),
                         );
@@ -70,7 +79,7 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                     ),
                   ),
                 ),
-                Expanded(child: listPage[idHeader]),
+                Expanded(child: listPage[idPage]),
               ],
             )
           : ListView(
