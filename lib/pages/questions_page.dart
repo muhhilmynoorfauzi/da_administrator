@@ -97,7 +97,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                   ? Center(child: CircularProgressIndicator(color: primary))
                   : SizedBox(
                       height: 50,
-                      child: Html(data: question!.listQuestions[index].question),
+                      child: Html(data: question!.listQuestions[index].page),
                     ),
             ),
             contentPadding: const EdgeInsets.all(20),
@@ -235,7 +235,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                         Expanded(
                                           child: SizedBox(
                                             width: 200,
-                                            child: Html(data: question!.listQuestions[index].question),
+                                            child: Html(data: question!.listQuestions[index].page),
                                           ),
                                         ),
                                         Container(

@@ -71,7 +71,7 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
                           child: Text('Rekomendasi Belajar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
                         ),
                         Text(
-                          'Evaluasi tryout makin mudah dengan Rekomendasi Belajar! Dream Academy akan kasih tahu materi mana yang perlu kamu pelajari lebih lanjut!\n',
+                          'Evaluasi TryOut makin mudah dengan Rekomendasi Belajar! Dream Academy akan kasih tahu materi mana yang perlu kamu pelajari lebih lanjut!\n',
                           style: TextStyle(color: Colors.black, fontSize: h3),
                         ),
                         Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),

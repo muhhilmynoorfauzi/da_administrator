@@ -1,22 +1,20 @@
-// QuestPgUserPage
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:da_administrator/model/questions/check_model.dart';
 import 'package:da_administrator/model/questions/pg_model.dart';
-import 'package:da_administrator/pages_user/component/appbar.dart';
+import 'package:da_administrator/model/questions/stuffing_model.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
 
-class QuestPgUserPage extends StatefulWidget {
-  const QuestPgUserPage({super.key, required this.question});
+class ResultStuffingUserPage extends StatefulWidget {
+  const ResultStuffingUserPage({super.key, required this.question});
 
-  final PgModel question;
+  final StuffingModel question;
 
   @override
-  State<QuestPgUserPage> createState() => _QuestPgUserPageState();
+  State<ResultStuffingUserPage> createState() => _ResultStuffingUserPageState();
 }
 
-class _QuestPgUserPageState extends State<QuestPgUserPage> {
+class _ResultStuffingUserPageState extends State<ResultStuffingUserPage> {
   var isLogin = true;
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
@@ -38,7 +36,7 @@ class _QuestPgUserPageState extends State<QuestPgUserPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.only(right: 10,bottom: 10),
+            margin: const EdgeInsets.only(right: 10, bottom: 10),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,31 +57,32 @@ class _QuestPgUserPageState extends State<QuestPgUserPage> {
               ],
             ),
           ),
-          Column(
-            children: List.generate(
-              widget.question.options.length,
-              (index) {
-                var options = widget.question.options[index];
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: Radio<String>(value: options, groupValue: selected, onChanged: (String? value) => setState(() => selected = value)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text('Jawaban : ', style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+              ),
+              Expanded(
+                child: Container(
+                  height: 100,
+                  margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+                  child: TextField(
+                    maxLines: 5,
+                    style: TextStyle(color: Colors.black, fontSize: h4),
+                    decoration: InputDecoration(
+                      fillColor: Colors.black,
+                      border: const OutlineInputBorder(),
+                      labelStyle: TextStyle(color: Colors.black, fontSize: h4),
                     ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
-                        child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+                  ),
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

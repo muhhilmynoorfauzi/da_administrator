@@ -61,17 +61,6 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
               Icon(Icons.check_circle_rounded, color: primary, size: 70),
               Text('Pembayaran Selesai', style: TextStyle(fontSize: h1, fontWeight: FontWeight.bold, color: Colors.black)),
               Text('Otomatis kembali dalam $_remainingTime', style: TextStyle(fontSize: h3, color: Colors.black)),
-            ],
-          ),
-          SizedBox(height: tinggi(context) * .3),
-          Column(
-            children: [
-              Container(
-                height: 300,
-                width: 300,
-                color: Colors.grey,
-                //image vector
-              ),
               const SizedBox(height: 10),
               SizedBox(
                 height: 35,
@@ -82,6 +71,15 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
                 ),
               ),
             ],
+          ),
+          SizedBox(height: tinggi(context) * .15),
+          Center(
+            child: Container(
+              height: 300,
+              width: 300,
+              color: Colors.grey,
+              //image vector
+            ),
           ),
         ],
       ),

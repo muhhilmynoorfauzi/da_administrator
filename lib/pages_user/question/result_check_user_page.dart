@@ -5,16 +5,16 @@ import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
 
-class QuestCheckUserPage extends StatefulWidget {
-  const QuestCheckUserPage({super.key, required this.question});
+class ResultCheckUserPage extends StatefulWidget {
+  const ResultCheckUserPage({super.key, required this.question});
 
   final CheckModel question;
 
   @override
-  State<QuestCheckUserPage> createState() => _QuestCheckUserPageState();
+  State<ResultCheckUserPage> createState() => _ResultCheckUserPageState();
 }
 
-class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
+class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
   var isLogin = true;
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
@@ -67,7 +67,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
           Column(
             children: List.generate(
               widget.question.options.length,
-              (index) {
+                  (index) {
                 var options = widget.question.options[index];
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,

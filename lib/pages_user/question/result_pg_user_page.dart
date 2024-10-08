@@ -1,24 +1,26 @@
+// QuestPgUserPage
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/model/questions/check_model.dart';
+import 'package:da_administrator/model/questions/pg_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
 
-class QuestCheckUserPage extends StatefulWidget {
-  const QuestCheckUserPage({super.key, required this.question});
+class ResultPgUserPage extends StatefulWidget {
+  const ResultPgUserPage({super.key, required this.question});
 
-  final CheckModel question;
+  final PgModel question;
 
   @override
-  State<QuestCheckUserPage> createState() => _QuestCheckUserPageState();
+  State<ResultPgUserPage> createState() => _ResultPgUserPageState();
 }
 
-class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
+class _ResultPgUserPageState extends State<ResultPgUserPage> {
   var isLogin = true;
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
-  late List<String> listJawaban;
+  String? selected;
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +31,6 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
     }
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    listJawaban = List.generate(widget.question.options.length, (index) => '');
-  }
-
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -43,7 +38,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.only(right: 10, bottom: 10),
+            margin: const EdgeInsets.only(right: 10,bottom: 10),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,34 +62,21 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
           Column(
             children: List.generate(
               widget.question.options.length,
-              (index) {
+                  (index) {
                 var options = widget.question.options[index];
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Radio<String>(value: options, groupValue: selected, onChanged: (String? value) => setState(() => selected = value)),
+                    ),
                     Expanded(
-                      flex: 3,
                       child: Container(
                         margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
                         child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        child: Checkbox(
-                          value: listJawaban[index] == options,
-                          onChanged: (bool? value) {
-                            if (listJawaban[index] != options) {
-                              setState(() => listJawaban[index] = options);
-                            } else if (listJawaban[index] == options) {
-                              setState(() => listJawaban[index] = '');
-                            }
-                          },
-                        ),
                       ),
                     ),
                   ],

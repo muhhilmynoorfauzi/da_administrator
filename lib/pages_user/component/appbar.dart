@@ -21,7 +21,7 @@ AppBar appbarDesk({
   bool aboutActive = false,
   double elevation = 1,
 }) {
-  final List<String> _options = ['Bank Soal', 'Tryout', 'Rekomendasi Belajar'];
+  final List<String> _options = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return AppBar(
     backgroundColor: Colors.white,
     surfaceTintColor: Colors.white,
@@ -63,7 +63,7 @@ AppBar appbarDesk({
             if (newValue == 'Bank Soal') {
               context.read<CounterProvider>().setTitleUserPage('Dream Academy - Bank Soal');
               Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
-            } else if (newValue == 'Tryout') {
+            } else if (newValue == 'TryOut') {
               context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Dream Academy');
               Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
             } else if (newValue == 'Rekomendasi Belajar') {

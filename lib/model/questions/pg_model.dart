@@ -8,7 +8,7 @@ class PgModel {
   List<String> yourAnswer;
   List<String?> image;
   int? value;
-  int rating;
+  int? rating;
   String urlVideoExplanation;
   String explanation;
 

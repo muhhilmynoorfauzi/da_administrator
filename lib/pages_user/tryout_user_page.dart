@@ -113,10 +113,10 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                               Container(
                                 height: 80,
                                 alignment: Alignment.centerLeft,
-                                child: Text('Tryout', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
+                                child: Text('TryOut', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
                               ),
                               Text(
-                                'Soal tryout dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
+                                'Soal TryOut dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
                                 style: TextStyle(color: Colors.black, fontSize: h3),
                               ),
                               Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),

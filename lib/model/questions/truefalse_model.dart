@@ -7,7 +7,7 @@ class TrueFalseModel {
   List<TrueFalseOption> trueAnswer;
   List<TrueFalseOption> yourAnswer;
   int? value;
-  int rating;
+  int? rating;
   String urlVideoExplanation;
   String explanation;
 

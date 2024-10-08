@@ -227,7 +227,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                     Container(
                       height: 100,
                       alignment: Alignment.center,
-                      child: Text('Lebih mudah dengan Bundling Tryout Dream Academy', style: TextStyle(color: primary, fontSize: h4, fontWeight: FontWeight.bold)),
+                      child: Text('Lebih mudah dengan Bundling TryOut Dream Academy', style: TextStyle(color: primary, fontSize: h4, fontWeight: FontWeight.bold)),
                     )
                   ],
                 ),

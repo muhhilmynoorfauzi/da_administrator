@@ -1,3 +1,4 @@
+import 'package:da_administrator/pages/example.dart';
 import 'package:da_administrator/pages/home_page.dart';
 import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
@@ -8,6 +9,10 @@ import 'package:da_administrator/pages_user/pay_coin_user_page.dart';
 import 'package:da_administrator/pages_user/pay_done_user_page.dart';
 import 'package:da_administrator/pages_user/pay_ewallet_user_page.dart';
 import 'package:da_administrator/pages_user/pay_free_user_page.dart';
+import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
+import 'package:da_administrator/pages_user/question/quest_pg_user_page.dart';
+import 'package:da_administrator/pages_user/question/result_quest_user_page.dart';
+import 'package:da_administrator/pages_user/question/waiting_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
@@ -72,8 +77,11 @@ class _MyAppState extends State<MyApp> {
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 final user = FirebaseAuth.instance.currentUser;
-                return const HomeUserPage();
-                // return const DetailMytryoutUserPage();
+                // return const ResultQuestUserPage();
+                // return const NavQuestUserPage(minutes: 30);
+                // return const WaitingUserPage(minutes: 1);
+                // return const HomeUserPage();
+                return const DetailMytryoutUserPage();
                 // return const TryoutUserPage(idPage: 0);
                 // return const PayDoneUserPage();
                 // return const PayFreeUserPage();

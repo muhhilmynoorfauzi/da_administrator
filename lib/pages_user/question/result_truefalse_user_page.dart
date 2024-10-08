@@ -7,16 +7,16 @@ import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
 
-class QuestTruefalseUserPage extends StatefulWidget {
-  const QuestTruefalseUserPage({super.key, required this.question});
+class ResultTruefalseUserPage extends StatefulWidget {
+  const ResultTruefalseUserPage({super.key, required this.question});
 
   final TrueFalseModel question;
 
   @override
-  State<QuestTruefalseUserPage> createState() => _QuestTruefalseUserPageState();
+  State<ResultTruefalseUserPage> createState() => _ResultTruefalseUserPageState();
 }
 
-class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
+class _ResultTruefalseUserPageState extends State<ResultTruefalseUserPage> {
   var isLogin = true;
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
@@ -63,7 +63,7 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: List.generate(
               widget.question.trueAnswer.length,
-              (index) {
+                  (index) {
                 var option = widget.question.trueAnswer[index];
                 int? idSelected;
                 return StatefulBuilder(

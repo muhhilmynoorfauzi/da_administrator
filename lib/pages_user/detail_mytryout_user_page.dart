@@ -4,6 +4,8 @@ import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/pay_coin_user_page.dart';
 import 'package:da_administrator/pages_user/pay_ewallet_user_page.dart';
 import 'package:da_administrator/pages_user/pay_free_user_page.dart';
+import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
+import 'package:da_administrator/pages_user/question/result_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
@@ -20,6 +22,7 @@ class DetailMytryoutUserPage extends StatefulWidget {
 class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
   var isLogin = true;
+  var isComplite = true;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +30,14 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
       return onMobile(context);
     } else {
       return onDesk(context);
+    }
+  }
+
+  void onPressKerja(BuildContext context) {
+    if (isComplite) {
+      Navigator.pushReplacement(context, FadeRoute1(const ResultQuestUserPage()));
+    } else {
+      Navigator.pushReplacement(context, FadeRoute1(const NavQuestUserPage(minutes: 1)));
     }
   }
 
@@ -227,7 +238,7 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                     Container(
                       height: 100,
                       alignment: Alignment.center,
-                      child: Text('Lebih mudah dengan Bundling Tryout Dream Academy', style: TextStyle(color: primary, fontSize: h4, fontWeight: FontWeight.bold)),
+                      child: Text('Lebih mudah dengan Bundling TryOut Dream Academy', style: TextStyle(color: primary, fontSize: h4, fontWeight: FontWeight.bold)),
                     )
                   ],
                 ),
@@ -323,14 +334,14 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                               SizedBox(
                                 height: 30,
                                 child: OutlinedButton(
-                                  onPressed: () {},
+                                  onPressed: () => onPressKerja(context),
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(color: (false) ? Colors.transparent : primary),
                                     padding: const EdgeInsets.symmetric(horizontal: 30),
                                     backgroundColor: (false) ? Colors.transparent : primary,
                                   ),
                                   child: Text(
-                                    (false) ? 'Detail Pengerjaan' : 'Mulai Mengerjakan',
+                                    (isComplite) ? 'Detail Pengerjaan' : 'Mulai Mengerjakan',
                                     style: TextStyle(fontSize: h4, color: (false) ? Colors.black : Colors.white),
                                   ),
                                 ),
