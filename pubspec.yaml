@@ -64,8 +64,8 @@ dependencies:
   flutter_html: ^3.0.0-beta.2
   #grafik
   fl_chart: ^0.69.0
-  #  community_charts_flutter: ^1.0.4
-  #  flutter_math_fork: ^0.7.2
+  #  video youtube
+  youtube_player_iframe_plus: ^2.3.2
   #asset svg
   flutter_svg:
 

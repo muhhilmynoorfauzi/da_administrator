@@ -33,12 +33,12 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
     }
   }
 
-  void onPressKerja(BuildContext context) {
-    if (isComplite) {
-      Navigator.pushReplacement(context, FadeRoute1(const ResultQuestUserPage()));
-    } else {
-      Navigator.pushReplacement(context, FadeRoute1(const NavQuestUserPage(minutes: 1)));
-    }
+  void onPressMulai(BuildContext context) {
+    Navigator.pushReplacement(context, FadeRoute1(const NavQuestUserPage(minutes: 1)));
+  }
+
+  void onPressResult(BuildContext context) {
+    Navigator.pushReplacement(context, FadeRoute1(const ResultQuestUserPage()));
   }
 
   Future<void> showDaftarSekarang({required BuildContext context}) async {
@@ -331,21 +331,32 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                                 maxLines: 6,
                               ),
                               const Expanded(child: SizedBox()),
-                              SizedBox(
-                                height: 30,
-                                child: OutlinedButton(
-                                  onPressed: () => onPressKerja(context),
-                                  style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: (false) ? Colors.transparent : primary),
-                                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                                    backgroundColor: (false) ? Colors.transparent : primary,
-                                  ),
-                                  child: Text(
-                                    (isComplite) ? 'Detail Pengerjaan' : 'Mulai Mengerjakan',
-                                    style: TextStyle(fontSize: h4, color: (false) ? Colors.black : Colors.white),
-                                  ),
-                                ),
-                              )
+                              Row(
+                                children: [
+                                  if (isComplite)
+                                    SizedBox(
+                                      height: 30,
+                                      child: OutlinedButton(
+                                        onPressed: () => onPressMulai(context),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(color: primary),
+                                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                                          backgroundColor: primary,
+                                        ),
+                                        child: Text('Mulai Mengerjakan', style: TextStyle(fontSize: h4, color: Colors.white)),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    height: 30,
+                                    child: OutlinedButton(
+                                      onPressed: () => onPressResult(context),
+                                      style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.black), padding: const EdgeInsets.symmetric(horizontal: 30)),
+                                      child: Text('Detail Pengerjaan', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ],
                           ),
                         ),

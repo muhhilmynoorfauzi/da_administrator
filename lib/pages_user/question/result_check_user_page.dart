@@ -4,6 +4,7 @@ import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
+import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
 
 class ResultCheckUserPage extends StatefulWidget {
   const ResultCheckUserPage({super.key, required this.question});
@@ -19,6 +20,28 @@ class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
   late List<String> listJawaban;
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
+      params: const YoutubePlayerParams(
+        color: 'red',
+        privacyEnhanced: true,
+        showControls: true,
+        strictRelatedVideos: true,
+        enableKeyboard: true,
+        showFullscreenButton: true,
+        showVideoAnnotations: true,
+        useHybridComposition: true,
+        playsInline: true,
+        enableJavaScript: true,
+      ),
+    );
+    listJawaban = List.generate(widget.question.options.length, (index) => '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +50,6 @@ class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
     } else {
       return onDesk(context);
     }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    listJawaban = List.generate(widget.question.options.length, (index) => '');
   }
 
   Widget onDesk(BuildContext context) {
@@ -67,8 +83,21 @@ class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
           Column(
             children: List.generate(
               widget.question.options.length,
-                  (index) {
+              (index) {
                 var options = widget.question.options[index];
+                bool isTrue = widget.question.trueAnswer[index] == widget.question.options[index];
+                bool isSelectedTrue = false;
+                bool isSelectedFalse = false;
+
+                for (String you in widget.question.yourAnswer) {
+                  if (widget.question.trueAnswer.contains(you) && you == options) {
+                    isSelectedTrue = true;
+                  }
+                  if (!widget.question.trueAnswer.contains(you) && you == options) {
+                    isSelectedFalse = true;
+                  }
+                }
+
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -77,29 +106,54 @@ class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
                       child: Container(
                         margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
-                        child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: (isTrue || isSelectedTrue)
+                              ? primary
+                              : isSelectedFalse
+                                  ? secondary
+                                  : secondaryWhite,
+                        ),
+                        child: Text(options, style: TextStyle(color: (isTrue || isSelectedTrue) ? Colors.white : Colors.black, fontSize: h4), maxLines: 10),
                       ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Container(
                         alignment: Alignment.centerLeft,
-                        child: Checkbox(
-                          value: listJawaban[index] == options,
-                          onChanged: (bool? value) {
-                            if (listJawaban[index] != options) {
-                              setState(() => listJawaban[index] = options);
-                            } else if (listJawaban[index] == options) {
-                              setState(() => listJawaban[index] = '');
-                            }
-                          },
-                        ),
+                        child: Checkbox(value: (isSelectedTrue || isSelectedFalse), onChanged: (bool? value) {}),
                       ),
                     ),
                   ],
                 );
               },
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 50, bottom: 10),
+            child: Text('Pembahasan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold), maxLines: 1),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.question.explanation,
+                  style: TextStyle(color: Colors.black, fontSize: h4),
+                  textAlign: TextAlign.justify,
+                ),
+                SizedBox(
+                  width: lebar(context) * .4,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
+                  ),
+                )
+              ],
             ),
           ),
         ],

@@ -16,6 +16,7 @@ class PayDoneUserPage extends StatefulWidget {
 class _PayDoneUserPageState extends State<PayDoneUserPage> {
   int _remainingTime = 5; // Durasi awal 5 detik
   Timer? _timer;
+  final imageVec = 'assets/vec3.png';
 
   @override
   void initState() {
@@ -73,14 +74,7 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
             ],
           ),
           SizedBox(height: tinggi(context) * .15),
-          Center(
-            child: Container(
-              height: 300,
-              width: 300,
-              color: Colors.grey,
-              //image vector
-            ),
-          ),
+          Center(child: SizedBox(height: 300, width: 300, child: Image.asset(imageVec))),
         ],
       ),
     );

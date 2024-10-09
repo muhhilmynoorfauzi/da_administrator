@@ -358,6 +358,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0-beta.2"
+  flutter_inappwebview:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview
+      sha256: d198297060d116b94048301ee6749cd2e7d03c1f2689783f52d210a6b7aba350
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.8.0"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -1122,6 +1130,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
+  youtube_player_iframe_plus:
+    dependency: "direct main"
+    description:
+      name: youtube_player_iframe_plus
+      sha256: b3053b855bdeee8828d63d744d86b7ca4d3330d58e6730b5f7af05dd25126906
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
 sdks:
   dart: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"

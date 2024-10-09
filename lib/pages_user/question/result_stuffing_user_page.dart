@@ -4,6 +4,7 @@ import 'package:da_administrator/model/questions/stuffing_model.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
+import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
 
 class ResultStuffingUserPage extends StatefulWidget {
   const ResultStuffingUserPage({super.key, required this.question});
@@ -19,6 +20,28 @@ class _ResultStuffingUserPageState extends State<ResultStuffingUserPage> {
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
   String? selected;
+
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
+      params: const YoutubePlayerParams(
+        color: 'red',
+        privacyEnhanced: true,
+        showControls: true,
+        strictRelatedVideos: true,
+        enableKeyboard: true,
+        showFullscreenButton: true,
+        showVideoAnnotations: true,
+        useHybridComposition: true,
+        playsInline: true,
+        enableJavaScript: true,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,27 +85,68 @@ class _ResultStuffingUserPageState extends State<ResultStuffingUserPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text('Jawaban : ', style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+                child: Text('Jawaban Anda: ', style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
               ),
               Expanded(
                 child: Container(
-                  height: 100,
                   margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
-                  child: TextField(
-                    maxLines: 5,
-                    style: TextStyle(color: Colors.black, fontSize: h4),
-                    decoration: InputDecoration(
-                      fillColor: Colors.black,
-                      border: const OutlineInputBorder(),
-                      labelStyle: TextStyle(color: Colors.black, fontSize: h4),
-                    ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: (widget.question.yourAnswer.first == widget.question.trueAnswer) ? primary : secondary,
+                  ),
+                  child: Text(
+                    widget.question.yourAnswer.first,
+                    style: TextStyle(color: (widget.question.yourAnswer.first == widget.question.trueAnswer) ? Colors.white : Colors.black, fontSize: h4),
                   ),
                 ),
               ),
             ],
-          )
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text('Jawaban Benar: ', style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+              ),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+                  child: Text(widget.question.trueAnswer, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 50, bottom: 10),
+            child: Text('Pembahasan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold), maxLines: 1),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.question.explanation,
+                  style: TextStyle(color: Colors.black, fontSize: h4),
+                  textAlign: TextAlign.justify,
+                ),
+                SizedBox(
+                  width: lebar(context) * .4,
+                  child:ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
+                  ),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -63,31 +63,26 @@ class _MyAppState extends State<MyApp> {
                   if (user!.email == 'kikiamaliaaa725@gmail.com') {
                     return const HomePage();
                   } else {
-                    return const LoginPage();
+                    return const HomeUserPage();
                   }
                 } else if (snapshot.hasError) {
                   return const Text('Error');
                 } else {
                   // return const HomePage();
-                  return const LoginPage();
+                  // return const LoginPage();
+                  // return const ResultQuestUserPage();
+                  return const HomeUserPage();
+                  // return const AboutUserPage();
+                  // return const NavQuestUserPage(minutes: 30);
+                  // return const WaitingUserPage(minutes: 1);
+                  // return const DetailMytryoutUserPage();
+                  // return const DetailTryoutUserPage();
+                  // return const TryoutUserPage(idPage: 0);
+                  // return const PayDoneUserPage();
+                  // return const PayFreeUserPage();
+                  // return const PayCoinUserPage();
+                  // return const PayEwalletUserPage();
                 }
-              },
-            ),
-        '/admin': (context) => StreamBuilder(
-              stream: FirebaseAuth.instance.authStateChanges(),
-              builder: (context, snapshot) {
-                final user = FirebaseAuth.instance.currentUser;
-                // return const ResultQuestUserPage();
-                // return const NavQuestUserPage(minutes: 30);
-                // return const WaitingUserPage(minutes: 1);
-                // return const HomeUserPage();
-                return const DetailMytryoutUserPage();
-                // return const TryoutUserPage(idPage: 0);
-                // return const PayDoneUserPage();
-                // return const PayFreeUserPage();
-                // return const PayCoinUserPage();
-                // return const PayEwalletUserPage();
-                // return const DetailTryoutUserPage();
               },
             ),
       },

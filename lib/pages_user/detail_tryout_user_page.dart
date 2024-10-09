@@ -20,6 +20,9 @@ class DetailTryoutUserPage extends StatefulWidget {
 class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
   var isLogin = true;
+  final imageVec2 = 'assets/vec2.png';
+  final imageVec4 = 'assets/vec4.png';
+  var jurusanNotReady = false;
 
   @override
   Widget build(BuildContext context) {
@@ -453,106 +456,157 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    height: 300,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: CachedNetworkImage(
-                              imageUrl: urlImage,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  (jurusanNotReady)
+                      ? Container(
+                          height: 300,
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                          child: Row(
                             children: [
-                              Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                children: List.generate(
-                                  4,
-                                  (index) {
-                                    var jurusan = ['Teknik Informatika', 'Matematika', 'Sasta Inggris', 'Desain Komunikasi Visual'];
-                                    var univ = ['Universitas Hasanudin', 'Universitas Hasanudin', 'Universitas Muslim Indonesia', 'Universitas Muslim Indonesia'];
-                                    return Container(
-                                      width: 300,
-                                      padding: const EdgeInsets.all(3),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.check_circle, color: primary, size: 30),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: AspectRatio(
+                                  aspectRatio: 1,
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageVec2,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 10),
+                                    Wrap(
+                                      children: List.generate(
+                                        4,
+                                        (index) {
+                                          var jurusan = ['Teknik Informatika', 'Matematika', 'Sasta Inggris', 'Desain Komunikasi Visual'];
+                                          var univ = ['Universitas Hasanudin', 'Universitas Hasanudin', 'Universitas Muslim Indonesia', 'Universitas Muslim Indonesia'];
+                                          return Container(
+                                            width: 300,
+                                            padding: const EdgeInsets.all(3),
+                                            child: Row(
                                               children: [
-                                                Text(
-                                                  jurusan[index],
-                                                  style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                                Text(
-                                                  univ[index],
-                                                  style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 1,
+                                                Icon(Icons.check_circle, color: primary, size: 30),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        jurusan[index],
+                                                        style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        maxLines: 1,
+                                                      ),
+                                                      Text(
+                                                        univ[index],
+                                                        style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        maxLines: 1,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const Expanded(child: SizedBox()),
+                                    Container(
+                                      width: 450,
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.info, color: primary),
+                                          const SizedBox(width: 10),
+                                          Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              Container(
-                                width: 450,
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.info, color: primary),
-                                    const SizedBox(width: 10),
-                                    Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                                    ),
+                                    const Expanded(child: SizedBox()),
+                                    Column(
+                                      children: [
+                                        Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                        const SizedBox(height: 10),
+                                        SizedBox(
+                                          height: 30,
+                                          width: double.infinity,
+                                          child: OutlinedButton(
+                                            onPressed: () {},
+                                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                                            child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ),
-                              const Expanded(child: SizedBox()),
-                              Column(
-                                children: [
-                                  Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                  const SizedBox(height: 10),
-                                  SizedBox(
-                                    height: 30,
-                                    width: double.infinity,
-                                    child: OutlinedButton(
-                                      onPressed: () {},
-                                      style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                      child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ],
                           ),
+                        )
+                      : Center(
+                          child: Container(
+                            height: 150,
+                            width: 700,
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: AspectRatio(
+                                    aspectRatio: 1,
+                                    child: CachedNetworkImage(
+                                      imageUrl: imageVec4,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Anda belum mengatur target Jurusan Anda',
+                                        style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const Expanded(child: SizedBox(width: 10)),
+                                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                      const SizedBox(height: 10),
+                                      SizedBox(
+                                        height: 30,
+                                        width: double.infinity,
+                                        child: OutlinedButton(
+                                          onPressed: () {},
+                                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
                   SizedBox(
                     width: double.infinity,
                     height: 40,

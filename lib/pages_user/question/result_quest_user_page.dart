@@ -27,7 +27,33 @@ class ResultQuestUserPage extends StatefulWidget {
 }
 
 class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
-  dynamic page = Center(
+  dynamic page = ResultTruefalseUserPage(
+    question: TrueFalseModel(
+      question:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
+      type: 'benar_salah',
+      image: [],
+      trueAnswer: [
+        TrueFalseOption(option: 'option1', trueAnswer: true),
+        TrueFalseOption(option: 'option2', trueAnswer: true),
+        TrueFalseOption(option: 'option3', trueAnswer: true),
+        TrueFalseOption(option: 'option4', trueAnswer: true),
+      ],
+      yourAnswer: [
+        TrueFalseOption(option: 'option1', trueAnswer: false),
+        TrueFalseOption(option: 'option2', trueAnswer: true),
+        TrueFalseOption(option: 'option3', trueAnswer: true),
+        TrueFalseOption(option: 'option4', trueAnswer: true),
+      ],
+      value: 0,
+      rating: 0,
+      urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
+      explanation:
+          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
+    ),
+  );
+
+  /*dynamic page = Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -39,7 +65,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
         ),
       ],
     ),
-  );
+  );*/
 
   @override
   Widget build(BuildContext context) {
@@ -88,52 +114,59 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
       case 'banyak_pilihan':
         page = ResultCheckUserPage(
           question: CheckModel(
-            question: 'question',
+            question:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
             options: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
             trueAnswer: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', '@empty', '@empty'],
             type: 'type',
-            yourAnswer: [],
+            yourAnswer: ['', '', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
             image: [],
             value: 0,
             rating: 0,
-            urlVideoExplanation: 'urlVideoExplanation',
-            explanation: 'explanation',
+            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
+            explanation:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
           ),
         );
       case 'pilihan_ganda':
         page = ResultPgUserPage(
           question: PgModel(
-            question: 'question',
+            question:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
             options: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
             trueAnswer: 'Jawaban 2',
-            type: 'type',
-            yourAnswer: [],
+            type: 'pilihan_ganda',
+            yourAnswer: ['Jawaban 1'],
             image: [],
             value: 0,
             rating: 0,
-            urlVideoExplanation: 'urlVideoExplanation',
-            explanation: 'explanation',
+            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
+            explanation:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
           ),
         );
       case 'isian':
         page = ResultStuffingUserPage(
           question: StuffingModel(
-            question: 'question',
+            question:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
             trueAnswer: 'Jawaban 1',
-            type: 'type',
-            yourAnswer: [],
+            type: 'isian',
+            yourAnswer: ['Jawaban 1'],
             image: [],
             value: 0,
             rating: 0,
-            urlVideoExplanation: 'urlVideoExplanation',
-            explanation: 'explanation',
+            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
+            explanation:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
           ),
         );
       case 'benar_salah':
         page = ResultTruefalseUserPage(
           question: TrueFalseModel(
-            question: 'question',
-            type: 'type',
+            question:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
+            type: 'benar_salah',
             image: [],
             trueAnswer: [
               TrueFalseOption(option: 'option1', trueAnswer: true),
@@ -141,17 +174,30 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               TrueFalseOption(option: 'option3', trueAnswer: true),
               TrueFalseOption(option: 'option4', trueAnswer: false),
             ],
-            yourAnswer: [],
+            yourAnswer: [
+              TrueFalseOption(option: 'option1', trueAnswer: true),
+              TrueFalseOption(option: 'option2', trueAnswer: false),
+              TrueFalseOption(option: 'option3', trueAnswer: true),
+              TrueFalseOption(option: 'option4', trueAnswer: false),
+            ],
             value: 0,
             rating: 0,
-            urlVideoExplanation: 'urlVideoExplanation',
-            explanation: 'explanation',
+            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
+            explanation:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
           ),
         );
       default:
         print('Unknown type');
     }
     setState(() {});
+  }
+  
+  void kembaliKeTryout(){
+    context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
+    Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
+    Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+    // Navigator.pop(context);
   }
 
   Widget onDesk(BuildContext context) {
@@ -181,7 +227,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: TextButton(
-            onPressed: () {},
+            onPressed: () => kembaliKeTryout(),
             style: TextButton.styleFrom(backgroundColor: primary),
             child: Text('Kembali ke Dashboard TryOut', style: TextStyle(fontSize: h4, color: Colors.white)),
           ),
@@ -399,6 +445,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                                 collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 dense: true,
+                                expansionAnimationStyle: AnimationStyle.noAnimation,
                                 iconColor: Colors.black,
                                 title: Row(
                                   children: [

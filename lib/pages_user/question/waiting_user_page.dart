@@ -22,6 +22,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
   late int totalTimeInMinutes;
   late int remainingTimeInSeconds; // 30 minutes in seconds
   Timer? timer;
+  final imageVec = 'assets/vec3.png';
 
   int questId = 0;
 
@@ -124,14 +125,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
             ],
           ),
           SizedBox(height: tinggi(context) * .15),
-          Center(
-            child: Container(
-              height: 300,
-              width: 300,
-              color: Colors.grey,
-              //image vector
-            ),
-          ),
+          Center(child: SizedBox(height: 300, width: 300, child: Image.asset(imageVec))),
         ],
       ),
     );

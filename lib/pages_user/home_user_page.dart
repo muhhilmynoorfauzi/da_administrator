@@ -6,6 +6,7 @@ import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
 
 class HomeUserPage extends StatefulWidget {
   const HomeUserPage({super.key});
@@ -16,6 +17,27 @@ class HomeUserPage extends StatefulWidget {
 
 class _HomeUserPageState extends State<HomeUserPage> {
   var isLogin = true;
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
+      params: const YoutubePlayerParams(
+        color: 'red',
+        privacyEnhanced: true,
+        showControls: true,
+        strictRelatedVideos: true,
+        enableKeyboard: true,
+        showFullscreenButton: true,
+        showVideoAnnotations: true,
+        useHybridComposition: true,
+        playsInline: true,
+        enableJavaScript: true,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,45 +80,39 @@ class _HomeUserPageState extends State<HomeUserPage> {
             child: ListView(
               children: [
                 SizedBox(
-                  height: 700,
+                  height: tinggi(context) - (tinggi(context) * .1),
                   width: lebar(context),
                   child: Row(
                     children: [
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.all(40),
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Dream Academy', style: TextStyle(color: Colors.black, fontSize: h1 + 20, fontWeight: FontWeight.bold)),
-                              Text('Dream AcademyDream AcademyDream Academy', style: TextStyle(color: Colors.grey, fontSize: h3, fontWeight: FontWeight.normal)),
-                              Text(
-                                'Dream AcademyDream AcademyDream Academy'
-                                'Dream AcademyDream AcademyDream Academy'
-                                'Dream AcademyDream AcademyDream Academy'
-                                'Dream AcademyDream AcademyDream Academy'
-                                'Dream AcademyDream AcademyDream Academy',
-                                style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ],
-                          ),
+                      Container(
+                        width: lebar(context) * .5,
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Dream Academy', style: TextStyle(color: Colors.black, fontSize: h1 + 20, fontWeight: FontWeight.bold)),
+                            Text('Dream AcademyDream AcademyDream Academy', style: TextStyle(color: Colors.grey, fontSize: h3, fontWeight: FontWeight.normal)),
+                            Text(
+                              'Dream AcademyDream AcademyDream Academy'
+                              'Dream AcademyDream AcademyDream Academy'
+                              'Dream AcademyDream AcademyDream Academy'
+                              'Dream AcademyDream AcademyDream Academy'
+                              'Dream AcademyDream AcademyDream Academy',
+                              style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.justify,
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.all(40),
-                          child: AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Container(
-                              color: Colors.grey,
-                            ),
-                          ),
+                      Container(
+                        width: lebar(context) * .5,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(40),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
                         ),
                       ),
                     ],
