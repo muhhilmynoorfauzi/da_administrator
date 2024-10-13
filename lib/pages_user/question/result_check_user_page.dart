@@ -38,6 +38,7 @@ class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
         useHybridComposition: true,
         playsInline: true,
         enableJavaScript: true,
+        autoPlay: false,
       ),
     );
     listJawaban = List.generate(widget.question.options.length, (index) => '');

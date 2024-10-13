@@ -41,6 +41,7 @@ class _ResultTruefalseUserPageState extends State<ResultTruefalseUserPage> {
         useHybridComposition: true,
         playsInline: true,
         enableJavaScript: true,
+        autoPlay: false,
       ),
     );
   }

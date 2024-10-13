@@ -1,6 +1,7 @@
 import 'package:da_administrator/pages_user/about_user_page.dart';
 import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/home_user_page.dart';
+import 'package:da_administrator/pages_user/profile/nav_profile_user_page.dart';
 import 'package:da_administrator/pages_user/rekomendasi_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
@@ -93,7 +94,9 @@ AppBar appbarDesk({
       const SizedBox(width: 30),
       isLogin
           ? InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
+              },
               borderRadius: BorderRadius.circular(100),
               child: Container(
                 height: 40,

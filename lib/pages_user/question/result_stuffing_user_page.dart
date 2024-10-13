@@ -39,6 +39,7 @@ class _ResultStuffingUserPageState extends State<ResultStuffingUserPage> {
         useHybridComposition: true,
         playsInline: true,
         enableJavaScript: true,
+        autoPlay: false,
       ),
     );
   }

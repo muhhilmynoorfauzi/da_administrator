@@ -235,7 +235,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                         Expanded(
                                           child: SizedBox(
                                             width: 200,
-                                            child: Html(data: question!.listQuestions[index].page),
+                                            child: Html(data: question!.listQuestions[index].question),
                                           ),
                                         ),
                                         Container(

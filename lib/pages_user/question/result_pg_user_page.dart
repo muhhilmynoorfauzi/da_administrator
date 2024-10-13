@@ -41,6 +41,7 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
         useHybridComposition: true,
         playsInline: true,
         enableJavaScript: true,
+        autoPlay: false,
       ),
     );
   }

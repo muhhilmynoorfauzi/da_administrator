@@ -7,35 +7,38 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PayDoneUserPage extends StatefulWidget {
-  const PayDoneUserPage({super.key});
+  const PayDoneUserPage({super.key, required this.second});
+
+  final int second;
 
   @override
   _PayDoneUserPageState createState() => _PayDoneUserPageState();
 }
 
 class _PayDoneUserPageState extends State<PayDoneUserPage> {
-  int _remainingTime = 5; // Durasi awal 5 detik
-  Timer? _timer;
+  int remainingTime = 5; // Durasi awal 5 detik
+  Timer? timerRun;
   final imageVec = 'assets/vec3.png';
 
   @override
   void initState() {
     super.initState();
+    remainingTime = widget.second;
     startTimer();
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Hentikan timer saat halaman ditutup
+    timerRun?.cancel(); // Hentikan timer saat halaman ditutup
     super.dispose();
   }
 
   void startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() => _remainingTime--);
+    timerRun = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingTime > 0) {
+        setState(() => remainingTime--);
       } else {
-        _timer?.cancel(); // Hentikan timer saat mencapai 0
+        timerRun?.cancel(); // Hentikan timer saat mencapai 0
         context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
         Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
       }
@@ -61,7 +64,7 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
             children: [
               Icon(Icons.check_circle_rounded, color: primary, size: 70),
               Text('Pembayaran Selesai', style: TextStyle(fontSize: h1, fontWeight: FontWeight.bold, color: Colors.black)),
-              Text('Otomatis kembali dalam $_remainingTime', style: TextStyle(fontSize: h3, color: Colors.black)),
+              Text('Otomatis kembali dalam $remainingTime', style: TextStyle(fontSize: h3, color: Colors.black)),
               const SizedBox(height: 10),
               SizedBox(
                 height: 35,

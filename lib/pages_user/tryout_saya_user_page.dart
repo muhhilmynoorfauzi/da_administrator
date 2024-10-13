@@ -1,12 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/pages/example.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
 import 'package:da_administrator/service/color.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TryoutSayaUserPage extends StatefulWidget {
   const TryoutSayaUserPage({super.key});
@@ -16,6 +21,17 @@ class TryoutSayaUserPage extends StatefulWidget {
 }
 
 class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
+  var userUid = 'userUID123';
+  TextEditingController foundController = TextEditingController();
+
+  // var claimed = false;
+
+  List<TryoutModel> allTryout = [];
+  List<String> idAllTryout = [];
+
+  List<TryoutModel> myTryout = [];
+  List<String> idMyTryout = [];
+
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 700) {
@@ -25,8 +41,54 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     }
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    super.initState();
+
+    getDataProduct();
+    profider.addListener(() => getDataProduct());
+  }
+
+  void getDataProduct() async {
+    allTryout = [];
+    idAllTryout = [];
+
+    myTryout = [];
+    idMyTryout = [];
+
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v1');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
+
+      allTryout = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      idAllTryout = querySnapshot.docs.map((doc) => doc.id).toList();
+
+      for (int i = 0; i < allTryout.length; i++) {
+        if (allTryout[i].claimedUid.isNotEmpty) {
+          for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
+            if (allTryout[i].claimedUid[j].userUID.contains(userUid)) {
+              myTryout.add(allTryout[i]);
+              idMyTryout.add(idAllTryout[i]);
+            }
+          }
+        }
+      }
+
+      setState(() {});
+    } catch (e) {
+      print('salah home_page: $e');
+    }
+  }
+
   void selengkapnya(BuildContext context) {
     Navigator.push(context, FadeRoute1(const TryoutSelengkapnyaUserPage()));
+  }
+
+  String formatDateTime(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('dd MMMM yyyy');
+    return formatter.format(dateTime);
   }
 
   Widget cardTryout({
@@ -34,7 +96,10 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     required String title,
     required String desk,
     required bool readyOnFree,
+    required bool claimed,
     required VoidCallback onTap,
+    required DateTime started,
+    required DateTime ended,
   }) {
     return SizedBox(
       width: 495,
@@ -68,12 +133,35 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                      Text(desk, style: TextStyle(fontSize: h4, color: Colors.black), overflow: TextOverflow.ellipsis, maxLines: 4),
+                      Text(
+                        title,
+                        style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                      ),
+                      Text(
+                        '${formatDateTime(started)} - ${formatDateTime(ended)}',
+                        style: TextStyle(fontSize: h5 + 2, color: Colors.black),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(desk, style: TextStyle(fontSize: h4, color: Colors.black), overflow: TextOverflow.ellipsis, maxLines: 3),
                       const Expanded(child: SizedBox()),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                            decoration: BoxDecoration(color: claimed ? primary : secondary, borderRadius: BorderRadius.circular(50)),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  claimed ? 'JOINED' : 'Waiting',
+                                  style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
                           Text(readyOnFree ? 'Berbayar dan Gratis' : 'Berbayar', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: primary)),
                         ],
                       ),
@@ -200,16 +288,28 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     spacing: 10,
                     runSpacing: 10,
                     children: List.generate(
-                      2,
-                      (index) => cardTryout(
-                        imageUrl: 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp',
-                        title: 'Try Out UTBK 2024 #11 - SNBT',
-                        desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
-                        readyOnFree: false,
-                        onTap: () {
-                          Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
-                        },
-                      ),
+                      myTryout.length,
+                      (index) {
+                        var claimed = false;
+
+                        for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
+                          if (myTryout[index].claimedUid[i].userUID == userUid) {
+                            claimed = myTryout[index].claimedUid[i].approval;
+                          }
+                        }
+                        return cardTryout(
+                          imageUrl: myTryout[index].image,
+                          title: myTryout[index].toName,
+                          desk: myTryout[index].desk,
+                          readyOnFree: myTryout[index].showFreeMethod,
+                          claimed: claimed,
+                          ended: myTryout[index].ended,
+                          started: myTryout[index].started,
+                          onTap: () {
+                            Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -248,16 +348,28 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     spacing: 10,
                     runSpacing: 10,
                     children: List.generate(
-                      2,
-                      (index) => cardTryout(
-                        imageUrl: 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp',
-                        title: 'Try Out UTBK 2024 #11 - SNBT',
-                        desk: 'Tes Potensi Skolastik (TPS) dan Tes Literasi',
-                        readyOnFree: false,
-                        onTap: () {
-                          Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
-                        },
-                      ),
+                      myTryout.length,
+                      (index) {
+                        var claimed = false;
+
+                        for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
+                          if (myTryout[index].claimedUid[i].userUID == userUid) {
+                            claimed = myTryout[index].claimedUid[i].approval;
+                          }
+                        }
+                        return cardTryout(
+                          imageUrl: myTryout[index].image,
+                          title: myTryout[index].toName,
+                          desk: myTryout[index].desk,
+                          readyOnFree: myTryout[index].showFreeMethod,
+                          claimed: claimed,
+                          started: myTryout[index].started,
+                          ended: myTryout[index].ended,
+                          onTap: () {
+                            Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],

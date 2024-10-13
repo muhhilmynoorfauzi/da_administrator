@@ -1,14 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:da_administrator/firebase_service/tryout_service.dart';
+import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/model/tryout/user_claimed.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/pay_done_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PayEwalletUserPage extends StatefulWidget {
-  const PayEwalletUserPage({super.key});
+  const PayEwalletUserPage({super.key, required this.docId, required this.tryoutUser});
+
+  final String docId;
+  final TryoutModel? tryoutUser;
 
   @override
   State<PayEwalletUserPage> createState() => _PayEwalletUserPageState();
@@ -16,7 +23,15 @@ class PayEwalletUserPage extends StatefulWidget {
 
 class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
   var isLogin = true;
-  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
+
+  var total = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    total = widget.tryoutUser!.listPrice.first;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +42,42 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
     }
   }
 
-  void payment(BuildContext context) {
-    Navigator.push(context, FadeRoute1(const PayDoneUserPage()));
+  Future<void> payment(BuildContext context) async {
+    var claimedUid = widget.tryoutUser!.claimedUid;
+    claimedUid.add(
+      UserClaimed(
+        userUID: 'userUID123',
+        payment: 'Gopay',
+        created: DateTime.now(),
+        tryoutID: widget.docId,
+        approval: false,
+        name: 'Muh. Hilmy',
+        imgFollow: '',
+        price: widget.tryoutUser!.listPrice.first,
+      ),
+    );
+    await TryoutService.edit(
+      id: widget.docId,
+      claimedUid: claimedUid,
+      created: widget.tryoutUser!.created,
+      updated: widget.tryoutUser!.updated,
+      toCode: widget.tryoutUser!.toCode,
+      toName: widget.tryoutUser!.toName,
+      started: widget.tryoutUser!.started,
+      ended: widget.tryoutUser!.ended,
+      desk: widget.tryoutUser!.desk,
+      image: widget.tryoutUser!.image,
+      phase: widget.tryoutUser!.phase,
+      expired: widget.tryoutUser!.expired,
+      public: widget.tryoutUser!.public,
+      showFreeMethod: widget.tryoutUser!.showFreeMethod,
+      totalTime: widget.tryoutUser!.totalTime,
+      numberQuestions: widget.tryoutUser!.numberQuestions,
+      listTest: widget.tryoutUser!.listTest,
+      listPrice: widget.tryoutUser!.listPrice,
+    );
+    await Future.delayed(const Duration(milliseconds: 200));
+    Navigator.push(context, FadeRoute1(const PayDoneUserPage(second: 5)));
   }
 
   Future<void> showMetode({required BuildContext context}) async {
@@ -100,23 +149,38 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
                     child: AspectRatio(
                       aspectRatio: 1,
                       child: CachedNetworkImage(
-                        imageUrl: urlImage,
+                        imageUrl: widget.tryoutUser!.image,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
                         errorWidget: (context, url, error) => const Icon(Icons.error),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Try Out UTBK 2024 #9 - SNBT', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                        Text('Tes Potensi Skolastik (TPS) dan Tes Literasi', style: TextStyle(fontSize: h4, color: Colors.black)),
-                        const Expanded(child: SizedBox()),
-                        Text('Rp 20.000', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                      ],
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Try Out UTBK 2024 #9 - SNBT', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                widget.tryoutUser!.desk,
+                                style: TextStyle(fontSize: h4, color: Colors.black),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(widget.tryoutUser!.listPrice.first),
+                            style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 ],
@@ -157,7 +221,10 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Harga', style: TextStyle(fontSize: h4, color: Colors.black)),
-                      Text('Rp 20.000', style: TextStyle(fontSize: h4, color: Colors.black)),
+                      Text(
+                        NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(widget.tryoutUser!.listPrice.first),
+                        style: TextStyle(fontSize: h4, color: Colors.black),
+                      ),
                     ],
                   ),
                   Row(
@@ -182,7 +249,10 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Total', style: TextStyle(fontSize: h2, fontWeight: FontWeight.bold, color: Colors.black)),
-                      Text('Rp 20.000', style: TextStyle(fontSize: h2, fontWeight: FontWeight.bold, color: Colors.black)),
+                      Text(
+                        NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(total),
+                        style: TextStyle(fontSize: h2, fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),

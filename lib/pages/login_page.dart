@@ -23,14 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return loginDesk(context);
-
-    /*if (lebar(context) <= 700) {
-      return loginMobile(context);
-    } else if (lebar(context) >= 700 && lebar(context) <= 1200) {
-      return loginTablet(context);
-    } else {
-      return loginDesk(context);
-    }*/
   }
 
   Widget loginDesk(BuildContext context) {
@@ -51,8 +43,8 @@ class _LoginPageState extends State<LoginPage> {
             child: SvgPicture.asset('assets/bg.svg', fit: BoxFit.fitWidth, width: lebar(context)),
           ),
           SizedBox(
-            height: lebar(context) <= 400 ? lebar(context) + 250 : 600,
-            width: 400,
+            height: lebar(context) <= 400 ? lebar(context) + 250 : 550,
+            width: 380,
             child: cardLogin(),
           ),
         ],
@@ -71,10 +63,10 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10)),
-            child: AspectRatio(aspectRatio: 1, child: Image.network(vector)),
+            child: AspectRatio(aspectRatio: 1, child: Image.network(vector, fit: BoxFit.cover)),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             child: Text('Login with Google', style: TextStyle(color: Colors.black, fontSize: h2, fontWeight: FontWeight.bold)),
           ),
           Container(
@@ -109,25 +101,25 @@ class _LoginPageState extends State<LoginPage> {
                       )),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
                 text: 'By clicking continue, you agree to our ',
-                style: TextStyle(color: Colors.black, fontSize: h4),
+                style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.w100),
                 children: [
                   TextSpan(
                     text: 'Terms of Service',
-                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h4 - 2),
                     recognizer: TapGestureRecognizer()..onTap = () {},
                   ),
                   TextSpan(
                     text: ' and ',
-                    style: TextStyle(color: Colors.black, fontSize: h4),
+                    style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.w100),
                   ),
                   TextSpan(
                     text: 'Privacy Policy',
-                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h4 - 2),
                     recognizer: TapGestureRecognizer()..onTap = () {},
                   ),
                 ],

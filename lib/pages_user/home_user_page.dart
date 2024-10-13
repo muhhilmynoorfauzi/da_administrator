@@ -2,7 +2,7 @@ import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
-import 'package:da_administrator/service/state_manajement.dart';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -19,25 +19,10 @@ class _HomeUserPageState extends State<HomeUserPage> {
   var isLogin = true;
   late YoutubePlayerController _controller;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
-      params: const YoutubePlayerParams(
-        color: 'red',
-        privacyEnhanced: true,
-        showControls: true,
-        strictRelatedVideos: true,
-        enableKeyboard: true,
-        showFullscreenButton: true,
-        showVideoAnnotations: true,
-        useHybridComposition: true,
-        playsInline: true,
-        enableJavaScript: true,
-      ),
-    );
-  }
+  final ScrollController scrollController1 = ScrollController();
+  final ScrollController scrollController2 = ScrollController();
+  bool scrollingDown1 = true; // Flag untuk menentukan arah scroll
+  bool scrollingUp2 = true; // Flag untuk menentukan arah scroll
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +31,65 @@ class _HomeUserPageState extends State<HomeUserPage> {
     } else {
       return homeUserDesk(context);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
+      params: const YoutubePlayerParams(
+          color: 'red',
+          privacyEnhanced: true,
+          showControls: true,
+          strictRelatedVideos: true,
+          enableKeyboard: true,
+          showFullscreenButton: true,
+          showVideoAnnotations: true,
+          useHybridComposition: true,
+          playsInline: true,
+          enableJavaScript: true,
+          autoPlay: false),
+    );
+    // WidgetsBinding.instance.addPostFrameCallback((_) {});
+  }
+
+  void autoScroll1() async {
+    while (true) {
+      if (scrollingDown1) {
+        // Scroll ke bagian paling bawah
+        await scrollController1.animateTo(scrollController1.position.maxScrollExtent, duration: const Duration(seconds: 3), curve: Curves.easeInOut);
+      } else {
+        // Scroll ke bagian paling atas
+        await scrollController1.animateTo(scrollController1.position.minScrollExtent, duration: const Duration(seconds: 3), curve: Curves.easeInOut);
+      }
+      // Ubah arah scroll
+      scrollingDown1 = !scrollingDown1;
+    }
+  }
+
+  void autoScroll2() async {
+    while (true) {
+      if (scrollingUp2) {
+        // Scroll ke bagian paling atas
+        await scrollController2.animateTo(scrollController2.position.minScrollExtent, duration: const Duration(seconds: 3), curve: Curves.easeInOut);
+      } else {
+        // Scroll ke bagian paling bawah
+        await scrollController2.animateTo(scrollController2.position.maxScrollExtent, duration: const Duration(seconds: 3), curve: Curves.easeInOut);
+      }
+      // Ubah arah scroll
+      scrollingUp2 = !scrollingUp2;
+    }
+  }
+
+  @override
+  void dispose() {
+    scrollController1.dispose();
+    super.dispose();
+  }
+
+  void openNewTab(String contact) {
+    html.window.open('https://wa.me/+62$contact', '_blank');
   }
 
   Widget homeUserDesk(BuildContext context) {
@@ -59,7 +103,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
           backgroundColor: primary,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-          onPressed: () {},
+          onPressed: () => openNewTab('82195012789'),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -126,103 +170,168 @@ class _HomeUserPageState extends State<HomeUserPage> {
                   child: Image.asset('assets/vec1.png'),
                 ),
                 //100+ pelajar telah berproses bersama kami
-                Container(
-                  height: 500,
-                  width: lebar(context),
-                  decoration: BoxDecoration(gradient: primaryGradient),
-                  padding: const EdgeInsets.symmetric(horizontal: 100),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          children: List.generate(
-                            2,
-                            (index) => Expanded(
-                              child: ListView(
-                                physics: const NeverScrollableScrollPhysics(),
-                                reverse: (index == 1) ? true : false,
-                                children: List.generate(
-                                  4,
-                                  (index) => SizedBox(
-                                    height: 200,
-                                    child: Card(
-                                      margin: const EdgeInsets.all(10),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(10),
-                                            height: 70,
-                                            child: Row(
-                                              children: [
-                                                CircleAvatar(
-                                                  backgroundColor: Colors.grey,
-                                                  child: Image.network('https://avatars.githubusercontent.com/u/61872710?v=4'),
-                                                ),
-                                                const SizedBox(width: 10),
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      autoScroll1();
+                      autoScroll2();
+                    });
+                    return Container(
+                      height: 500,
+                      width: lebar(context),
+                      decoration: BoxDecoration(gradient: primaryGradient),
+                      padding: const EdgeInsets.symmetric(horizontal: 100),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ListView(
+                                    controller: scrollController1,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    children: List.generate(
+                                      4,
+                                      (index) => SizedBox(
+                                        height: 200,
+                                        child: Card(
+                                          margin: const EdgeInsets.all(10),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(10),
+                                                height: 70,
+                                                child: Row(
                                                   children: [
-                                                    Text('Muh. Hilmy Noor Fauzi', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
-                                                    Text('20 Juli 2024', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                    ClipRRect(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                      child: CircleAvatar(
+                                                        backgroundColor: Colors.grey,
+                                                        child: Image.network('https://avatars.githubusercontent.com/u/61872710?v=4'),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Text('Muh. Hilmy Noor Fauzi', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                        Text('20 Juli 2024', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                      ],
+                                                    )
                                                   ],
-                                                )
-                                              ],
-                                            ),
+                                                ),
+                                              ),
+                                              Container(
+                                                height: 110,
+                                                width: double.infinity,
+                                                padding: const EdgeInsets.all(10),
+                                                child: Text(
+                                                  'Saya sangat senang belajar di Dream Academy karena memiliki banyak contoh soal dan penjelasan mudah dipahami',
+                                                  style: TextStyle(color: Colors.black, fontSize: h4),
+                                                  maxLines: 4,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          Container(
-                                            height: 110,
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.all(10),
-                                            child: Text(
-                                              'Saya sangat senang belajar di Dream Academy karena memiliki banyak contoh soal dan penjelasan mudah dipahami',
-                                              style: TextStyle(color: Colors.black, fontSize: h4),
-                                              maxLines: 4,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
+                                Expanded(
+                                  child: ListView(
+                                    controller: scrollController2,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    reverse: true,
+                                    children: List.generate(
+                                      4,
+                                      (index) => SizedBox(
+                                        height: 200,
+                                        child: Card(
+                                          margin: const EdgeInsets.all(10),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(10),
+                                                height: 70,
+                                                child: Row(
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                      child: CircleAvatar(
+                                                        backgroundColor: Colors.grey,
+                                                        child: Image.network('https://avatars.githubusercontent.com/u/61872710?v=4'),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Text('Muh. Hilmy Noor Fauzi', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                        Text('20 Juli 2024', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                height: 110,
+                                                width: double.infinity,
+                                                padding: const EdgeInsets.all(10),
+                                                child: Text(
+                                                  'Saya sangat senang belajar di Dream Academy karena memiliki banyak contoh soal dan penjelasan mudah dipahami',
+                                                  style: TextStyle(color: Colors.black, fontSize: h4),
+                                                  maxLines: 4,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 100),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('1000++ Pelajar Telah', style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.bold)),
+                                  Text('Berproses bersama kami', style: TextStyle(color: Colors.white, fontSize: h1 + 5, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami',
+                                    style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.w100),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 20),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
+                                      child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 100),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('1000++ Pelajar Telah', style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.bold)),
-                              Text('Berproses bersama kami', style: TextStyle(color: Colors.white, fontSize: h1 + 5, fontWeight: FontWeight.bold)),
-                              Text(
-                                'Berproses bersama kami'
-                                'Berproses bersama kami'
-                                'Berproses bersama kami'
-                                'Berproses bersama kami',
-                                style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.w100),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20),
-                                child: TextButton(
-                                  onPressed: () {},
-                                  style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
-                                  child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 //persiapkan semua untuk ujianmu
                 Container(
@@ -288,7 +397,10 @@ class _HomeUserPageState extends State<HomeUserPage> {
                                     width: 450,
                                     child: Row(
                                       children: [
-                                        CircleAvatar(backgroundColor: Colors.transparent, radius: 40, child: SvgPicture.asset(img[index])),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(50),
+                                          child: CircleAvatar(backgroundColor: Colors.transparent, radius: 40, child: SvgPicture.asset(img[index])),
+                                        ),
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(

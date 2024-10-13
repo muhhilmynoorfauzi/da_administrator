@@ -37,7 +37,7 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    setState(() => idPage = widget.idPage);
+    idPage = widget.idPage;
   }
 
   Widget onDesk(BuildContext context) {
@@ -58,28 +58,29 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: List.generate(
                       listHeaders.length,
-                      (index) {
-                        return InkWell(
-                          onTap: () {
-                            context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listHeaders[index]}');
-                            idPage = index;
-                            setState(() {});
-                          },
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          child: Container(
-                            height: 30,
-                            // duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.symmetric(horizontal: 30),
-                            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2))),
-                            child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
-                          ),
-                        );
-                      },
+                      (index) => InkWell(
+                        onTap: () async {
+                          context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listPage[idPage]}');
+                          idPage = index;
+                          setState(() {});
+                        },
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        child: Container(
+                          height: 30,
+                          margin: const EdgeInsets.symmetric(horizontal: 30),
+                          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2))),
+                          child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                Expanded(child: listPage[idPage]),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Expanded(child: listPage[idPage]);
+                  },
+                ),
               ],
             )
           : ListView(
