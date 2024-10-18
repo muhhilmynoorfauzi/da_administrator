@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/tryout/test_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
-import 'package:da_administrator/model/tryout/user_claimed.dart';
+import 'package:da_administrator/model/tryout/claimed_model.dart';
 
 
 class TryoutService {
@@ -25,9 +25,9 @@ class TryoutService {
     required bool showFreeMethod,
     required int totalTime,
     required int numberQuestions,
-    required List<TestModel> listTest,
-    required List<UserClaimed> claimedUid,
+    required List<ClaimedModel> claimedUid,
     required List<int> listPrice,
+    required List<TestModel> listTest,
   }) async {
     final docRef = FirebaseFirestore.instance.collection('tryout_v1').doc(id);
 
@@ -38,8 +38,6 @@ class TryoutService {
       'toName': toName,
       'started': started.toIso8601String(),
       'ended': ended.toIso8601String(),
-      'startWork': started.toIso8601String(),
-      'endWork': ended.toIso8601String(),
       'desk': desk,
       'image': image,
       'phase': phase,
@@ -48,9 +46,9 @@ class TryoutService {
       'showFreeMethod': showFreeMethod,
       'totalTime': totalTime,
       'numberQuestions': numberQuestions,
-      'listTest': listTest.map((content) => content.toJson()).toList(),
       'claimedUid': claimedUid.map((content) => content.toJson()).toList(),
       'listPrice': listPrice,
+      'listTest': listTest.map((content) => content.toJson()).toList(),
     };
 
     await docRef.update(updates);

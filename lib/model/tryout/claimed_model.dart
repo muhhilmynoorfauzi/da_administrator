@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/tryout/test_model.dart';
 
-class UserClaimed {
+class ClaimedModel {
   String userUID;
   String payment;
   DateTime created;
@@ -11,7 +11,7 @@ class UserClaimed {
   String imgFollow;
   int price;
 
-  UserClaimed({
+  ClaimedModel({
     required this.userUID,
     required this.payment,
     required this.created,
@@ -33,7 +33,7 @@ class UserClaimed {
         'price': price,
       };
 
-  factory UserClaimed.fromJson(Map<String, dynamic> json) => UserClaimed(
+  factory ClaimedModel.fromJson(Map<String, dynamic> json) => ClaimedModel(
         userUID: json['userUID'],
         payment: json['payment'],
         created: DateTime.parse(json['created']),
@@ -44,5 +44,5 @@ class UserClaimed {
         price: json['price'],
       );
 
-  factory UserClaimed.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) => UserClaimed.fromJson(snapshot.data()!);
+  factory ClaimedModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) => ClaimedModel.fromJson(snapshot.data()!);
 }

@@ -171,8 +171,6 @@ class _HomePageState extends State<HomePage> {
                       toName: controller.text,
                       ended: nowTime,
                       started: nowTime,
-                      startWork: nowTime,
-                      endWork: nowTime,
                       public: false,
                       showFreeMethod: false,
                       desk: '',

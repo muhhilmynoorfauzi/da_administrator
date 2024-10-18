@@ -102,13 +102,13 @@ class _MyAppState extends State<MyApp> {
               // return const DetailMytryoutUserPage();
               // return const DetailTryoutUserPage();
               // return const TryoutUserPage(idPage: 0);
-              // return const HomePage();
               // return const PayDoneUserPage();
               // return const PayFreeUserPage();
               // return const PayCoinUserPage();
               // return const PayEwalletUserPage();
-              return const LoginPage();
               // return const AutoScrollListView();
+              // return const HomePage();
+              return const LoginPage();
             }
           },
         );

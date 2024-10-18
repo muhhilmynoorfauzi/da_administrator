@@ -1,14 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/model/questions/check_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
+import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 class QuestCheckUserPage extends StatefulWidget {
-  const QuestCheckUserPage({super.key, required this.question});
+  const QuestCheckUserPage({super.key, required this.indexQuest});
 
-  final CheckModel question;
+  final int indexQuest;
 
   @override
   State<QuestCheckUserPage> createState() => _QuestCheckUserPageState();
@@ -16,8 +18,8 @@ class QuestCheckUserPage extends StatefulWidget {
 
 class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
   var isLogin = true;
-  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
 
+  CheckModel? question;
   late List<String> listJawaban;
 
   @override
@@ -31,9 +33,20 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
 
   @override
   void initState() {
+    started();
     // TODO: implement initState
     super.initState();
-    listJawaban = List.generate(widget.question.options.length, (index) => '');
+  }
+
+  void started() {
+    question = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
+    if (question != null) {
+      if (question!.yourAnswer.isNotEmpty) {
+        listJawaban = question!.yourAnswer;
+      } else {
+        listJawaban = List.generate(question!.options.length, (index) => '');
+      }
+    }
   }
 
   Widget onDesk(BuildContext context) {
@@ -48,27 +61,49 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: AspectRatio(
-                    aspectRatio: 5 / 1,
-                    child: CachedNetworkImage(
-                      imageUrl: urlImage,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                if (question!.image.isNotEmpty)
+                  Column(
+                    children: List.generate(
+                      question!.image.length,
+                      (index) {
+                        if (question!.image[index] != '') {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: AspectRatio(
+                              aspectRatio: 5 / 1,
+                              child: CachedNetworkImage(
+                                imageUrl: question!.image[index]!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      },
                     ),
                   ),
+                QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
+                    controller: QuillController(
+                      document: Document.fromHtml(question!.question),
+                      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                      readOnly: true,
+                    ),
+                    customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                  ),
                 ),
-                Text(widget.question.question, style: TextStyle(color: Colors.black, fontSize: h4)),
               ],
             ),
           ),
           Column(
             children: List.generate(
-              widget.question.options.length,
+              question!.options.length,
               (index) {
-                var options = widget.question.options[index];
+                var options = question!.options[index];
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -89,10 +124,12 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
                           value: listJawaban[index] == options,
                           onChanged: (bool? value) {
                             if (listJawaban[index] != options) {
-                              setState(() => listJawaban[index] = options);
+                              listJawaban[index] = options;
                             } else if (listJawaban[index] == options) {
-                              setState(() => listJawaban[index] = '');
+                              listJawaban[index] = '';
                             }
+                            question!.yourAnswer = listJawaban;
+                            setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                           },
                         ),
                       ),

@@ -1,12 +1,12 @@
 import 'package:da_administrator/pages/function_qustion/add_qustion.dart';
 import 'package:da_administrator/pages/function_qustion/edit_questions.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/firebase_service/questions_service.dart';
 import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 class QuestionsPage extends StatefulWidget {
   final String idQuestion;
@@ -85,43 +85,55 @@ class _QuestionsPageState extends State<QuestionsPage> {
       context: context,
       builder: (BuildContext context) {
         var loading = false;
-        return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            title: SizedBox(
-              width: 1000,
-              child: loading
-                  ? Center(child: CircularProgressIndicator(color: primary))
-                  : SizedBox(
-                      height: 50,
-                      child: Html(data: question!.listQuestions[index].page),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              title: SizedBox(
+                width: 1000,
+                child: loading
+                    ? Center(child: CircularProgressIndicator(color: primary))
+                    : QuillEditor.basic(
+                      focusNode: FocusNode(),
+                      configurations: QuillEditorConfigurations(
+                        controller: QuillController(
+                          document: Document.fromHtml(question!.listQuestions[index].question),
+                          selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          readOnly: true,
+                        ),
+                        placeholder: 'Soal',
+                        customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                        checkBoxReadOnly: true,
+                        sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                      ),
                     ),
-            ),
-            contentPadding: const EdgeInsets.all(20),
-            actionsPadding: const EdgeInsets.all(10),
-            actions: loading
-                ? []
-                : [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Batal', style: TextStyle(color: Colors.black, fontSize: h4)),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        setState(() => loading = true);
-                        await question!.listQuestions.removeAt(index);
-                        await QuestionsService.edit(id: widget.idQuestion, idTryOut: question!.idTryOut, listQuestions: question!.listQuestions);
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
-                    ),
-                  ],
-          );
-        });
+              ),
+              contentPadding: const EdgeInsets.all(20),
+              actionsPadding: const EdgeInsets.all(10),
+              actions: loading
+                  ? []
+                  : [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text('Batal', style: TextStyle(color: Colors.black, fontSize: h4)),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          setState(() => loading = true);
+                          await question!.listQuestions.removeAt(index);
+                          await QuestionsService.edit(id: widget.idQuestion, idTryOut: question!.idTryOut, listQuestions: question!.listQuestions);
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                      ),
+                    ],
+            );
+          },
+        );
       },
     );
   }
@@ -233,9 +245,21 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: SizedBox(
-                                            width: 200,
-                                            child: Html(data: question!.listQuestions[index].question),
+                                          child: QuillEditor.basic(
+                                            focusNode: FocusNode(),
+                                            configurations: QuillEditorConfigurations(
+                                              controller: QuillController(
+                                                document: Document.fromHtml(question!.listQuestions[index].question),
+                                                selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                                                readOnly: true,
+                                              ),
+                                              placeholder: 'Soal',
+                                              customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                                              checkBoxReadOnly: true,
+                                              readOnlyMouseCursor: MouseCursor.uncontrolled,
+                                              floatingCursorDisabled: true,
+                                              sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                                            ),
                                           ),
                                         ),
                                         Container(
@@ -272,7 +296,10 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                           icon: const Icon(Icons.edit),
                                         ),
                                         IconButton(
-                                          onPressed: () => deleteQuestion(index),
+                                          onPressed: () {
+                                            print(question!.listQuestions[index]);
+                                            deleteQuestion(index);
+                                          },
                                           icon: const Icon(Icons.delete),
                                         )
                                       ],

@@ -35,9 +35,9 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
 
   @override
   void initState() {
+    idPage = widget.idPage;
     // TODO: implement initState
     super.initState();
-    idPage = widget.idPage;
   }
 
   Widget onDesk(BuildContext context) {

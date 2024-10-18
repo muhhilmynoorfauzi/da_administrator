@@ -196,7 +196,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
   void kembaliKeTryout(){
     context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
     Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
-    Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+    // Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
     // Navigator.pop(context);
   }
 

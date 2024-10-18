@@ -32,6 +32,9 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
   List<TryoutModel> myTryout = [];
   List<String> idMyTryout = [];
 
+  List<TryoutModel> doneTryout = [];
+  List<String> idDoneTryout = [];
+
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 700) {
@@ -58,6 +61,8 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     myTryout = [];
     idMyTryout = [];
 
+    doneTryout = [];
+    idDoneTryout = [];
     try {
       CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v1');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
@@ -72,6 +77,14 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               myTryout.add(allTryout[i]);
               idMyTryout.add(idAllTryout[i]);
             }
+          }
+        }
+      }
+      if (myTryout.isNotEmpty) {
+        for (int i = 0; i < myTryout.length; i++) {
+          if (myTryout[i].phase) {
+            doneTryout.add(myTryout[i]);
+            idDoneTryout.add(idMyTryout[i]);
           }
         }
       }
@@ -133,18 +146,13 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
-                      ),
+                      Text(title, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black), overflow: TextOverflow.ellipsis),
                       Text(
                         '${formatDateTime(started)} - ${formatDateTime(ended)}',
                         style: TextStyle(fontSize: h5 + 2, color: Colors.black),
                       ),
                       const SizedBox(height: 5),
-                      Text(desk, style: TextStyle(fontSize: h4, color: Colors.black), overflow: TextOverflow.ellipsis, maxLines: 3),
+                      Text(desk, style: TextStyle(fontSize: h4, color: Colors.black), overflow: TextOverflow.ellipsis, maxLines: 3, textAlign: TextAlign.justify),
                       const Expanded(child: SizedBox()),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,14 +160,9 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
                             decoration: BoxDecoration(color: claimed ? primary : secondary, borderRadius: BorderRadius.circular(50)),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  claimed ? 'JOINED' : 'Waiting',
-                                  style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
-                                ),
-                              ],
+                            child: Text(
+                              claimed ? 'Joined' : 'Process',
+                              style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ),
                           Text(readyOnFree ? 'Berbayar dan Gratis' : 'Berbayar', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: primary)),
@@ -270,16 +273,17 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('TryOut Belum Selesai', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                      SizedBox(
-                        height: 30,
-                        child: OutlinedButton.icon(
-                          onPressed: () => selengkapnya(context),
-                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                          iconAlignment: IconAlignment.end,
-                          icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
-                          label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                      if (myTryout.isNotEmpty)
+                        SizedBox(
+                          height: 30,
+                          child: OutlinedButton.icon(
+                            onPressed: () => selengkapnya(context),
+                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                            iconAlignment: IconAlignment.end,
+                            icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
+                            label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   Text('Lihat somua TO kamu milikl korjakan TO nya sokarang!', style: TextStyle(fontSize: h4, color: Colors.black)),
@@ -290,11 +294,11 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     children: List.generate(
                       myTryout.length,
                       (index) {
-                        var claimed = false;
+                        var approval = false;
 
                         for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
                           if (myTryout[index].claimedUid[i].userUID == userUid) {
-                            claimed = myTryout[index].claimedUid[i].approval;
+                            approval = myTryout[index].claimedUid[i].approval;
                           }
                         }
                         return cardTryout(
@@ -302,11 +306,11 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           title: myTryout[index].toName,
                           desk: myTryout[index].desk,
                           readyOnFree: myTryout[index].showFreeMethod,
-                          claimed: claimed,
+                          claimed: approval,
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
                           },
                         );
                       },
@@ -330,16 +334,17 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('TryOut Selesai', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                      SizedBox(
-                        height: 30,
-                        child: OutlinedButton.icon(
-                          onPressed: () => selengkapnya(context),
-                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                          iconAlignment: IconAlignment.end,
-                          icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
-                          label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                      if (doneTryout.isNotEmpty)
+                        SizedBox(
+                          height: 30,
+                          child: OutlinedButton.icon(
+                            onPressed: () => selengkapnya(context),
+                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                            iconAlignment: IconAlignment.end,
+                            icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
+                            label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   Text('Lihat semua TryOut yang telah kamu ikuti', style: TextStyle(fontSize: h4, color: Colors.black)),
@@ -348,25 +353,25 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     spacing: 10,
                     runSpacing: 10,
                     children: List.generate(
-                      myTryout.length,
+                      doneTryout.length,
                       (index) {
-                        var claimed = false;
+                        var approval = false;
 
-                        for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
-                          if (myTryout[index].claimedUid[i].userUID == userUid) {
-                            claimed = myTryout[index].claimedUid[i].approval;
+                        for (int i = 0; i < doneTryout[index].claimedUid.length; i++) {
+                          if (doneTryout[index].claimedUid[i].userUID == userUid) {
+                            approval = doneTryout[index].claimedUid[i].approval;
                           }
                         }
                         return cardTryout(
-                          imageUrl: myTryout[index].image,
-                          title: myTryout[index].toName,
-                          desk: myTryout[index].desk,
-                          readyOnFree: myTryout[index].showFreeMethod,
-                          claimed: claimed,
-                          started: myTryout[index].started,
-                          ended: myTryout[index].ended,
+                          imageUrl: doneTryout[index].image,
+                          title: doneTryout[index].toName,
+                          desk: doneTryout[index].desk,
+                          readyOnFree: doneTryout[index].showFreeMethod,
+                          claimed: approval,
+                          started: doneTryout[index].started,
+                          ended: doneTryout[index].ended,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idDoneTryout[index], myTryout: doneTryout[index])));
                           },
                         );
                       },

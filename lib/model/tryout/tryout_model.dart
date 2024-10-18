@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/tryout/test_model.dart';
-import 'package:da_administrator/model/tryout/user_claimed.dart';
+import 'package:da_administrator/model/tryout/claimed_model.dart';
 
 class TryoutModel {
   DateTime created;
@@ -9,8 +9,6 @@ class TryoutModel {
   String toName;
   DateTime started;
   DateTime ended;
-  DateTime startWork;
-  DateTime endWork;
   String desk;
   String image;
   bool phase;
@@ -19,9 +17,9 @@ class TryoutModel {
   bool showFreeMethod;
   int totalTime;
   int numberQuestions;
-  List<TestModel> listTest;
-  List<UserClaimed> claimedUid;
+  List<ClaimedModel> claimedUid;
   List<int> listPrice;
+  List<TestModel> listTest;
 
   TryoutModel({
     required this.created,
@@ -30,8 +28,6 @@ class TryoutModel {
     required this.toName,
     required this.started,
     required this.ended,
-    required this.startWork,
-    required this.endWork,
     required this.desk,
     required this.image,
     required this.phase,
@@ -40,54 +36,54 @@ class TryoutModel {
     required this.showFreeMethod,
     required this.totalTime,
     required this.numberQuestions,
-    required this.listTest,
     required this.claimedUid,
     required this.listPrice,
+    required this.listTest,
   });
 
-  Map<String, dynamic> toJson() => {
-        'created': created.toIso8601String(),
-        'updated': updated.toIso8601String(),
-        'toCode': toCode,
-        'toName': toName,
-        'started': started.toIso8601String(),
-        'ended': ended.toIso8601String(),
-        'startWork': started.toIso8601String(),
-        'endWork': ended.toIso8601String(),
-        'desk': desk,
-        'image': image,
-        'phase': phase,
-        'expired': expired,
-        'public': public,
-        'showFreeMethod': showFreeMethod,
-        'totalTime': totalTime,
-        'numberQuestions': numberQuestions,
-        'listTest': listTest.map((content) => content.toJson()).toList(),
-        'claimedUid': claimedUid.map((content) => content.toJson()).toList(),
-        'listPrice': listPrice,
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      'created': created.toIso8601String(),
+      'updated': updated.toIso8601String(),
+      'toCode': toCode,
+      'toName': toName,
+      'started': started.toIso8601String(),
+      'ended': ended.toIso8601String(),
+      'desk': desk,
+      'image': image,
+      'phase': phase,
+      'expired': expired,
+      'public': public,
+      'showFreeMethod': showFreeMethod,
+      'totalTime': totalTime,
+      'numberQuestions': numberQuestions,
+      'claimedUid': claimedUid.map((content) => content.toJson()).toList(),
+      'listPrice': listPrice,
+      'listTest': listTest.map((content) => content.toJson()).toList(),
+    };
+  }
 
-  factory TryoutModel.fromJson(Map<String, dynamic> json) => TryoutModel(
-        created: DateTime.parse(json['created']),
-        updated: DateTime.parse(json['updated']),
-        toCode: json['toCode'],
-        toName: json['toName'],
-        started: DateTime.parse(json['started']),
-        ended: DateTime.parse(json['ended']),
-        startWork: DateTime.parse(json['startWork']),
-        endWork: DateTime.parse(json['endWork']),
-        desk: json['desk'],
-        image: json['image'],
-        phase: json['phase'],
-        expired: json['expired'],
-        public: json['public'],
-        showFreeMethod: json['showFreeMethod'],
-        totalTime: json['totalTime'],
-        numberQuestions: json['numberQuestions'],
-        listTest: (json['listTest'] as List<dynamic>).map((content) => TestModel.fromJson(content)).toList(),
-        claimedUid: (json['claimedUid'] as List<dynamic>).map((content) => UserClaimed.fromJson(content)).toList(),
-        listPrice: List<int>.from(json['listPrice']),
-      );
+  factory TryoutModel.fromJson(Map<String, dynamic> json) {
+    return TryoutModel(
+      created: DateTime.parse(json['created']),
+      updated: DateTime.parse(json['updated']),
+      toCode: json['toCode'],
+      toName: json['toName'],
+      started: DateTime.parse(json['started']),
+      ended: DateTime.parse(json['ended']),
+      desk: json['desk'],
+      image: json['image'],
+      phase: json['phase'],
+      expired: json['expired'],
+      public: json['public'],
+      showFreeMethod: json['showFreeMethod'],
+      totalTime: json['totalTime'],
+      numberQuestions: json['numberQuestions'],
+      claimedUid: (json['claimedUid'] as List<dynamic>).map((content) => ClaimedModel.fromJson(content)).toList(),
+      listPrice: List<int>.from(json['listPrice']),
+      listTest: (json['listTest'] as List<dynamic>).map((content) => TestModel.fromJson(content)).toList(),
+    );
+  }
 
   factory TryoutModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     return TryoutModel.fromJson(snapshot.data()!);

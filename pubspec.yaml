@@ -61,7 +61,7 @@ dependencies:
   #asset svg
   flutter_quill: ^9.5.7
   vsc_quill_delta_to_html: ^1.0.5
-  flutter_html: ^3.0.0-beta.2
+#  flutter_html: ^3.0.0-beta.2
   #grafik
   fl_chart: ^0.69.0
   #  video youtube

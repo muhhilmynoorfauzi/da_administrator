@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/firebase_service/tryout_service.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
-import 'package:da_administrator/model/tryout/user_claimed.dart';
+import 'package:da_administrator/model/tryout/claimed_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/pay_done_user_page.dart';
 import 'package:da_administrator/service/color.dart';
@@ -43,7 +43,7 @@ class _PayFreeUserPageState extends State<PayFreeUserPage> {
   Future<void> payment(BuildContext context) async {
     var claimedUid = widget.tryoutUser!.claimedUid;
     claimedUid.add(
-      UserClaimed(
+      ClaimedModel(
         userUID: 'userUID123',
         payment: 'FreeMethod',
         created: DateTime.now(),

@@ -9,8 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class WaitingUserPage extends StatefulWidget {
-  const WaitingUserPage({super.key, required this.minutes, this.isLast = false});
+  const WaitingUserPage({super.key, required this.minutes, required this.isLast, required this.idUserTo});
 
+  final String idUserTo;
   final int minutes;
   final bool isLast;
 
@@ -49,21 +50,18 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
           remainingTimeInSeconds--;
         } else {
           timer.cancel();
-          lanjutKerja();
+          kembaliTryOutSaya();
         }
       });
     });
   }
 
-  void lanjutKerja() {
-    context.read<CounterProvider>().setTitleUserPage('Dream Academy');
-    Navigator.pushAndRemoveUntil(context, FadeRoute1(const NavQuestUserPage(minutes: 1)), (Route<dynamic> route) => false);
+  void lanjutKerja(BuildContext context) {
+    Navigator.pushAndRemoveUntil(context, FadeRoute1(NavQuestUserPage(minutes: 100, idUserTo: widget.idUserTo)), (Route<dynamic> route) => false);
   }
 
   Future<void> kembaliTryOutSaya() async {
-    context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
     Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
-    Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
   }
 
   @override
@@ -91,7 +89,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
                 style: TextStyle(fontSize: h1, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               Text(
-                'Otomatis melanjutkan TryOut atau\nTunggu hingga waktu selesai untuk melanjutkan TryOut',
+                'Lanjutkan TryOut atau Tunggu hingga\nwaktu selesai untuk kembali ke TryOut saya',
                 style: TextStyle(fontSize: h3, color: Colors.black),
                 textAlign: TextAlign.center,
               ),
@@ -110,11 +108,11 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    if (!widget.isLast)
+                    if (widget.isLast)
                       SizedBox(
                         width: 220,
                         child: TextButton(
-                          onPressed: () => lanjutKerja(),
+                          onPressed: () => lanjutKerja(context),
                           style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 20)),
                           child: Text('Lanjut Kerja TryOut', style: TextStyle(fontSize: h4, color: Colors.white)),
                         ),

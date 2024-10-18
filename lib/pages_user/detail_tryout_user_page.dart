@@ -174,7 +174,12 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Expanded(
-                                  child: Text(tryoutUser!.toName, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                                  child: Text(
+                                    tryoutUser!.toName,
+                                    style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 const SizedBox(width: 5),
                                 if (claimed) Icon(Icons.check_circle_rounded, color: primary, size: 15),
