@@ -24,6 +24,17 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
 
 //-------------------------------------------------
 
+  User? _currentUser;
+
+  User? get getCurrentUser => _currentUser;
+
+  void setCurrentUser(User? user) {
+    _currentUser = user;
+    notifyListeners();
+  }
+
+//-------------------------------------------------
+
   final googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _user;
 

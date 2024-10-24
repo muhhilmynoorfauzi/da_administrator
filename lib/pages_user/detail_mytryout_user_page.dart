@@ -20,7 +20,7 @@ class DetailMytryoutUserPage extends StatefulWidget {
   final bool approval;
   final TryoutModel myTryout;
 
-  const DetailMytryoutUserPage({super.key, required this.docId, required this.myTryout, this.approval = false});
+  const DetailMytryoutUserPage({super.key, required this.docId, required this.myTryout, required this.approval});
 
   @override
   State<DetailMytryoutUserPage> createState() => _DetailMytryoutUserPageState();
@@ -234,18 +234,18 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (!widget.approval)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        widget.myTryout.toName,
-                                        style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      widget.myTryout.toName,
+                                      style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                  ),
+                                  if (!widget.approval)
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
                                       decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
@@ -254,8 +254,8 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                                         style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                ],
+                              ),
                               Text(
                                 '${formatDateTime(widget.myTryout.started)} s.d. ${formatDateTime(widget.myTryout.ended)}',
                                 style: TextStyle(fontSize: h4, color: Colors.black),
@@ -271,38 +271,62 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
                               const Expanded(child: SizedBox()),
                               StatefulBuilder(
                                 builder: (BuildContext context, StateSetter setState) {
-                                  // bool showBtn = false;
                                   bool allDone = false;
+                                  bool notFirstTime = false;
+
                                   if (allUserTo.isNotEmpty) {
                                     for (int i = 0; i < allUserTo.length; i++) {
                                       if (allUserTo[i].userUID == userUid) {
-                                        for (int j = 0; j < allUserTo[i].listTest.length; j++) {
-                                          if (allUserTo[i].listTest[j].done) {
-                                            allDone = true;
-                                            setState(() {});
-                                            break;
-                                          }
-                                        }
+                                        notFirstTime = allUserTo[i].listTest.first.listSubtest.first.done;
+                                        allDone = allUserTo[i].listTest.last.done;
+                                        setState(() {});
+                                        break;
                                       }
                                     }
                                   }
                                   return Row(
                                     children: [
-                                      if (!widget.myTryout.phase && !allDone && widget.approval)
-                                        SizedBox(
-                                          height: 30,
-                                          child: OutlinedButton(
-                                            onPressed: () {
-                                              onPressMulai(context);
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              side: BorderSide(color: primary),
-                                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                                              backgroundColor: primary,
-                                            ),
-                                            child: Text('Mulai Mengerjakan', style: TextStyle(fontSize: h4, color: Colors.white)),
-                                          ),
-                                        ),
+                                      (widget.myTryout.phase)
+                                          ? Container(
+                                              height: 30,
+                                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: secondary),
+                                              child: Text('Fase tryout telah selesai', style: TextStyle(fontSize: h4, color: Colors.white)),
+                                            )
+                                          : (widget.approval)
+                                              ? (allDone)
+                                                  ? Container(
+                                                      height: 30,
+                                                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                                      alignment: Alignment.center,
+                                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: secondary),
+                                                      child: Text('Semua soal Tryout telah selesai', style: TextStyle(fontSize: h4, color: Colors.white)),
+                                                    )
+                                                  : SizedBox(
+                                                      height: 30,
+                                                      child: OutlinedButton(
+                                                        onPressed: () {
+                                                          onPressMulai(context);
+                                                        },
+                                                        style: OutlinedButton.styleFrom(
+                                                          side: BorderSide(color: primary),
+                                                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                                                          backgroundColor: primary,
+                                                        ),
+                                                        child: Text(
+                                                          notFirstTime ? 'Lanjut mengerjakan' : 'Mulai Mengerjakan',
+                                                          style: TextStyle(fontSize: h4, color: Colors.white),
+                                                        ),
+                                                      ),
+                                                    )
+                                              : Container(
+                                                  height: 30,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: secondary),
+                                                  child: Text('Proses', style: TextStyle(fontSize: h4, color: Colors.white)),
+                                                ),
                                       const SizedBox(width: 10),
                                       if (widget.myTryout.phase)
                                         SizedBox(

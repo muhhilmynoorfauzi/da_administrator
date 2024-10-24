@@ -19,9 +19,6 @@ class QuestPgUserPage extends StatefulWidget {
 }
 
 class _QuestPgUserPageState extends State<QuestPgUserPage> {
-  var isLogin = true;
-  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
-
   PgModel? question;
 
   String? selected;

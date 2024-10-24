@@ -66,6 +66,7 @@ class _PayFreeUserPageState extends State<PayFreeUserPage> {
       desk: widget.tryoutUser!.desk,
       image: widget.tryoutUser!.image,
       phase: widget.tryoutUser!.phase,
+      phaseIRT: widget.tryoutUser!.phaseIRT,
       expired: widget.tryoutUser!.expired,
       public: widget.tryoutUser!.public,
       showFreeMethod: widget.tryoutUser!.showFreeMethod,

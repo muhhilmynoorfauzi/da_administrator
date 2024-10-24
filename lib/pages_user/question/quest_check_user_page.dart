@@ -17,8 +17,6 @@ class QuestCheckUserPage extends StatefulWidget {
 }
 
 class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
-  var isLogin = true;
-
   CheckModel? question;
   late List<String> listJawaban;
 

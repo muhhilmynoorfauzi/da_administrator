@@ -68,6 +68,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
       desk: widget.tryoutUser!.desk,
       image: widget.tryoutUser!.image,
       phase: widget.tryoutUser!.phase,
+      phaseIRT: widget.tryoutUser!.phaseIRT,
       expired: widget.tryoutUser!.expired,
       public: widget.tryoutUser!.public,
       showFreeMethod: widget.tryoutUser!.showFreeMethod,

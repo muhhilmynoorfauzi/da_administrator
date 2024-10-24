@@ -35,9 +35,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 700) {
-      return homeMobile(context);
+      return onMo(context);
     } else {
-      return homeDesk(context);
+      return onDesk(context);
     }
   }
 
@@ -137,7 +137,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> tambahTryout() async {
     var nowTime = DateTime.now();
-    var img = 'https://firebasestorage.googleapis.com/v0/b/dreamacademy-example.appspot.com/o/question%2Fdefault_image.png?alt=media&token=d058ce51-799c-4f60-bf69-eb33efefb390';
+    var img = 'https://firebasestorage.googleapis.com/v0/b/dreamacademy-example.appspot.com/o/assets%2Fdefault_image.png?alt=media&token=93c29a79-0819-4dc7-a04b-3816503d2242';
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -167,7 +167,7 @@ class _HomePageState extends State<HomePage> {
                     TryoutModel(
                       created: nowTime,
                       updated: nowTime,
-                      toCode: '',
+                      toCode: controller.text,
                       toName: controller.text,
                       ended: nowTime,
                       started: nowTime,
@@ -176,18 +176,13 @@ class _HomePageState extends State<HomePage> {
                       desk: '',
                       image: img,
                       phase: false,
+                      phaseIRT: false,
                       expired: false,
                       totalTime: 30,
                       numberQuestions: 155,
                       listTest: [
-                        TestModel(
-                          nameTest: 'TPS',
-                          listSubtest: [],
-                        ),
-                        TestModel(
-                          nameTest: 'Tes Literasi',
-                          listSubtest: [],
-                        ),
+                        TestModel(nameTest: 'TPS', listSubtest: []),
+                        TestModel(nameTest: 'Tes Literasi', listSubtest: []),
                       ],
                       claimedUid: [],
                       listPrice: [200000, 400000, 700000, 1000000],
@@ -278,7 +273,7 @@ class _HomePageState extends State<HomePage> {
     context.read<CounterProvider>().setPage(idPage: null, idDetailPage: null);
   }
 
-  Widget homeMobile(BuildContext context) {
+  Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -337,7 +332,7 @@ class _HomePageState extends State<HomePage> {
                                         onPressed: () async {
                                           context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
 
-                                          Navigator.push(context, SlideTransition1(const DetailToPage()));
+                                          Navigator.push(context, FadeRoute1(const DetailToPage()));
                                         },
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -424,7 +419,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget homeDesk(BuildContext context) {
+  Widget onDesk(BuildContext context) {
     bool onTablet = (lebar(context) >= 700 && lebar(context) <= 1200);
 
     return Scaffold(

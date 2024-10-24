@@ -72,22 +72,28 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
 
       for (int i = 0; i < allTryout.length; i++) {
         if (allTryout[i].claimedUid.isNotEmpty) {
+          //jika list data tryout tidak kosong
           for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
-            if (allTryout[i].claimedUid[j].userUID.contains(userUid)) {
-              myTryout.add(allTryout[i]);
-              idMyTryout.add(idAllTryout[i]);
+            //jika menemukan di dalam claimedUId ada UID yang sama
+            if (allTryout[i].claimedUid[j].userUID == userUid) {
+              //jika fasenya belum selesai
+              if (!(allTryout[i].phase)) {
+                myTryout.add(allTryout[i]);
+                idMyTryout.add(idAllTryout[i]);
+              } else if (allTryout[i].phase) {
+                doneTryout.add(allTryout[i]);
+                idDoneTryout.add(idAllTryout[i]);
+              }
             }
           }
         }
       }
-      if (myTryout.isNotEmpty) {
+
+      /*if (myTryout.isNotEmpty) {
         for (int i = 0; i < myTryout.length; i++) {
-          if (myTryout[i].phase) {
-            doneTryout.add(myTryout[i]);
-            idDoneTryout.add(idMyTryout[i]);
-          }
+          if (myTryout[i].phase) {}
         }
-      }
+      }*/
 
       setState(() {});
     } catch (e) {
@@ -165,7 +171,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                               style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ),
-                          Text(readyOnFree ? 'Berbayar dan Gratis' : 'Berbayar', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: primary)),
                         ],
                       ),
                     ],
@@ -371,7 +376,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idDoneTryout[index], myTryout: doneTryout[index])));
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
                           },
                         );
                       },

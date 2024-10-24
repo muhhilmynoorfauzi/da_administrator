@@ -8,6 +8,7 @@ import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/model/tryout/subtest_model.dart';
 import 'package:da_administrator/model/tryout/test_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/pages/detail_claimed.dart';
 import 'package:da_administrator/pages/questions_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
@@ -35,13 +36,12 @@ class _DetailToPageState extends State<DetailToPage> {
 
   @override
   Widget build(BuildContext context) {
-    var page = (lebar(context) <= 1200) ? detailMobile(context) : detailDesk(context);
+    var page = (lebar(context) <= 1200) ? onMo(context) : onDesk(context);
     return Stack(
       children: [
         page,
         if (isLoading)
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 500),
+          Container(
             height: tinggi(context),
             width: lebar(context),
             color: Colors.white,
@@ -133,7 +133,7 @@ class _DetailToPageState extends State<DetailToPage> {
 
 //----------------------------------------------------------------
 
-  Future<void> btnSimpan(String id) async {
+  Future<void> btnSimpan(BuildContext context, String id) async {
     setState(() => isLoading = !isLoading);
     final profider = Provider.of<CounterProvider>(context, listen: false);
     if (pickedFileTO != null) {
@@ -150,6 +150,7 @@ class _DetailToPageState extends State<DetailToPage> {
       desk: tryout!.desk,
       image: tryout!.image,
       phase: tryout!.phase,
+      phaseIRT: tryout!.phaseIRT,
       expired: tryout!.expired,
       public: tryout!.public,
       showFreeMethod: tryout!.showFreeMethod,
@@ -675,7 +676,7 @@ class _DetailToPageState extends State<DetailToPage> {
 
 //----------------------------------------------------------------
 
-  Widget detailMobile(BuildContext context) {
+  Widget onMo(BuildContext context) {
     var id = context.watch<CounterProvider>().getIdDetailPage!;
     // bool smallDevice = lebar(context) <= 700;
 
@@ -685,6 +686,7 @@ class _DetailToPageState extends State<DetailToPage> {
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
+          shadowColor: Colors.black,
           leading: IconButton(
             onPressed: () {
               // context.read<CounterProvider>().setPage(idPage: null, idDetailPage: null);
@@ -692,6 +694,7 @@ class _DetailToPageState extends State<DetailToPage> {
             },
             icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
           ),
+          titleSpacing: 0,
           title: Row(
             children: [
               Expanded(
@@ -709,12 +712,10 @@ class _DetailToPageState extends State<DetailToPage> {
               onPressed: () => context.read<CounterProvider>().setReload(),
               icon: const Icon(Icons.close, color: Colors.black),
             ),
-            const SizedBox(width: 10),
             IconButton(
-              onPressed: () => btnSimpan(id),
+              onPressed: () => btnSimpan(context, id),
               icon: const Icon(Icons.check, color: Colors.black),
             ),
-            const SizedBox(width: 10),
           ],
         ),
         body: ListView(
@@ -826,7 +827,13 @@ class _DetailToPageState extends State<DetailToPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Total Claim', style: TextStyle(color: Colors.black, fontSize: h4)),
-                        Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryout!.claimedUid, titleTo: tryout!.toName))),
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.only(left: 20, right: 10)),
+                          iconAlignment: IconAlignment.end,
+                          label: Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                          icon: const Icon(Icons.navigate_next_rounded, color: Colors.black),
+                        ),
                       ],
                     ),
                   ),
@@ -1049,6 +1056,28 @@ class _DetailToPageState extends State<DetailToPage> {
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(vertical: 10),
                   ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('IRT System', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        Text(
+                          tryout!.phaseIRT ? 'Active' : 'Not\nActive',
+                          style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                    value: tryout!.phaseIRT,
+                    onChanged: (bool value) => setState(() => tryout!.phaseIRT = value),
+                  ),
+                  Container(
+                    color: Colors.black.withOpacity(.1),
+                    height: 1,
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                  ),
                   Row(
                     children: [
                       Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
@@ -1187,7 +1216,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                                   await Future.delayed(const Duration(milliseconds: 500));
                                                   Navigator.push(
                                                     context,
-                                                    SlideTransition1(
+                                                    FadeRoute1(
                                                       QuestionsPage(
                                                         idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
                                                         subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
@@ -1198,7 +1227,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                                   String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
 
                                                   tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
-                                                  await btnSimpan(id);
+                                                  await btnSimpan(context, id);
                                                 }
 
                                                 setState(() => questionsloading = false);
@@ -1238,7 +1267,7 @@ class _DetailToPageState extends State<DetailToPage> {
     }
   }
 
-  Widget detailDesk(BuildContext context) {
+  Widget onDesk(BuildContext context) {
     var id = context.watch<CounterProvider>().getIdDetailPage!;
 
     if (tryout != null) {
@@ -1247,6 +1276,7 @@ class _DetailToPageState extends State<DetailToPage> {
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
+          shadowColor: Colors.black,
           title: Row(
             children: [
               Expanded(
@@ -1269,7 +1299,7 @@ class _DetailToPageState extends State<DetailToPage> {
             const SizedBox(width: 10),
             TextButton.icon(
               style: TextButton.styleFrom(backgroundColor: primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              onPressed: () => btnSimpan(id),
+              onPressed: () => btnSimpan(context, id),
               label: Text('Simpan', style: TextStyle(color: Colors.white, fontSize: h4)),
               icon: const Icon(Icons.check, color: Colors.white, size: 20),
             ),
@@ -1386,10 +1416,16 @@ class _DetailToPageState extends State<DetailToPage> {
                         SizedBox(
                           height: 35,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Total Claim', style: TextStyle(color: Colors.black, fontSize: h4)),
-                              Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              const Expanded(child: SizedBox()),
+                              OutlinedButton.icon(
+                                onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryout!.claimedUid, titleTo: tryout!.toName))),
+                                style: OutlinedButton.styleFrom(padding: const EdgeInsets.only(left: 20, right: 10)),
+                                iconAlignment: IconAlignment.end,
+                                label: Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                icon: const Icon(Icons.navigate_next_rounded, color: Colors.black),
+                              ),
                             ],
                           ),
                         ),
@@ -1621,13 +1657,38 @@ class _DetailToPageState extends State<DetailToPage> {
                           width: double.infinity,
                           margin: const EdgeInsets.symmetric(vertical: 10),
                         ),
-                        Row(
-                          children: [
-                            Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
-                            const Expanded(child: SizedBox()),
-                            Text('${tryout!.totalTime.toString()} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
-                            IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit, color: Colors.black)),
-                          ],
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('IRT System', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              Text(
+                                tryout!.phaseIRT ? 'Active' : 'Not\nActive',
+                                style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                          value: tryout!.phaseIRT,
+                          onChanged: (bool value) => setState(() => tryout!.phaseIRT = value),
+                        ),
+                        Container(
+                          color: Colors.black.withOpacity(.1),
+                          height: 1,
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        SizedBox(
+                          height: 47,
+                          child: Row(
+                            children: [
+                              Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              const Expanded(child: SizedBox()),
+                              Text('${tryout!.totalTime.toString()} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
+                              IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit, color: Colors.black)),
+                            ],
+                          ),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1762,7 +1823,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                             await Future.delayed(const Duration(milliseconds: 500));
                                             Navigator.push(
                                               context,
-                                              SlideTransition1(
+                                              FadeRoute1(
                                                 QuestionsPage(
                                                   idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
                                                   subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
@@ -1773,13 +1834,13 @@ class _DetailToPageState extends State<DetailToPage> {
                                             String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
 
                                             tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
-                                            await btnSimpan(id);
+                                            await btnSimpan(context, id);
 
                                             await Future.delayed(const Duration(milliseconds: 500));
 
                                             Navigator.push(
                                               context,
-                                              SlideTransition1(
+                                              FadeRoute1(
                                                 QuestionsPage(
                                                   idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
                                                   subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,

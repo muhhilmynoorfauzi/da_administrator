@@ -83,8 +83,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
               bool subTestSelesai = userTo!.listTest[testKe].listSubtest[subTestKe].done;
               if (subTestSelesai) {
                 print('test ke $testKe, sub test ke $subTestKe telah selesai');
-                break;
-              } else if (!subTestSelesai) {
+              } else {
                 // testKe = i;
                 // subTestKe = j;
                 print('sekarang kerja soal test ke $testKe, sub test ke $subTestKe');
@@ -117,7 +116,6 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   }
 
   Future<void> timeOut(BuildContext context) async {
-    context.read<CounterProvider>().setTitleUserPage('Dream Academy');
     await onClickQust(soalKe, onSave: true);
     if (testKe == (userTo!.listTest.length - 1)) {
       Navigator.pushAndRemoveUntil(
@@ -168,7 +166,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
           correctAnswer: userTo!.correctAnswer,
           wrongAnswer: userTo!.wrongAnswer,
           startWork: userTo!.startWork,
-          endWork: DateTime.now(),
+          endWork: userTo!.endWork,
           created: userTo!.created,
           leaderBoard: userTo!.leaderBoard,
           rationalization: userTo!.rationalization,
@@ -179,6 +177,38 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     //save
     // await Future.delayed(const Duration(milliseconds: 200));
     setState(() => loadingQuest = !loadingQuest);
+  }
+
+  Future<void> markAsDoneAndNavigate({
+    required BuildContext context,
+    required int testKe,
+    required int subTestKe,
+    required int soalKe,
+    required bool isLastTest,
+    required bool isLastSubTest,
+  })  async {
+    // Mark subtest as done
+    userTo!.listTest[testKe].listSubtest[subTestKe].done = true;
+
+    // Check if test should also be marked as done
+    if (isLastSubTest) {
+      userTo!.listTest[testKe].done = true;
+    }
+
+    // If it's the very last test and subtest, mark the entire work as done
+    if (isLastTest && isLastSubTest) {
+      userTo!.endWork = DateTime.now();
+    }
+
+    // Save the question
+    await onClickQust(soalKe, onSave: true);
+
+    // Navigate to the next page
+    Navigator.pushAndRemoveUntil(
+      context,
+      FadeRoute1(WaitingUserPage(minutes: 3, isLast: isLastTest && isLastSubTest, idUserTo: widget.idUserTo)),
+      (Route<dynamic> route) => false,
+    );
   }
 
   Future<void> showSelesaikan({required BuildContext context}) async {
@@ -199,30 +229,23 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    userTo!.listTest[testKe].listSubtest[subTestKe].done = true;
-                    if (testKe == (userTo!.listTest.length - 1)) {
-                      await onClickQust(soalKe, onSave: true);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        FadeRoute1(WaitingUserPage(minutes: 3, isLast: true, idUserTo: widget.idUserTo)),
-                        (Route<dynamic> route) => false,
-                      );
-                    } else if (subTestKe == (userTo!.listTest[testKe].listSubtest.length - 1)) {
-                      userTo!.listTest[testKe].done = true;
-                      await onClickQust(soalKe, onSave: true);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        FadeRoute1(WaitingUserPage(minutes: 3, isLast: false, idUserTo: widget.idUserTo)),
-                        (Route<dynamic> route) => false,
-                      );
+                    int lastTest = (userTo!.listTest.length - 1);
+                    int lastSubTest = (userTo!.listTest[testKe].listSubtest.length - 1);
+
+                    bool isLastTest = testKe == lastTest;
+                    bool isLastSubTest = subTestKe == lastSubTest;
+
+                    if (isLastTest && isLastSubTest) {
+                      print('ini test terakhir dan subtest terakhir');
+                    } else if (!isLastTest && isLastSubTest) {
+                      print('ini bukan test terakhir tapi subtest terakhir dari test ke ${testKe + 1}');
+                    } else if (isLastTest && !isLastSubTest) {
+                      print('ini test terakhir tapi bukan subtest terakhir');
                     } else {
-                      await onClickQust(soalKe, onSave: true);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        FadeRoute1(WaitingUserPage(minutes: 3, isLast: false, idUserTo: widget.idUserTo)),
-                        (Route<dynamic> route) => false,
-                      );
+                      print('ini bukan test terakhir dan bukan subtest terakhir');
                     }
+
+                    await markAsDoneAndNavigate(context: context, testKe: testKe, subTestKe: subTestKe, soalKe: soalKe, isLastTest: isLastTest, isLastSubTest: isLastSubTest);
                   },
                   child: Text('Ya', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
                 ),

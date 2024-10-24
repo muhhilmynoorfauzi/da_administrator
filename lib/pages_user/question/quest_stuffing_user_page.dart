@@ -19,10 +19,6 @@ class QuestStuffingUserPage extends StatefulWidget {
 
 class _QuestStuffingUserPageState extends State<QuestStuffingUserPage> {
   StuffingModel? question;
-
-  var isLogin = true;
-  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
-
   TextEditingController answerController = TextEditingController();
 
   @override

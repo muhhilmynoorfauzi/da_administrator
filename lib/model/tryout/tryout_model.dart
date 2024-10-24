@@ -12,6 +12,7 @@ class TryoutModel {
   String desk;
   String image;
   bool phase;
+  bool phaseIRT;
   bool expired;
   bool public;
   bool showFreeMethod;
@@ -31,6 +32,7 @@ class TryoutModel {
     required this.desk,
     required this.image,
     required this.phase,
+    required this.phaseIRT,
     required this.expired,
     required this.public,
     required this.showFreeMethod,
@@ -52,6 +54,7 @@ class TryoutModel {
       'desk': desk,
       'image': image,
       'phase': phase,
+      'phaseIRT': phaseIRT,
       'expired': expired,
       'public': public,
       'showFreeMethod': showFreeMethod,
@@ -74,6 +77,7 @@ class TryoutModel {
       desk: json['desk'],
       image: json['image'],
       phase: json['phase'],
+      phaseIRT: json['phaseIRT'],
       expired: json['expired'],
       public: json['public'],
       showFreeMethod: json['showFreeMethod'],

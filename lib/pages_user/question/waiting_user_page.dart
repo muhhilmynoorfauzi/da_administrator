@@ -30,6 +30,9 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
   @override
   void initState() {
     super.initState();
+    testKe = 0;
+    subTestKe = 0;
+
     totalTimeInMinutes = widget.minutes;
     remainingTimeInSeconds = widget.minutes * 60;
 
@@ -107,8 +110,8 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
                         child: Text('Kembali ke TryOut saya', style: TextStyle(fontSize: h4, color: Colors.white)),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    if (widget.isLast)
+                    if (!widget.isLast) const SizedBox(width: 10),
+                    if (!widget.isLast)
                       SizedBox(
                         width: 220,
                         child: TextButton(

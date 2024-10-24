@@ -1,3 +1,4 @@
+import 'package:da_administrator/pages/detail_claimed.dart';
 import 'package:da_administrator/pages/example.dart';
 import 'package:da_administrator/pages/home_page.dart';
 import 'package:da_administrator/pages/login_page.dart';
@@ -18,6 +19,7 @@ import 'package:da_administrator/pages_user/tryout_saya_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:da_administrator/service/show_image_page.dart';
 import 'package:da_administrator/service/state_manajement.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -47,7 +49,13 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _checkCurrentUser();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) => setState(() => currentUser = user));
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      currentUser = user;
+      if (currentUser != null) {
+        context.read<CounterProvider>().setCurrentUser(user);
+      }
+      setState(() {});
+    });
   }
 
   void _checkCurrentUser() {
@@ -72,17 +80,12 @@ class _MyAppState extends State<MyApp> {
 
         if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'tryout') {
           String codeRoom = uri.pathSegments.length > 1 ? uri.pathSegments[1] : '';
-          if (codeRoom == '' || codeRoom == ' ') {
-            return MaterialPageRoute(
-              builder: (context) => const HomeUserPage(),
-            );
-          } else {
+          if (codeRoom.isNotEmpty || codeRoom != ' ') {
             return MaterialPageRoute(
               builder: (context) => DetailTryoutUserPage(docId: codeRoom),
             );
           }
         }
-
         return MaterialPageRoute(
           builder: (context) {
             if (currentUser != null) {
@@ -94,21 +97,23 @@ class _MyAppState extends State<MyApp> {
             } else {
               // return const HomePage();
               // return const ResultQuestUserPage();
-              // return const HomeUserPage();
+              return const HomeUserPage();
+              // return const TryoutUserPage(idPage: 0);
               // return const NavProfileUserPage();
               // return const AboutUserPage();
               // return const NavQuestUserPage(minutes: 30);
               // return const WaitingUserPage(minutes: 1);
               // return const DetailMytryoutUserPage();
               // return const DetailTryoutUserPage();
-              // return const TryoutUserPage(idPage: 0);
               // return const PayDoneUserPage();
               // return const PayFreeUserPage();
               // return const PayCoinUserPage();
               // return const PayEwalletUserPage();
               // return const AutoScrollListView();
+              // return const DetailClaimed();
+              // return const ShowImagePage();
               // return const HomePage();
-              return const LoginPage();
+              // return const LoginPage();
             }
           },
         );

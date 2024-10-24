@@ -3,6 +3,11 @@ import 'package:da_administrator/pages/function_qustion/edit_questions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/firebase_service/questions_service.dart';
 import 'package:da_administrator/model/questions/questions_model.dart';
+import 'package:da_administrator/pages/user_view_question/view_check_quest_page.dart';
+import 'package:da_administrator/pages/user_view_question/view_pg_quest_page.dart';
+import 'package:da_administrator/pages/user_view_question/view_stuffing_quest_page.dart';
+import 'package:da_administrator/pages/user_view_question/view_truefalse_quest_page.dart';
+import 'package:da_administrator/pages_user/question/quest_pg_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
@@ -26,9 +31,10 @@ class _QuestionsPageState extends State<QuestionsPage> {
   @override
   Widget build(BuildContext context) {
     contextF = context;
+    var page = (lebar(context) <= 1200) ? onMo(context) : onDesk(context);
     return Stack(
       children: [
-        questionsMobile(context),
+        page,
         if (isLoading)
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
@@ -97,19 +103,19 @@ class _QuestionsPageState extends State<QuestionsPage> {
                 child: loading
                     ? Center(child: CircularProgressIndicator(color: primary))
                     : QuillEditor.basic(
-                      focusNode: FocusNode(),
-                      configurations: QuillEditorConfigurations(
-                        controller: QuillController(
-                          document: Document.fromHtml(question!.listQuestions[index].question),
-                          selection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                          readOnly: true,
+                        focusNode: FocusNode(),
+                        configurations: QuillEditorConfigurations(
+                          controller: QuillController(
+                            document: Document.fromHtml(question!.listQuestions[index].question),
+                            selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                            readOnly: true,
+                          ),
+                          placeholder: 'Soal',
+                          customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                          checkBoxReadOnly: true,
+                          sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
                         ),
-                        placeholder: 'Soal',
-                        customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
-                        checkBoxReadOnly: true,
-                        sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
                       ),
-                    ),
               ),
               contentPadding: const EdgeInsets.all(20),
               actionsPadding: const EdgeInsets.all(10),
@@ -149,14 +155,21 @@ class _QuestionsPageState extends State<QuestionsPage> {
   }
 
 //----------------------------------------------------------------
+  Document toStringHtml(String value) {
+    var data = Document.fromHtml(value);
+    return data;
+  }
+
+//----------------------------------------------------------------
   String? _selectedOption;
 
-  Widget questionsMobile(BuildContext context) {
+  Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
+        shadowColor: Colors.black,
         leading: const SizedBox(),
         leadingWidth: 0,
         titleSpacing: 0,
@@ -236,72 +249,316 @@ class _QuestionsPageState extends State<QuestionsPage> {
                       child: (question!.listQuestions.isNotEmpty)
                           ? ListView.builder(
                               itemCount: question!.listQuestions.length,
-                              itemBuilder: (context, index) {
+                              itemBuilder: (context, indexQuest) {
                                 return Card(
                                   color: Colors.white,
                                   surfaceTintColor: Colors.white,
                                   child: Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Expanded(
-                                          child: QuillEditor.basic(
-                                            focusNode: FocusNode(),
-                                            configurations: QuillEditorConfigurations(
-                                              controller: QuillController(
-                                                document: Document.fromHtml(question!.listQuestions[index].question),
-                                                selection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                                                readOnly: true,
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    margin: const EdgeInsets.only(bottom: 10),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
+                                                    child: Text(
+                                                      formatType(question!.listQuestions[indexQuest].type),
+                                                      style: TextStyle(color: Colors.white, fontSize: h4),
+                                                      textAlign: TextAlign.justify,
+                                                    ),
+                                                  ),
+                                                  const Expanded(child: SizedBox()),
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: OutlinedButton(
+                                                      onPressed: () {
+                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: question!.listQuestions[indexQuest])));
+                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: question!.listQuestions[indexQuest])));
+                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                          Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: question!.listQuestions[indexQuest])));
+                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: question!.listQuestions[indexQuest])));
+                                                        }
+                                                      },
+                                                      child: Text('Preview', style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              placeholder: 'Soal',
-                                              customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
-                                              checkBoxReadOnly: true,
-                                              readOnlyMouseCursor: MouseCursor.uncontrolled,
-                                              floatingCursorDisabled: true,
-                                              sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
-                                            ),
+                                              QuillEditor.basic(
+                                                focusNode: FocusNode(),
+                                                configurations: QuillEditorConfigurations(
+                                                  controller: QuillController(
+                                                    document: Document.fromHtml(question!.listQuestions[indexQuest].question),
+                                                    selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                                                    readOnly: true,
+                                                  ),
+                                                  placeholder: 'Soal',
+                                                  customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                                                  checkBoxReadOnly: true,
+                                                  readOnlyMouseCursor: MouseCursor.uncontrolled,
+                                                  floatingCursorDisabled: true,
+                                                  sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () async {
+                                                      if (lebar(context) <= 700) {
+                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          await editMultiJawabanDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          await editPGDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                          await editIsianDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          await editBenarSalahDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        }
+                                                      } else {
+                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          await editMultiJawabanDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          await editPGDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                          await editIsianDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          await editBenarSalahDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        }
+                                                      }
+                                                      setState(() {});
+                                                    },
+                                                    icon: const Icon(Icons.edit),
+                                                  ),
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      print(question!.listQuestions[indexQuest]);
+                                                      deleteQuestion(indexQuest);
+                                                    },
+                                                    icon: const Icon(Icons.delete),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
                                           ),
                                         ),
-                                        Container(
-                                          margin: const EdgeInsets.only(left: 10),
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
-                                          child: Text(formatType(question!.listQuestions[index].type), style: TextStyle(color: Colors.white, fontSize: h4)),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.hourglass_empty_rounded, size: 100, color: Colors.grey),
+                                  Text('Belum ada Soal', style: TextStyle(color: Colors.grey, fontSize: h4)),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Center(child: CircularProgressIndicator(color: primary)),
+    );
+  }
+
+  onDesk(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.black,
+        leading: const SizedBox(),
+        leadingWidth: 0,
+        titleSpacing: 0,
+        title: TextButton.icon(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
+          label: Text(widget.subTest, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => saveQuestion(),
+            child: Text('Simpan', style: TextStyle(color: Colors.black, fontSize: h4)),
+          ),
+          const SizedBox(width: 10),
+        ],
+      ),
+      body: (question != null)
+          ? Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                height: tinggi(context),
+                width: 1300,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          margin: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(50)),
+                          child: DropdownButton<String>(
+                            dropdownColor: Colors.white,
+                            focusColor: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            value: _selectedOption,
+                            hint: Text('Tambah Soal', style: TextStyle(color: Colors.white, fontSize: h4)),
+                            icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.white),
+                            underline: const SizedBox(),
+                            items: ['Banyak Pilihan', 'Pilihan Ganda', 'Isian', 'Benar Salah'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, style: TextStyle(color: Colors.black, fontSize: h4)),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) async {
+                              if (lebar(context) <= 700) {
+                                if (newValue == 'Banyak Pilihan') {
+                                  await addMultiJawabanDialogSmallDevice();
+                                } else if (newValue == 'Pilihan Ganda') {
+                                  await addPGDialogSmallDevice();
+                                } else if (newValue == 'Isian') {
+                                  await addIsianDialogSmallDevice();
+                                } else if (newValue == 'Benar Salah') {
+                                  await addBenarSalahDialogSmallDevice();
+                                }
+                              } else {
+                                if (newValue == 'Banyak Pilihan') {
+                                  await addMultiJawabanDialog();
+                                } else if (newValue == 'Pilihan Ganda') {
+                                  await addPGDialog();
+                                } else if (newValue == 'Isian') {
+                                  await addIsianDialog();
+                                } else if (newValue == 'Benar Salah') {
+                                  await addBenarSalahDialog();
+                                }
+                              }
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        Text('Jumlah Soal ${question!.listQuestions.length}', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Expanded(
+                      child: (question!.listQuestions.isNotEmpty)
+                          ? ListView.builder(
+                              itemCount: question!.listQuestions.length,
+                              itemBuilder: (context, indexQuest) {
+                                return Card(
+                                  color: Colors.white,
+                                  surfaceTintColor: Colors.white,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              margin: const EdgeInsets.only(bottom: 10),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
+                                              child: Text(
+                                                formatType(question!.listQuestions[indexQuest].type),
+                                                style: TextStyle(color: Colors.white, fontSize: h4),
+                                                textAlign: TextAlign.justify,
+                                              ),
+                                            ),
+                                            const Expanded(child: SizedBox()),
+                                            SizedBox(
+                                              height: 30,
+                                              child: OutlinedButton(
+                                                onPressed: () {
+                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: question!.listQuestions[indexQuest])));
+                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: question!.listQuestions[indexQuest])));
+                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                    Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: question!.listQuestions[indexQuest])));
+                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: question!.listQuestions[indexQuest])));
+                                                  }
+                                                },
+                                                child: Text('Preview', style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            if (lebar(context) <= 700) {
-                                              if (question!.listQuestions[index].type == 'banyak_pilihan') {
-                                                await editMultiJawabanDialogSmallDevice(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'pilihan_ganda') {
-                                                await editPGDialogSmallDevice(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'isian') {
-                                                await editIsianDialogSmallDevice(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'benar_salah') {
-                                                await editBenarSalahDialogSmallDevice(soal: question!.listQuestions[index], index: index);
-                                              }
-                                            } else {
-                                              if (question!.listQuestions[index].type == 'banyak_pilihan') {
-                                                await editMultiJawabanDialog(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'pilihan_ganda') {
-                                                await editPGDialog(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'isian') {
-                                                await editIsianDialog(soal: question!.listQuestions[index], index: index);
-                                              } else if (question!.listQuestions[index].type == 'benar_salah') {
-                                                await editBenarSalahDialog(soal: question!.listQuestions[index], index: index);
-                                              }
-                                            }
-                                            setState(() {});
-                                          },
-                                          icon: const Icon(Icons.edit),
+                                        QuillEditor.basic(
+                                          focusNode: FocusNode(),
+                                          configurations: QuillEditorConfigurations(
+                                            controller: QuillController(
+                                              document: Document.fromHtml(question!.listQuestions[indexQuest].question),
+                                              selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                                              readOnly: true,
+                                            ),
+                                            placeholder: 'Soal',
+                                            customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                                            checkBoxReadOnly: true,
+                                            readOnlyMouseCursor: MouseCursor.uncontrolled,
+                                            floatingCursorDisabled: true,
+                                            sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                                          ),
                                         ),
-                                        IconButton(
-                                          onPressed: () {
-                                            print(question!.listQuestions[index]);
-                                            deleteQuestion(index);
-                                          },
-                                          icon: const Icon(Icons.delete),
-                                        )
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () async {
+                                                if (lebar(context) <= 700) {
+                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    await editMultiJawabanDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    await editPGDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                    await editIsianDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    await editBenarSalahDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  }
+                                                } else {
+                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    await editMultiJawabanDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    await editPGDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
+                                                    await editIsianDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    await editBenarSalahDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  }
+                                                }
+                                                setState(() {});
+                                              },
+                                              icon: const Icon(Icons.edit),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                print(question!.listQuestions[indexQuest]);
+                                                deleteQuestion(indexQuest);
+                                              },
+                                              icon: const Icon(Icons.delete),
+                                            )
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
