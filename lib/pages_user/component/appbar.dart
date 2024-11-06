@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
 import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/home_user_page.dart';
@@ -10,9 +11,21 @@ import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:html' as html;
 
+// import 'dart:html' as html;
 import 'package:provider/provider.dart';
+
+void getDataUserTo() async {
+  try {
+    CollectionReference collectionRef = FirebaseFirestore.instance.collection('user_profile_v1');
+    QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+    // allUserTo = querySnapshot.docs.map((doc) => UserToModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+    // idAllUserTo = querySnapshot.docs.map((doc) => doc.id).toList();
+  } catch (e) {
+    print('salah detail_tryout_user_page user tryout: $e');
+  }
+}
 
 AppBar appbarDesk({
   required BuildContext context,
@@ -21,8 +34,9 @@ AppBar appbarDesk({
   bool featureActive = false,
   bool aboutActive = false,
   double elevation = 1,
+  VoidCallback? actionProfile,
 }) {
-  final List<String> _options = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
+  final List<String> action = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return AppBar(
     backgroundColor: Colors.white,
     surfaceTintColor: Colors.white,
@@ -31,7 +45,7 @@ AppBar appbarDesk({
     leadingWidth: 200,
     toolbarHeight: 40,
     leading: InkWell(
-      onTap: () => html.window.location.reload(),
+      // onTap: () => html.window.location.reload(),
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       child: SvgPicture.asset('assets/logo1.svg'),
@@ -74,7 +88,7 @@ AppBar appbarDesk({
           },
           icon: const SizedBox(),
           underline: const SizedBox(),
-          items: _options.map((String option) {
+          items: action.map((String option) {
             return DropdownMenuItem(value: option, child: Text(option, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)));
           }).toList(),
         ),
@@ -94,7 +108,101 @@ AppBar appbarDesk({
       const SizedBox(width: 30),
       isLogin
           ? InkWell(
-              onTap: () {
+              onTap: () async {
+                actionProfile!();
+                /*
+                  1. get data user
+                  2. jika collection sudah ada isinya, cari berdasarkan uid yang sudah di collection
+                  3. jika ditemukan yang sesuai dengan uid, masukkan id collection dan data ke parameter NavProfileUserPage
+                  4. jika tidak ditemukan yang sesuai dengan uid, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
+                  3. jika collection belum ada isinya, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
+                */
+                Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
+              },
+              borderRadius: BorderRadius.circular(100),
+              child: Container(
+                height: 40,
+                width: 130,
+                margin: const EdgeInsets.all(3),
+                decoration: BoxDecoration(color: Colors.black.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.money_dollar_circle_fill, color: Colors.orange),
+                    Text('120', style: TextStyle(color: Colors.black, fontSize: h4)),
+                    const Expanded(child: SizedBox()),
+                    const Icon(CupertinoIcons.person_crop_circle_fill, color: Colors.black),
+                  ],
+                ),
+              ),
+            )
+          : Container(
+              height: 50,
+              // width: 200,
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(10)),
+              child: Row(
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    onPressed: () {},
+                    child: Text('Login', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    onPressed: () {},
+                    child: Text('Register', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+      const SizedBox(width: 10),
+    ],
+  );
+}
+
+AppBar appbarMo({
+  required BuildContext context,
+  required bool isLogin,
+  double elevation = 1,
+  VoidCallback? actionProfile,
+}) {
+  return AppBar(
+    backgroundColor: Colors.white,
+    surfaceTintColor: Colors.white,
+    shadowColor: Colors.black,
+    scrolledUnderElevation: elevation,
+    leadingWidth: 0,
+    leading: const SizedBox(),
+    toolbarHeight: 40,
+    title: InkWell(
+      // onTap: () => html.window.location.reload(),
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      child: SvgPicture.asset('assets/logo1.svg', width: 120),
+    ),
+    actions: [
+      isLogin
+          ? InkWell(
+              onTap: () async {
+                if (actionProfile != null) {
+                  actionProfile();
+                }
+                /*
+                  1. get data user
+                  2. jika collection sudah ada isinya, cari berdasarkan uid yang sudah di collection
+                  3. jika ditemukan yang sesuai dengan uid, masukkan id collection dan data ke parameter NavProfileUserPage
+                  4. jika tidak ditemukan yang sesuai dengan uid, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
+                  3. jika collection belum ada isinya, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
+                */
                 Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
               },
               borderRadius: BorderRadius.circular(100),

@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'package:da_administrator/firebase_service/user_to_service.dart';
 import 'package:da_administrator/model/questions/check_model.dart';
 import 'package:da_administrator/model/questions/pg_model.dart';
+import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/model/questions/stuffing_model.dart';
 import 'package:da_administrator/model/questions/truefalse_model.dart';
+import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/model/user_to/leaderboard_model.dart';
+import 'package:da_administrator/model/user_to/user_to_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
+import 'package:da_administrator/pages_user/question/quest_check_user_page.dart';
 import 'package:da_administrator/pages_user/question/result_check_user_page.dart';
 import 'package:da_administrator/pages_user/question/result_pg_user_page.dart';
 import 'package:da_administrator/pages_user/question/result_stuffing_user_page.dart';
@@ -18,46 +24,341 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ResultQuestUserPage extends StatefulWidget {
-  const ResultQuestUserPage({super.key});
+  const ResultQuestUserPage({super.key, required this.userIndex, required this.idUserTo, required this.allUserTo, required this.allQuestion, required this.myTryout});
 
-  //list hasil user
+  final List<QuestionsModel> allQuestion;
+  final List<UserToModel> allUserTo;
+  final int userIndex;
+  final TryoutModel myTryout;
+  final String idUserTo;
 
   @override
   _ResultQuestUserPageState createState() => _ResultQuestUserPageState();
 }
 
 class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
-  /*dynamic page = ResultTruefalseUserPage(
-    question: TrueFalseModel(
-      question:
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-      type: 'benar_salah',
-      image: [],
-      trueAnswer: [
-        TrueFalseOption(option: 'option1', trueAnswer: true),
-        TrueFalseOption(option: 'option2', trueAnswer: true),
-        TrueFalseOption(option: 'option3', trueAnswer: true),
-        TrueFalseOption(option: 'option4', trueAnswer: true),
-      ],
-      yourAnswer: [
-        TrueFalseOption(option: 'option1', trueAnswer: false),
-        TrueFalseOption(option: 'option2', trueAnswer: true),
-        TrueFalseOption(option: 'option3', trueAnswer: true),
-        TrueFalseOption(option: 'option4', trueAnswer: true),
-      ],
-      value: 0,
-      rating: 0,
-      urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
-      explanation:
-          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-    ),
-  );*/
+  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+
+  bool isLogin = true;
+  var onLoading = true;
+
+  late int userIndex;
+  late List<UserToModel?> allUserTo;
+  late String idUserTo;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onLoading) {
+      bool emptyValue = allUserTo[userIndex]!.correctAnswer == 0 &&
+          allUserTo[userIndex]!.unanswered == 0 &&
+          allUserTo[userIndex]!.wrongAnswer == 0 &&
+          allUserTo[userIndex]!.valuesDiscussion == 0 &&
+          allUserTo[userIndex]!.average == 0;
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3),
+              ),
+              Text(
+                (emptyValue) ? 'Jangan Keluar dari halaman ini\nSedang menghitung nilai' : 'Harap Tunggu',
+                style: TextStyle(fontSize: h3, color: Colors.black.withOpacity(.3), fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
+        ),
+      );
+    } else {
+      if (lebar(context) <= 800) {
+        return onMo(context);
+      } else {
+        return onDesk(context);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allUserTo = widget.allUserTo;
+    idUserTo = widget.idUserTo;
+    userIndex = widget.userIndex;
+    // allQuestion = widget.allQuestion;
+
+    counting();
+  }
+
+  Future<void> counting() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (allUserTo[userIndex]!.correctAnswer == 0 &&
+        allUserTo[userIndex]!.unanswered == 0 &&
+        allUserTo[userIndex]!.wrongAnswer == 0 &&
+        allUserTo[userIndex]!.valuesDiscussion == 0 &&
+        allUserTo[userIndex]!.average == 0) {
+      if (widget.myTryout.phaseIRT) {
+        // calculateIRT;
+      } else {
+        calculateNoIRT();
+      }
+    }
+    onLoading = false;
+
+    await Future.delayed(const Duration(milliseconds: 300));
+    // onSave();
+    setState(() {});
+    return;
+  }
+
+  void calculateNoIRT() {
+    int totalScore = 0;
+    int totalQuestions = 0;
+
+    print("=============== Nilai setelah di hitung ===============");
+    for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
+      var test = allUserTo[userIndex]!.listTest[i];
+
+      for (int j = 0; j < test.listSubtest.length; j++) {
+        var subtest = test.listSubtest[j];
+        double subtestScore = 0;
+
+        for (int k = 0; k < subtest.listQuestions.length; k++) {
+          var question = subtest.listQuestions[k];
+          totalQuestions++;
+          if (question is CheckModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.toSet().containsAll(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is PgModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is StuffingModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is TrueFalseModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first.option == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else {
+              bool isCorrect = true;
+              for (int l = 0; l < question.trueAnswer.length; l++) {
+                if (question.yourAnswer[l].option != question.trueAnswer[l].option || question.yourAnswer[l].trueAnswer != question.trueAnswer[l].trueAnswer) {
+                  isCorrect = false;
+                  break;
+                }
+              }
+              if (isCorrect) {
+                allUserTo[userIndex]!.correctAnswer++;
+                question.value = 4;
+                totalScore += question.value ?? 0;
+                subtestScore += question.value ?? 0;
+              } else {
+                allUserTo[userIndex]!.wrongAnswer++;
+              }
+            }
+          }
+        }
+        print('ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
+        allUserTo[userIndex]!.listTest[i].listSubtest[j].totalSubtest = subtestScore;
+      }
+    }
+
+    allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
+    print("Total Questions: $totalQuestions");
+    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    print("Average Score: ${allUserTo[userIndex]!.average}");
+
+    allUserTo[userIndex]!.valuesDiscussion = totalScore;
+
+    //=============== cari peringakat keseluruhan ===============
+    List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
+    int position = sortedList.indexWhere((user) => user!.userUID == allUserTo[userIndex]!.userUID);
+
+    int rank = position != -1 ? position + 1 : -1;
+    if (rank != -1) {
+      allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: allUserTo.length, tryoutRating: rank));
+      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
+    }
+
+    //=============== cari peringkat berdasarkan tryout yang diambil ===============
+    var filteredList = allUserTo.where((user) => user!.toName == allUserTo[userIndex]!.toName).toList();
+    filteredList.sort((a, b) => b!.average.compareTo(a!.average));
+    int positionTO = filteredList.indexWhere((user) => user!.userUID == allUserTo[userIndex]!.userUID);
+    int rankTO = positionTO != -1 ? positionTO + 1 : -1;
+
+    if (rankTO != -1) {
+      allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: filteredList.length, tryoutRating: rankTO));
+      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
+    }
+  }
+
+  //============================================= IRT =============================================
+
+  void calculateIRT() {
+    int totalScore = 0;
+    int totalQuestions = 0;
+
+    print("=============== Nilai setelah di hitung ===============");
+    for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
+      var test = allUserTo[userIndex]!.listTest[i];
+
+      for (int j = 0; j < test.listSubtest.length; j++) {
+        var subtest = test.listSubtest[j];
+        double subtestScore = 0;
+
+        for (int k = 0; k < subtest.listQuestions.length; k++) {
+          var question = subtest.listQuestions[k];
+          totalQuestions++;
+          if (question is CheckModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.toSet().containsAll(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is PgModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is StuffingModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              allUserTo[userIndex]!.correctAnswer++;
+              question.value = 4;
+              totalScore += question.value ?? 0;
+              subtestScore += question.value ?? 0;
+            } else {
+              allUserTo[userIndex]!.wrongAnswer++;
+            }
+          } else if (question is TrueFalseModel) {
+            if (question.yourAnswer.isEmpty || question.yourAnswer.first.option == '') {
+              allUserTo[userIndex]!.unanswered++;
+            } else {
+              bool isCorrect = true;
+              for (int l = 0; l < question.trueAnswer.length; l++) {
+                if (question.yourAnswer[l].option != question.trueAnswer[l].option || question.yourAnswer[l].trueAnswer != question.trueAnswer[l].trueAnswer) {
+                  isCorrect = false;
+                  break;
+                }
+              }
+              if (isCorrect) {
+                allUserTo[userIndex]!.correctAnswer++;
+                question.value = 4;
+                totalScore += question.value ?? 0;
+                subtestScore += question.value ?? 0;
+              } else {
+                allUserTo[userIndex]!.wrongAnswer++;
+              }
+            }
+          }
+        }
+        print('ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
+        allUserTo[userIndex]!.listTest[i].listSubtest[j].totalSubtest = subtestScore;
+      }
+    }
+
+    allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
+    print("Total Questions: $totalQuestions");
+    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    print("Average Score: ${allUserTo[userIndex]!.average}");
+
+    allUserTo[userIndex]!.valuesDiscussion = totalScore;
+
+    //=============== cari peringakat keseluruhan ===============
+    List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
+    int position = sortedList.indexWhere((user) => user!.userUID == allUserTo[userIndex]!.userUID);
+
+    int rank = position != -1 ? position + 1 : -1;
+    if (rank != -1) {
+      allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: allUserTo.length, tryoutRating: rank));
+      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
+    }
+
+    //=============== cari peringkat berdasarkan tryout yang diambil ===============
+    var filteredList = allUserTo.where((user) => user!.toName == allUserTo[userIndex]!.toName).toList();
+    filteredList.sort((a, b) => b!.average.compareTo(a!.average));
+    int positionTO = filteredList.indexWhere((user) => user!.userUID == allUserTo[userIndex]!.userUID);
+    int rankTO = positionTO != -1 ? positionTO + 1 : -1;
+
+    if (rankTO != -1) {
+      allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: filteredList.length, tryoutRating: rankTO));
+      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
+    }
+  }
+
+  Future<void> onSave() async {
+    try {
+      await UserToService.edit(
+        id: idUserTo,
+        userUID: allUserTo[userIndex]!.userUID,
+        idTryOut: allUserTo[userIndex]!.idTryOut,
+        toName: allUserTo[userIndex]!.toName,
+        valuesDiscussion: allUserTo[userIndex]!.valuesDiscussion,
+        average: allUserTo[userIndex]!.average,
+        unanswered: allUserTo[userIndex]!.unanswered,
+        correctAnswer: allUserTo[userIndex]!.correctAnswer,
+        wrongAnswer: allUserTo[userIndex]!.wrongAnswer,
+        startWork: allUserTo[userIndex]!.startWork,
+        endWork: allUserTo[userIndex]!.endWork,
+        created: allUserTo[userIndex]!.created,
+        leaderBoard: allUserTo[userIndex]!.leaderBoard,
+        rationalization: allUserTo[userIndex]!.rationalization,
+        listTest: allUserTo[userIndex]!.listTest,
+      );
+    } catch (e) {
+      print('ada salah di save result user page,\n$e');
+    }
+  }
 
   dynamic page = Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.note_alt_rounded, size: 100, color: Colors.black.withOpacity(.3)),
+        Icon(Icons.note_alt_outlined, size: 100, color: Colors.black.withOpacity(.3)),
         Text(
           'Pilih soal untuk melihat detail\nketerangan soal yang sudah di jawab',
           style: TextStyle(fontSize: h1, color: Colors.black.withOpacity(.3), fontWeight: FontWeight.bold),
@@ -67,137 +368,8 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     ),
   );
 
-  @override
-  Widget build(BuildContext context) {
-    if (lebar(context) <= 800) {
-      return onMobile(context);
-    } else {
-      return onDesk(context);
-    }
-  }
-
-  var listType = [
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'banyak_pilihan',
-    'pilihan_ganda',
-    'isian',
-    'benar_salah',
-    'pilihan_ganda',
-    'isian',
-  ];
-
-  void onChangeQuestion(int index) {
-    switch (listType[index]) {
-      case 'banyak_pilihan':
-        page = ResultCheckUserPage(
-          question: CheckModel(
-            question:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-            options: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
-            trueAnswer: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', '@empty', '@empty'],
-            type: 'type',
-            yourAnswer: ['', '', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
-            image: [],
-            value: 0,
-            rating: 0,
-            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
-            explanation:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-          ),
-        );
-      case 'pilihan_ganda':
-        page = ResultPgUserPage(
-          question: PgModel(
-            question:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-            options: ['Jawaban 1', 'Jawaban 2', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5'],
-            trueAnswer: 'Jawaban 2',
-            type: 'pilihan_ganda',
-            yourAnswer: ['Jawaban 1'],
-            image: [],
-            value: 0,
-            rating: 0,
-            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
-            explanation:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-          ),
-        );
-      case 'isian':
-        page = ResultStuffingUserPage(
-          question: StuffingModel(
-            question:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-            trueAnswer: 'Jawaban 1',
-            type: 'isian',
-            yourAnswer: ['Jawaban 1'],
-            image: [],
-            value: 0,
-            rating: 0,
-            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
-            explanation:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-          ),
-        );
-      case 'benar_salah':
-        page = ResultTruefalseUserPage(
-          question: TrueFalseModel(
-            question:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-            type: 'benar_salah',
-            image: [],
-            trueAnswer: [
-              TrueFalseOption(option: 'option1', trueAnswer: true),
-              TrueFalseOption(option: 'option2', trueAnswer: false),
-              TrueFalseOption(option: 'option3', trueAnswer: true),
-              TrueFalseOption(option: 'option4', trueAnswer: false),
-            ],
-            yourAnswer: [
-              TrueFalseOption(option: 'option1', trueAnswer: true),
-              TrueFalseOption(option: 'option2', trueAnswer: false),
-              TrueFalseOption(option: 'option3', trueAnswer: true),
-              TrueFalseOption(option: 'option4', trueAnswer: false),
-            ],
-            value: 0,
-            rating: 0,
-            urlVideoExplanation: 'https://youtu.be/pRfmrE0ToTo?si=lfQzFVco5ehOUwD3',
-            explanation:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s w",
-          ),
-        );
-      default:
-        print('Unknown type');
-    }
-    setState(() {});
-  }
-  
-  void kembaliKeTryout(){
-    context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
+  void kembaliKeTryout(BuildContext context) {
     Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
-    // Navigator.push(context, FadeRoute1(const DetailMytryoutUserPage()));
-    // Navigator.pop(context);
   }
 
   Widget onDesk(BuildContext context) {
@@ -213,23 +385,23 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(),
-      body: sideInfo(context),
-    );
-  }
+  Widget onMo(BuildContext context) => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: appbarMo(context: context, isLogin: isLogin),
+        body: sideInfo(context),
+      );
 
   Widget sideInfo(BuildContext context) {
+    var onMobile = lebar(context) <= 800;
     return ListView(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: TextButton(
-            onPressed: () => kembaliKeTryout(),
+          padding: const EdgeInsets.all(10),
+          child: TextButton.icon(
+            onPressed: () => kembaliKeTryout(context),
             style: TextButton.styleFrom(backgroundColor: primary),
-            child: Text('Kembali ke Dashboard TryOut', style: TextStyle(fontSize: h4, color: Colors.white)),
+            icon: const Icon(Icons.navigate_before_rounded, color: Colors.white),
+            label: Text('Kembali ke Dashboard TryOut', style: TextStyle(fontSize: h4, color: Colors.white)),
           ),
         ),
         Container(
@@ -238,13 +410,11 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
           child: Column(
             children: [
-              //header
               Text(
-                'Try Out UTBK 2024 #9 - SNBT',
+                allUserTo[userIndex]!.toName,
                 style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              //nilai
               Container(
                 height: 70,
                 margin: const EdgeInsets.only(top: 30),
@@ -254,7 +424,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('780', style: TextStyle(fontSize: h1, color: primary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                    Text(allUserTo[userIndex]!.average.toString(), style: TextStyle(fontSize: h1, color: primary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     Text('Nilai Rata-rata', style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                   ],
                 ),
@@ -271,7 +441,8 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('21', style: TextStyle(fontSize: h1, color: primary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          Text(allUserTo[userIndex]!.correctAnswer.toString(),
+                              style: TextStyle(fontSize: h1, color: primary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                           Text('Benar', style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ],
                       ),
@@ -288,7 +459,8 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('9', style: TextStyle(fontSize: h1, color: secondary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          Text(allUserTo[userIndex]!.wrongAnswer.toString(),
+                              style: TextStyle(fontSize: h1, color: secondary, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                           Text('Salah', style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ],
                       ),
@@ -305,7 +477,11 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('0', style: TextStyle(fontSize: h1, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          Text(
+                            allUserTo[userIndex]!.unanswered.toString(),
+                            style: TextStyle(fontSize: h1, color: Colors.black, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                           Text('Kosong', style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ],
                       ),
@@ -313,7 +489,6 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                   ),
                 ],
               ),
-              //Leaderboard
               Container(
                 margin: const EdgeInsets.only(top: 10),
                 alignment: Alignment.centerLeft,
@@ -328,7 +503,11 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Peringkat Keseluruhan', style: TextStyle(fontSize: h5 + 2, color: Colors.black), textAlign: TextAlign.start),
-                        Text('100/50.000 peserta', style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.end),
+                        Text(
+                          '100/${allUserTo[userIndex]!.leaderBoard[0].overallRating} peserta',
+                          style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.end,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 5),
@@ -336,13 +515,16 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Peringkat Tryout', style: TextStyle(fontSize: h5 + 2, color: Colors.black), textAlign: TextAlign.start),
-                        Text('100/50.000 peserta', style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.end),
+                        Text(
+                          '100/${allUserTo[userIndex]!.leaderBoard[1].overallRating} peserta',
+                          style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.end,
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              //raisonalisasi
               Container(
                 margin: const EdgeInsets.only(top: 10),
                 alignment: Alignment.centerLeft,
@@ -376,7 +558,6 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                   ),
                 ),
               ),
-              //raisonalisasi
               Container(
                 margin: const EdgeInsets.only(top: 10),
                 alignment: Alignment.centerLeft,
@@ -398,9 +579,8 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), border: Border.all(color: Colors.black)),
-                child: LinearProgressIndicator(borderRadius: BorderRadius.circular(50), color: primary, value: 90 / 100, minHeight: 10),
+                child: LinearProgressIndicator(borderRadius: BorderRadius.circular(50), color: primary, value: allUserTo[userIndex]!.valuesDiscussion / 1000, minHeight: 10),
               ),
-              // Cara melihat pembahasan
               Container(
                 margin: const EdgeInsets.only(top: 10),
                 padding: const EdgeInsets.all(10),
@@ -419,99 +599,122 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                   ],
                 ),
               ),
-              // Test
               Column(
                 children: List.generate(
-                  2,
-                  (index0) {
-                    var listTitle = ['TPS', 'Tes Potensi Skolastik'];
+                  allUserTo[userIndex]!.listTest.length,
+                  (indexTest) {
                     return Column(
                       children: [
                         Container(
                           margin: const EdgeInsets.only(top: 10),
                           alignment: Alignment.centerLeft,
-                          child: Text(listTitle[index0], style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          child: Text(
+                            allUserTo[userIndex]!.listTest[indexTest].nameTest,
+                            style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: List.generate(
-                            4,
-                            (index1) => Container(
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
-                              child: ExpansionTile(
-                                backgroundColor: Colors.white,
-                                collapsedBackgroundColor: Colors.white,
-                                collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                dense: true,
-                                expansionAnimationStyle: AnimationStyle.noAnimation,
-                                iconColor: Colors.black,
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Kemampuan Penalaran Umum',
-                                        style: TextStyle(fontSize: h4, color: Colors.black),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
-                                      child: Text('300', style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: Colors.white)),
-                                    ),
-                                  ],
-                                ),
-                                children: [
-                                  Wrap(
-                                    children: List.generate(
-                                      30,
-                                      (index2) => InkWell(
-                                        onTap: () {
-                                          onChangeQuestion(index2);
-                                        },
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            Container(
-                                              height: 40,
-                                              width: 40,
-                                              margin: const EdgeInsets.fromLTRB(10, 10, 10, 15),
-                                              alignment: Alignment.center,
-                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: primary),
-                                              child: Text('${index2 + 1}', style: TextStyle(fontSize: h4, color: Colors.white), textAlign: TextAlign.start),
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(50),
-                                                  border: Border.all(color: Colors.white),
-                                                  color: Colors.white,
-                                                ),
-                                                child: Icon(Icons.check_circle_rounded, color: primary, size: 20),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              bottom: 0,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: List.generate(3, (index3) => const Icon(Icons.star, color: Colors.orange, size: 15)),
-                                              ),
-                                            ),
-                                          ],
+                            allUserTo[userIndex]!.listTest[indexTest].listSubtest.length,
+                            (indexSubtest) => Container(
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                                child: ExpansionTile(
+                                  backgroundColor: Colors.white,
+                                  collapsedBackgroundColor: Colors.white,
+                                  collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  dense: true,
+                                  expansionAnimationStyle: AnimationStyle.noAnimation,
+                                  iconColor: Colors.black,
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          allUserTo[userIndex]!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                          style: TextStyle(fontSize: h4, color: Colors.black),
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                    ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
+                                        child: Text(
+                                          allUserTo[userIndex]!.listTest[indexTest].listSubtest[indexSubtest].totalSubtest.toString(),
+                                          style: TextStyle(fontSize: h5 + 1, fontWeight: FontWeight.bold, color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 10),
-                                ],
-                              ),
-                            ),
+                                  children: [
+                                    Wrap(
+                                      children: List.generate(
+                                        allUserTo[userIndex]!.listTest[indexTest].listSubtest[indexSubtest].listQuestions.length,
+                                        (indexQuest) {
+                                          var question = allUserTo[userIndex]!.listTest[indexTest].listSubtest[indexSubtest].listQuestions[indexQuest];
+                                          return InkWell(
+                                            onTap: () {
+                                              if (question is CheckModel) {
+                                                page = ResultCheckUserPage(question: question);
+                                              } else if (question is PgModel) {
+                                                page = ResultPgUserPage(question: question);
+                                              } else if (question is StuffingModel) {
+                                                page = ResultStuffingUserPage(question: question);
+                                              } else if (question is TrueFalseModel) {
+                                                page = ResultTruefalseUserPage(question: question);
+                                              }
+                                              if (onMobile) {
+                                                Navigator.push(context, FadeRoute1(page));
+                                              }
+                                              setState(() {});
+                                            },
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                Container(
+                                                  height: 40,
+                                                  width: 40,
+                                                  margin: const EdgeInsets.fromLTRB(10, 10, 10, 15),
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: primary),
+                                                  child: Text('${indexQuest + 1}', style: TextStyle(fontSize: h4, color: Colors.white), textAlign: TextAlign.start),
+                                                ),
+                                                Positioned(
+                                                  top: 0,
+                                                  right: 0,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                      border: Border.all(color: Colors.white),
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: Icon(
+                                                      (question.value != 4) ? Icons.cancel : Icons.check_circle_rounded,
+                                                      color: (question.value != 4) ? secondary : primary,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: 0,
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: List.generate(question.rating!, (index3) => const Icon(Icons.star, color: Colors.orange, size: 15)),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                  ],
+                                )),
                           ),
                         ),
                       ],

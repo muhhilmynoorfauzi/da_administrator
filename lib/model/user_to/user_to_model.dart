@@ -9,8 +9,9 @@ class UserToModel {
   String idTryOut;
   String toName;
   int valuesDiscussion;
-  int average;
+  double average;
   int correctAnswer;
+  int unanswered;
   int wrongAnswer;
   DateTime startWork;
   DateTime endWork;
@@ -26,6 +27,7 @@ class UserToModel {
     required this.valuesDiscussion,
     required this.average,
     required this.correctAnswer,
+    required this.unanswered,
     required this.wrongAnswer,
     required this.startWork,
     required this.endWork,
@@ -43,6 +45,7 @@ class UserToModel {
       'valuesDiscussion': valuesDiscussion,
       'average': average,
       'correctAnswer': correctAnswer,
+      'unanswered': unanswered,
       'wrongAnswer': wrongAnswer,
       'startWork': startWork.toIso8601String(),
       'endWork': endWork.toIso8601String(),
@@ -59,8 +62,9 @@ class UserToModel {
       idTryOut: json['idTryOut'],
       toName: json['toName'],
       valuesDiscussion: json['valuesDiscussion'],
-      average: json['average'],
+      average: (json['average'] as num).toDouble(),
       correctAnswer: json['correctAnswer'],
+      unanswered: json['unanswered'],
       wrongAnswer: json['wrongAnswer'],
       startWork: DateTime.parse(json['startWork']),
       endWork: DateTime.parse(json['endWork']),

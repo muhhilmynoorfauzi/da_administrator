@@ -6,6 +6,7 @@ import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
 
 class ResultPgUserPage extends StatefulWidget {
@@ -18,8 +19,7 @@ class ResultPgUserPage extends StatefulWidget {
 }
 
 class _ResultPgUserPageState extends State<ResultPgUserPage> {
-  var isLogin = true;
-  var urlImage = 'https://fikom.umi.ac.id/wp-content/uploads/elementor/thumbs/Landscape-FIKOM-1-qmvnvvxai3ee9g7f3uxrd0i2h9830jt78pzxkltrtc.webp';
+  bool isLogin = true;
 
   String? selected;
 
@@ -30,26 +30,14 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
     super.initState();
     _controller = YoutubePlayerController(
       initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
-      params: const YoutubePlayerParams(
-        color: 'red',
-        privacyEnhanced: true,
-        showControls: true,
-        strictRelatedVideos: true,
-        enableKeyboard: true,
-        showFullscreenButton: true,
-        showVideoAnnotations: true,
-        useHybridComposition: true,
-        playsInline: true,
-        enableJavaScript: true,
-        autoPlay: false,
-      ),
+      params: const YoutubePlayerParams(color: 'red', strictRelatedVideos: true, showFullscreenButton: true, autoPlay: false),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
+    if (lebar(context) <= 800) {
+      return onMo(context);
     } else {
       return onDesk(context);
     }
@@ -67,19 +55,45 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: AspectRatio(
-                    aspectRatio: 5 / 1,
-                    child: CachedNetworkImage(
-                      imageUrl: urlImage,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                if (widget.question.image.isNotEmpty)
+                  Column(
+                    children: List.generate(
+                      widget.question.image.length,
+                      (index) {
+                        if (widget.question.image[index] != '') {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: AspectRatio(
+                              aspectRatio: 5 / 1,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.question.image[index]!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      },
                     ),
                   ),
+                QuillEditor.basic(
+                  focusNode: FocusNode(),
+                  configurations: QuillEditorConfigurations(
+                    controller: QuillController(
+                      document: Document.fromHtml(widget.question.question),
+                      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                      readOnly: true,
+                    ),
+                    customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                    checkBoxReadOnly: true,
+                    readOnlyMouseCursor: MouseCursor.uncontrolled,
+                    floatingCursorDisabled: true,
+                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                  ),
                 ),
-                Text(widget.question.question, style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
               ],
             ),
           ),
@@ -94,20 +108,20 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
                 bool isSelectedFalse = widget.question.yourAnswer.first == widget.question.options[index] && widget.question.yourAnswer.first != widget.question.trueAnswer;
                 bool isTrue = widget.question.trueAnswer == widget.question.options[index];
                 selected = widget.question.yourAnswer.first;
-                return SizedBox(
-                  width: 400,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: Radio<String>(
-                          value: options,
-                          groupValue: selected,
-                          onChanged: (String? value) {},
-                        ),
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Radio<String>(
+                        value: options,
+                        groupValue: selected,
+                        onChanged: (String? value) {},
                       ),
-                      Container(
+                    ),
+                    Expanded(
+                      child: Container(
+                        // width: 350,
                         margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
@@ -118,10 +132,10 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
                                   ? secondary
                                   : secondaryWhite,
                         ),
-                        child: Text(options, style: TextStyle(color: (isSelectedTrue || isTrue) ? Colors.white : Colors.black, fontSize: h4), maxLines: 20),
+                        child: Text(options, style: TextStyle(color: (isSelectedTrue || isTrue) ? Colors.white : Colors.black, fontSize: h4), textAlign: TextAlign.justify),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -138,18 +152,29 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.question.explanation,
-                  style: TextStyle(color: Colors.black, fontSize: h4),
-                  textAlign: TextAlign.justify,
+                QuillEditor.basic(
+                  focusNode: FocusNode(),
+                  configurations: QuillEditorConfigurations(
+                    controller: QuillController(
+                      document: Document.fromHtml(widget.question.explanation),
+                      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                      readOnly: true,
+                    ),
+                    customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                    checkBoxReadOnly: true,
+                    readOnlyMouseCursor: MouseCursor.uncontrolled,
+                    floatingCursorDisabled: true,
+                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                  ),
                 ),
-                SizedBox(
+                Container(
+                  margin: const EdgeInsets.only(top: 10),
                   width: lebar(context) * .4,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -158,9 +183,155 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.black,
+        scrolledUnderElevation: 1,
+        leadingWidth: 0,
+        leading: const SizedBox(),
+        toolbarHeight: 40,
+        title: TextButton.icon(
+          style: TextButton.styleFrom(backgroundColor: Colors.black.withOpacity(.1)),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
+          label: Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: ListView(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.only(right: 10, bottom: 10),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.question.image.isNotEmpty)
+                    Column(
+                      children: List.generate(
+                        widget.question.image.length,
+                        (index) {
+                          if (widget.question.image[index] != '') {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: AspectRatio(
+                                aspectRatio: 5 / 1,
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.question.image[index]!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return const SizedBox();
+                          }
+                        },
+                      ),
+                    ),
+                  QuillEditor.basic(
+                    focusNode: FocusNode(),
+                    configurations: QuillEditorConfigurations(
+                      controller: QuillController(
+                        document: Document.fromHtml(widget.question.question),
+                        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                        readOnly: true,
+                      ),
+                      customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                      checkBoxReadOnly: true,
+                      readOnlyMouseCursor: MouseCursor.uncontrolled,
+                      floatingCursorDisabled: true,
+                      sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Wrap(
+              runSpacing: 10,
+              spacing: 10,
+              children: List.generate(
+                widget.question.options.length,
+                (index) {
+                  var options = widget.question.options[index];
+                  bool isSelectedTrue = widget.question.yourAnswer.first == widget.question.trueAnswer && widget.question.yourAnswer.first == widget.question.options[index];
+                  bool isSelectedFalse = widget.question.yourAnswer.first == widget.question.options[index] && widget.question.yourAnswer.first != widget.question.trueAnswer;
+                  bool isTrue = widget.question.trueAnswer == widget.question.options[index];
+                  selected = widget.question.yourAnswer.first;
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Radio<String>(value: options, groupValue: selected, onChanged: (String? value) {}),
+                      ),
+                      Container(
+                        width: lebar(context) * .8,
+                        margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: (isSelectedTrue || isTrue)
+                              ? primary
+                              : isSelectedFalse
+                                  ? secondary
+                                  : secondaryWhite,
+                        ),
+                        child: Text(options, style: TextStyle(color: (isSelectedTrue || isTrue) ? Colors.white : Colors.black, fontSize: h4), textAlign: TextAlign.justify),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 50, bottom: 10),
+              child: Text('Pembahasan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold), maxLines: 1),
+            ),
+            Container(
+              margin: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  QuillEditor.basic(
+                    focusNode: FocusNode(),
+                    configurations: QuillEditorConfigurations(
+                      controller: QuillController(
+                        document: Document.fromHtml(widget.question.explanation),
+                        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                        readOnly: true,
+                      ),
+                      customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                      checkBoxReadOnly: true,
+                      readOnlyMouseCursor: MouseCursor.uncontrolled,
+                      floatingCursorDisabled: true,
+                      sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 10),
+                    width: lebar(context) * .8,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

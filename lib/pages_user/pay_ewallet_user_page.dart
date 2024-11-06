@@ -22,8 +22,7 @@ class PayEwalletUserPage extends StatefulWidget {
 }
 
 class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
-  var isLogin = true;
-
+  bool isLogin = true;
   var total = 0;
 
   @override
@@ -35,8 +34,8 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
+    if (lebar(context) <= 800) {
+      return onMo(context);
     } else {
       return onDesk(context);
     }
@@ -46,7 +45,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
     var claimedUid = widget.tryoutUser!.claimedUid;
     claimedUid.add(
       ClaimedModel(
-        userUID: 'userUID123',
+        userUID: 'bBm35Y9GYcNR8YHu2bybB61lyEr1',
         payment: 'Gopay',
         created: DateTime.now(),
         tryoutID: widget.docId,
@@ -92,7 +91,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
               surfaceTintColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               titlePadding: EdgeInsets.zero,
-              contentPadding: const EdgeInsets.all(20),
+              contentPadding: const EdgeInsets.all(10),
               content: SizedBox(
                 width: 500,
                 child: ListView(
@@ -114,23 +113,24 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
       body: ListView(
         children: [
           //tombol kembali
-          Container(
-            alignment: Alignment.center,
+          Center(
             child: Container(
-              width: 700,
+              width: 1000,
               alignment: Alignment.centerLeft,
-              child: Container(
-                width: 30,
-                height: 30,
-                margin: const EdgeInsets.only(right: 10),
-                child: TextButton(
-                  onPressed: () {
-                    context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Dream Academy');
-                    Navigator.pop(context);
-                  },
-                  style: TextButton.styleFrom(backgroundColor: primary, padding: EdgeInsets.zero),
-                  child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    margin: const EdgeInsets.only(right: 10, left: 10),
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(backgroundColor: primary, padding: EdgeInsets.zero),
+                      child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
+                    ),
+                  ),
+                  Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black))
+                ],
               ),
             ),
           ),
@@ -152,7 +152,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
                       child: CachedNetworkImage(
                         imageUrl: widget.tryoutUser!.image,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                         errorWidget: (context, url, error) => const Icon(Icons.error),
                       ),
                     ),
@@ -275,9 +275,154 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: appbarMo(context: context, isLogin: isLogin),
+      body: ListView(
+        children: [
+          //tombol kembali
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                margin: const EdgeInsets.all(10),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(backgroundColor: primary, padding: EdgeInsets.zero),
+                  child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
+                ),
+              ),
+              Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black))
+            ],
+          ),
+          //judul
+          Center(child: Text('Order', style: TextStyle(fontSize: h3, fontWeight: FontWeight.bold, color: Colors.black))),
+          //isi
+          Center(
+            child: Container(
+              height: 150,
+              width: 700,
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.tryoutUser!.image,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Try Out UTBK 2024 #9 - SNBT', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                widget.tryoutUser!.desk,
+                                style: TextStyle(fontSize: h4, color: Colors.black),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(widget.tryoutUser!.listPrice.first),
+                            style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          //metode
+          Center(
+            child: Container(
+              width: 700,
+              alignment: Alignment.centerRight,
+              margin: const EdgeInsets.only(right: 10),
+              child: SizedBox(
+                height: 35,
+                child: OutlinedButton.icon(
+                  onPressed: () => showMetode(context: context),
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30)),
+                  icon: const Icon(Icons.navigate_next_rounded, color: Colors.black),
+                  iconAlignment: IconAlignment.end,
+                  label: Text('Metode Pembayaran', style: TextStyle(fontSize: h4, color: Colors.black)),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: tinggi(context) * .5),
+        ],
+      ),
+      //Ringkasan
+      bottomNavigationBar: Container(
+        width: 700,
+        height: 200,
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Ringkasan', style: TextStyle(fontSize: h3, fontWeight: FontWeight.bold, color: Colors.black)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Harga', style: TextStyle(fontSize: h4, color: Colors.black)),
+                Text(
+                  NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(widget.tryoutUser!.listPrice.first),
+                  style: TextStyle(fontSize: h4, color: Colors.black),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Metode Pembayaran', style: TextStyle(fontSize: h4, color: Colors.black)),
+                Text('Gopay', style: TextStyle(fontSize: h4, color: Colors.black)),
+              ],
+            ),
+            Container(width: double.infinity, height: 1, color: Colors.grey),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Total', style: TextStyle(fontSize: h2, fontWeight: FontWeight.bold, color: Colors.black)),
+                Text(
+                  NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(total),
+                  style: TextStyle(fontSize: h2, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 35,
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => payment(context),
+                style: TextButton.styleFrom(backgroundColor: primary),
+                child: Text('Bayar', style: TextStyle(fontSize: h4, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

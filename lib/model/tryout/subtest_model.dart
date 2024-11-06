@@ -4,7 +4,7 @@ import '../questions/stuffing_model.dart';
 
 class SubtestModel {
   String nameSubTest;
-  int timeMinute;
+  double timeMinute;
   String idQuestions;
 
   SubtestModel({
@@ -21,7 +21,7 @@ class SubtestModel {
 
   factory SubtestModel.fromJson(Map<String, dynamic> json) => SubtestModel(
         nameSubTest: json['name'],
-        timeMinute: json['timeMinute'],
+        timeMinute: (json['timeMinute']as num).toDouble(),
         idQuestions: json['idQuestions'],
       );
 

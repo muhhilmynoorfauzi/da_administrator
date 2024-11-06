@@ -22,11 +22,12 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
+    /*if (lebar(context) <= 700) {
+      return onMo(context);
     } else {
       return onDesk(context);
-    }
+    }*/
+    return onDesk(context);
   }
 
   @override
@@ -42,7 +43,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
       if (question!.yourAnswer.isNotEmpty) {
         listJawaban = question!.yourAnswer;
       } else {
-        listJawaban = List.generate(question!.options.length, (index) => '');
+        listJawaban = List.generate(question!.options.length, (index) => ' ');
       }
     }
   }
@@ -72,7 +73,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
                               child: CachedNetworkImage(
                                 imageUrl: question!.image[index]!,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                 errorWidget: (context, url, error) => const Icon(Icons.error),
                               ),
                             ),
@@ -142,9 +143,98 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      body: ListView(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.only(right: 10, bottom: 10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (question!.image.isNotEmpty)
+                  Column(
+                    children: List.generate(
+                      question!.image.length,
+                      (index) {
+                        if (question!.image[index] != '') {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: AspectRatio(
+                              aspectRatio: 5 / 1,
+                              child: CachedNetworkImage(
+                                imageUrl: question!.image[index]!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      },
+                    ),
+                  ),
+                QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
+                    controller: QuillController(
+                      document: Document.fromHtml(question!.question),
+                      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                      readOnly: true,
+                    ),
+                    customStyleBuilder: (attribute) => TextStyle(color: Colors.black, fontSize: h4),
+                    sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            children: List.generate(
+              question!.options.length,
+              (index) {
+                var options = question!.options[index];
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+                        child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Checkbox(
+                          value: listJawaban[index] == options,
+                          onChanged: (bool? value) {
+                            if (listJawaban[index] != options) {
+                              listJawaban[index] = options;
+                            } else if (listJawaban[index] == options) {
+                              listJawaban[index] = '';
+                            }
+                            question!.yourAnswer = listJawaban;
+                            setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

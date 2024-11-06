@@ -23,56 +23,58 @@ class _ShowImagePageState extends State<ShowImagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeIn,
-              height: hideAppbar ? 0 : 50,
-              width: lebar(context),
-              alignment: Alignment.centerLeft,
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              onEnd: () {
-                if (!hideAppbar) {
-                  hideBtn = !hideBtn;
-                }
-                setState(() {});
-              },
-              child: Wrap(
-                children: [
-                  if (!hideBtn)
-                    TextButton.icon(
-                      style: TextButton.styleFrom(backgroundColor: Colors.black.withOpacity(.1)),
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
-                      label: Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  hideAppbar = !hideAppbar;
-                  if (hideAppbar) {
-                    hideBtn = true;
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeIn,
+                height: hideAppbar ? 0 : 50,
+                width: lebar(context),
+                alignment: Alignment.centerLeft,
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                onEnd: () {
+                  if (!hideAppbar) {
+                    hideBtn = !hideBtn;
                   }
                   setState(() {});
                 },
-                child: CachedNetworkImage(
-                  height: tinggi(context),
-                  width: lebar(context),
-                  imageUrl: widget.image,
-                  // fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                child: Wrap(
+                  children: [
+                    if (!hideBtn)
+                      TextButton.icon(
+                        style: TextButton.styleFrom(backgroundColor: Colors.black.withOpacity(.1)),
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
+                        label: Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: InkWell(
+                  hoverColor: Colors.transparent,
+                  onTap: () {
+                    hideAppbar = !hideAppbar;
+                    if (hideAppbar) {
+                      hideBtn = true;
+                    }
+                    setState(() {});
+                  },
+                  child: CachedNetworkImage(
+                    height: tinggi(context),
+                    width: lebar(context),
+                    imageUrl: widget.image,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

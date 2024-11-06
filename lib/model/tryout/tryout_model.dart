@@ -16,7 +16,7 @@ class TryoutModel {
   bool expired;
   bool public;
   bool showFreeMethod;
-  int totalTime;
+  double totalTime;
   int numberQuestions;
   List<ClaimedModel> claimedUid;
   List<int> listPrice;
@@ -81,7 +81,7 @@ class TryoutModel {
       expired: json['expired'],
       public: json['public'],
       showFreeMethod: json['showFreeMethod'],
-      totalTime: json['totalTime'],
+      totalTime: (json['totalTime'] as num).toDouble(),
       numberQuestions: json['numberQuestions'],
       claimedUid: (json['claimedUid'] as List<dynamic>).map((content) => ClaimedModel.fromJson(content)).toList(),
       listPrice: List<int>.from(json['listPrice']),

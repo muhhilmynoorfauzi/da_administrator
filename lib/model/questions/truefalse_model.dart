@@ -6,8 +6,8 @@ class TrueFalseModel {
   List<String?> image;
   List<TrueFalseOption> trueAnswer;
   List<TrueFalseOption> yourAnswer;
-  int? value;
-  int? rating;
+  int value;
+  int rating;
   String urlVideoExplanation;
   String explanation;
 

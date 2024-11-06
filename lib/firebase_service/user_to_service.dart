@@ -6,14 +6,14 @@ import 'package:da_administrator/model/user_to/user_test_model.dart';
 import 'package:da_administrator/model/user_to/user_to_model.dart';
 
 class UserToService {
-  static Future<void> add(UserToModel userTryout) async => await FirebaseFirestore.instance.collection('user_to_v1').add(userTryout.toJson());
+  static Future<void> add(UserToModel userTryout) async => await FirebaseFirestore.instance.collection('user_to_v2').add(userTryout.toJson());
 
   static Future<String> addGetId(UserToModel userTryout) async {
-    DocumentReference docRef = await FirebaseFirestore.instance.collection('user_to_v1').add(userTryout.toJson());
+    DocumentReference docRef = await FirebaseFirestore.instance.collection('user_to_v2').add(userTryout.toJson());
     return docRef.id;
   }
 
-  static Future<void> delete(String id) async => await FirebaseFirestore.instance.collection('user_to_v1').doc(id).delete();
+  static Future<void> delete(String id) async => await FirebaseFirestore.instance.collection('user_to_v2').doc(id).delete();
 
   static Future<void> edit({
     required String id,
@@ -21,8 +21,9 @@ class UserToService {
     required String idTryOut,
     required String toName,
     required int valuesDiscussion,
-    required int average,
+    required double average,
     required int correctAnswer,
+    required int unanswered,
     required int wrongAnswer,
     required DateTime startWork,
     required DateTime endWork,
@@ -31,7 +32,7 @@ class UserToService {
     required List<RationalizationModel> rationalization,
     required List<UserTestModel> listTest,
   }) async {
-    final docRef = FirebaseFirestore.instance.collection('user_to_v1').doc(id);
+    final docRef = FirebaseFirestore.instance.collection('user_to_v2').doc(id);
 
     final updates = <String, dynamic>{
       'userUID': userUID,
@@ -40,6 +41,7 @@ class UserToService {
       'valuesDiscussion': valuesDiscussion,
       'average': average,
       'correctAnswer': correctAnswer,
+      'unanswered': unanswered,
       'wrongAnswer': wrongAnswer,
       'startWork': startWork.toIso8601String(),
       'endWork': endWork.toIso8601String(),

@@ -25,18 +25,18 @@ int subTestKe = 0;
 
 class NavQuestUserPage extends StatefulWidget {
   final String idUserTo;
-  final int minutes;
 
-  const NavQuestUserPage({super.key, required this.minutes, required this.idUserTo});
+  const NavQuestUserPage({super.key, required this.idUserTo});
 
   @override
   _NavQuestUserPageState createState() => _NavQuestUserPageState();
 }
 
 class _NavQuestUserPageState extends State<NavQuestUserPage> {
-  late int totalTimeInMinutes;
-  late int remainingTimeInSeconds;
-  Timer? timer;
+  late Timer _timer;
+  late double _remainingTime; // Menyimpan waktu yang tersisa dalam detik
+  double _progress = 1.0; // Progres untuk LinearProgressIndicator (0 hingga 1)
+
   bool loadingQuest = false;
 
   dynamic page;
@@ -45,13 +45,13 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   @override
   Widget build(BuildContext context) {
     if (userTo != null) {
-      if (lebar(context) <= 700) {
-        return onMobile(context);
+      if (lebar(context) <= 900) {
+        return onMo(context);
       } else {
         return onDesk(context);
       }
     } else {
-      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary)));
+      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
     }
   }
 
@@ -59,16 +59,12 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   void initState() {
     super.initState();
     getDataUserTo();
-
-    totalTimeInMinutes = widget.minutes;
-    remainingTimeInSeconds = widget.minutes * 60;
-    startTimer();
   }
 
   void getDataUserTo() async {
     userTo = null;
     try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('user_to_v1').doc(widget.idUserTo);
+      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('user_to_v2').doc(widget.idUserTo);
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
       if (docSnapshot.exists) {
         userTo = UserToModel.fromSnapshot(docSnapshot);
@@ -84,10 +80,16 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
               if (subTestSelesai) {
                 print('test ke $testKe, sub test ke $subTestKe telah selesai');
               } else {
-                // testKe = i;
-                // subTestKe = j;
+                if (userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime != 0) {
+                  _remainingTime = userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime;
+                } else {
+                  _remainingTime = userTo!.listTest[testKe].listSubtest[subTestKe].timeMinute;
+                }
+
                 print('sekarang kerja soal test ke $testKe, sub test ke $subTestKe');
                 setQuestion(soalKe);
+                startTimer();
+
                 return; // Menghentikan seluruh perulangan setelah menemukan nilai false
               }
             }
@@ -100,15 +102,28 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     }
   }
 
+  String formatMinute(double seconds) {
+    int totalSeconds = seconds.round();
+    int minutes = totalSeconds ~/ 60;
+    int secondsPart = totalSeconds % 60;
+
+    String minutesStr = minutes.toString().padLeft(2, '0');
+    String secondsStr = secondsPart.toString().padLeft(2, '0');
+
+    return "$minutesStr:$secondsStr";
+  }
+
   void startTimer() {
-    const oneSec = Duration(seconds: 1);
-    timer = Timer.periodic(oneSec, (Timer timer) {
+    const int interval = 1000; // 1000 milidetik atau 1 detik
+    _timer = Timer.periodic(const Duration(milliseconds: interval), (timer) {
       setState(() {
-        if (remainingTimeInSeconds > 0) {
-          remainingTimeInSeconds--;
-        } else {
+        _remainingTime -= 1; // Kurangi 1 detik setiap interval
+        _progress = _remainingTime / userTo!.listTest[testKe].listSubtest[subTestKe].timeMinute;
+
+        if (_remainingTime <= 0) {
           timer.cancel();
-          print("waktu habis");
+          _progress = 0;
+          print("Waktu habis");
           timeOut(context);
         }
       });
@@ -120,13 +135,13 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     if (testKe == (userTo!.listTest.length - 1)) {
       Navigator.pushAndRemoveUntil(
         context,
-        FadeRoute1(WaitingUserPage(minutes: 3, isLast: true, idUserTo: widget.idUserTo)),
+        FadeRoute1(WaitingUserPage(second: 30, isLast: true, idUserTo: widget.idUserTo)),
         (Route<dynamic> route) => false,
       );
     } else {
       Navigator.pushAndRemoveUntil(
         context,
-        FadeRoute1(WaitingUserPage(minutes: 3, isLast: false, idUserTo: widget.idUserTo)),
+        FadeRoute1(WaitingUserPage(second: 30, isLast: false, idUserTo: widget.idUserTo)),
         (Route<dynamic> route) => false,
       );
     }
@@ -145,13 +160,12 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
       default:
         print('Unknown type');
     }
-    // setState(() {});
-    // for (int i = 0; i < listType.length; i++) {}
   }
 
   Future<void> onClickQust(int indexQuest, {bool onSave = false}) async {
     setState(() => loadingQuest = !loadingQuest);
     soalKe = indexQuest;
+    userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime = _remainingTime;
     setQuestion(soalKe);
     //save
     if (onSave) {
@@ -163,6 +177,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
           toName: userTo!.toName,
           valuesDiscussion: userTo!.valuesDiscussion,
           average: userTo!.average,
+          unanswered: userTo!.unanswered,
           correctAnswer: userTo!.correctAnswer,
           wrongAnswer: userTo!.wrongAnswer,
           startWork: userTo!.startWork,
@@ -174,8 +189,6 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
         );
       }
     }
-    //save
-    // await Future.delayed(const Duration(milliseconds: 200));
     setState(() => loadingQuest = !loadingQuest);
   }
 
@@ -186,7 +199,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     required int soalKe,
     required bool isLastTest,
     required bool isLastSubTest,
-  })  async {
+  }) async {
     // Mark subtest as done
     userTo!.listTest[testKe].listSubtest[subTestKe].done = true;
 
@@ -206,7 +219,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     // Navigate to the next page
     Navigator.pushAndRemoveUntil(
       context,
-      FadeRoute1(WaitingUserPage(minutes: 3, isLast: isLastTest && isLastSubTest, idUserTo: widget.idUserTo)),
+      FadeRoute1(WaitingUserPage(second: 30, isLast: isLastTest && isLastSubTest, idUserTo: widget.idUserTo)),
       (Route<dynamic> route) => false,
     );
   }
@@ -258,8 +271,6 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
-    int minutes = remainingTimeInSeconds ~/ 60;
-    int seconds = remainingTimeInSeconds % 60;
     int jmlSoal = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
 
     return Scaffold(
@@ -292,16 +303,17 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Sisa Waktu', style: TextStyle(color: Colors.black, fontSize: h4)),
-                    Text('${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}', style: TextStyle(color: Colors.black, fontSize: h4)),
+                    Text("Waktu tersisa:", style: TextStyle(color: Colors.black, fontSize: h4)),
+                    Text(" ${formatMinute(_remainingTime)}", style: TextStyle(color: Colors.black, fontSize: h4)),
                   ],
                 ),
                 LinearProgressIndicator(
-                  minHeight: 10,
-                  value: remainingTimeInSeconds / (totalTimeInMinutes * 60),
+                  value: _progress,
+                  borderRadius: BorderRadius.circular(20),
                   backgroundColor: Colors.black.withOpacity(.2),
-                  valueColor: AlwaysStoppedAnimation<Color>((minutes <= 10) ? Colors.orange : Colors.blue),
-                  borderRadius: BorderRadius.circular(50),
+                  valueColor: AlwaysStoppedAnimation<Color>((_remainingTime <= 600000) ? Colors.orange : Colors.blue),
+                  color: Colors.blue,
+                  minHeight: 10,
                 ),
               ],
             ),
@@ -316,7 +328,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
               margin: const EdgeInsets.only(left: 10),
               height: tinggi(context),
               alignment: Alignment.center,
-              child: loadingQuest ? CircularProgressIndicator(color: primary, strokeAlign: 10) : page,
+              child: loadingQuest ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
             ),
           ),
           SizedBox(
@@ -434,15 +446,183 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    int jmlSoal = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
+
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.black,
+        scrolledUnderElevation: 1,
+        toolbarHeight: 60,
+        leadingWidth: 0,
+        leading: const SizedBox(),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(userTo!.toName, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h3)),
+            Text(
+              '${userTo!.listTest[testKe].nameTest} - ${userTo!.listTest[testKe].listSubtest[subTestKe].nameSubTest}',
+              style: TextStyle(color: Colors.black, fontSize: h4),
+            ),
+          ],
+        ),
+      ),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Waktu tersisa:", style: TextStyle(color: Colors.black, fontSize: h4)),
+                      Text(" ${formatMinute(_remainingTime)}", style: TextStyle(color: Colors.black, fontSize: h4)),
+                    ],
+                  ),
+                  LinearProgressIndicator(
+                    value: _progress,
+                    borderRadius: BorderRadius.circular(20),
+                    backgroundColor: Colors.black.withOpacity(.2),
+                    valueColor: AlwaysStoppedAnimation<Color>((_remainingTime <= 600000) ? Colors.orange : Colors.blue),
+                    color: Colors.blue,
+                    minHeight: 10,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            height: tinggi(context),
+            width: lebar(context),
+            alignment: Alignment.center,
+            child: loadingQuest ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
+          ),
+          Center(
+            child: Container(
+              height: 500,
+              width: 500,
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
+              child: Column(
+                children: [
+                  Container(
+                    height: 150,
+                    width: 150,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(100), color: Colors.grey),
+                  ),
+                  Text('Ismail Bin Mail', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: Center(
+                      child: Wrap(
+                        spacing: 5,
+                        runSpacing: 5,
+                        alignment: WrapAlignment.center,
+                        children: List.generate(
+                          jmlSoal,
+                          (index0) {
+                            List<String> yourAnswer = [];
+                            // bool isNotTrueFalse;
+                            if (userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].type == 'benar_salah') {
+                              // isNotTrueFalse = true;
+                              List<TrueFalseOption> yourAnswerTrueFalse = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                              yourAnswer = List.generate(yourAnswerTrueFalse.length, (i) => yourAnswerTrueFalse[i].option);
+                            } else {
+                              // isNotTrueFalse = false;
+                              yourAnswer = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                            }
+                            bool isiKosong = yourAnswer.every((element) => element.isEmpty);
+                            return InkWell(
+                              onTap: () => onClickQust(index0, onSave: true),
+                              child: Container(
+                                height: 35,
+                                width: 35,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: (soalKe == index0) ? primary : Colors.transparent),
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: (soalKe == index0)
+                                      ? Colors.white
+                                      : (yourAnswer.isNotEmpty)
+                                          ? isiKosong
+                                              ? Colors.grey
+                                              : primary
+                                          : Colors.grey,
+                                ),
+                                child: Text('${index0 + 1}', style: TextStyle(color: (soalKe == index0) ? primary : Colors.white, fontSize: h4)),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  //
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        height: 50,
+        padding: const EdgeInsets.all(10),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              SizedBox(
+                height: 30,
+                child: TextButton.icon(
+                  onPressed: () {
+                    if (soalKe >= 1) {
+                      onClickQust(soalKe - 1, onSave: true);
+                    }
+                  },
+                  style: TextButton.styleFrom(backgroundColor: Colors.grey),
+                  icon: const Icon(Icons.keyboard_double_arrow_left_rounded, color: Colors.white),
+                  iconAlignment: IconAlignment.start,
+                  label: Text('Sebelumnya', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.normal)),
+                ),
+              ),
+              const SizedBox(width: 5),
+              SizedBox(
+                height: 30,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    if (soalKe + 1 < jmlSoal) {
+                      onClickQust(soalKe + 1, onSave: true);
+                    } else if (soalKe + 1 == jmlSoal) {
+                      await showSelesaikan(context: context);
+                    }
+                  },
+                  style: TextButton.styleFrom(backgroundColor: (soalKe + 1 == jmlSoal) ? secondary : primary),
+                  icon: const Icon(Icons.keyboard_double_arrow_right_rounded, color: Colors.white),
+                  iconAlignment: IconAlignment.end,
+                  label: Text(
+                    (soalKe + 1 == jmlSoal) ? 'Selesaikan' : 'Selanjutnya',
+                    style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.normal),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 }

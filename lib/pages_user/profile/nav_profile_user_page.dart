@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:da_administrator/pages/example.dart';
+import 'package:da_administrator/example.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/profile/detail_pribadi_user_page.dart';
@@ -23,7 +23,7 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 700) {
-      return onMobile(context);
+      return onMo(context);
     } else {
       return onDesk(context);
     }
@@ -104,9 +104,77 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.black,
+        scrolledUnderElevation: 1,
+        leadingWidth: 0,
+        leading: const SizedBox(),
+        title: Container(
+          width: 1000,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                margin: const EdgeInsets.only(right: 10),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(backgroundColor: primary, padding: EdgeInsets.zero),
+                  child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
+                ),
+              ),
+              Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black))
+            ],
+          ),
+        ),
+        actions: [
+          SizedBox(
+            height: 40,
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.logout, color: Colors.black, size: 20),
+              label: Text('Logout', style: TextStyle(fontSize: h4, fontWeight: FontWeight.normal, color: Colors.black)),
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
+      ),
+      body: page[idPage],
+      bottomNavigationBar: Container(
+        height: 50,
+        decoration: BoxDecoration(color: secondaryWhite),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 35,
+              width: 200,
+              child: TextButton(
+                onPressed: () => setState(() => idPage = 0),
+                style: TextButton.styleFrom(backgroundColor: (idPage == 0) ? primary : secondaryWhite, padding: const EdgeInsets.symmetric(horizontal: 30)),
+                child: Text('Profile', style: TextStyle(fontSize: h4, fontWeight: FontWeight.normal, color: (idPage == 0) ? Colors.white : Colors.black)),
+              ),
+            ),
+            SizedBox(
+              height: 35,
+              width: 200,
+              child: TextButton(
+                onPressed: () => setState(() => idPage = 1),
+                style: TextButton.styleFrom(backgroundColor: (idPage == 1) ? primary : secondaryWhite, padding: const EdgeInsets.symmetric(horizontal: 30)),
+                child: Text('Detail Pribadi', style: TextStyle(fontSize: h4, fontWeight: FontWeight.normal, color: (idPage == 1) ? Colors.white : Colors.black)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class WaitingUserPage extends StatefulWidget {
-  const WaitingUserPage({super.key, required this.minutes, required this.isLast, required this.idUserTo});
+  const WaitingUserPage({super.key, required this.second, required this.isLast, required this.idUserTo});
 
   final String idUserTo;
-  final int minutes;
+  final double second;
   final bool isLast;
 
   @override
@@ -20,9 +20,8 @@ class WaitingUserPage extends StatefulWidget {
 }
 
 class _WaitingUserPageState extends State<WaitingUserPage> {
-  late int totalTimeInMinutes;
-  late int remainingTimeInSeconds; // 30 minutes in seconds
-  Timer? timer;
+  late Timer _timer;
+  late double _remainingTime; // Menyimpan waktu yang tersisa dalam detik
   final imageVec = 'assets/vec3.png';
 
   int questId = 0;
@@ -33,26 +32,24 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
     testKe = 0;
     subTestKe = 0;
 
-    totalTimeInMinutes = widget.minutes;
-    remainingTimeInSeconds = widget.minutes * 60;
-
+    _remainingTime = widget.second;
     startTimer();
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
   void startTimer() {
-    const oneSec = Duration(seconds: 1);
-    timer = Timer.periodic(oneSec, (Timer timer) {
+    const int interval = 1000; // 1000 milidetik atau 1 detik
+    _timer = Timer.periodic(const Duration(milliseconds: interval), (timer) {
       setState(() {
-        if (remainingTimeInSeconds > 0) {
-          remainingTimeInSeconds--;
-        } else {
+        _remainingTime -= 1; // Kurangi 1 detik setiap interval
+        if (_remainingTime <= 0) {
           timer.cancel();
+          print("Waktu habis");
           kembaliTryOutSaya();
         }
       });
@@ -60,25 +57,30 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
   }
 
   void lanjutKerja(BuildContext context) {
-    Navigator.pushAndRemoveUntil(context, FadeRoute1(NavQuestUserPage(minutes: 100, idUserTo: widget.idUserTo)), (Route<dynamic> route) => false);
+    Navigator.pushAndRemoveUntil(context, FadeRoute1(NavQuestUserPage(idUserTo: widget.idUserTo)), (Route<dynamic> route) => false);
   }
 
   Future<void> kembaliTryOutSaya() async {
     Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
   }
 
+  String formatMinute(double seconds) {
+    int totalSeconds = seconds.round();
+    int minutes = totalSeconds ~/ 60;
+    int secondsPart = totalSeconds % 60;
+
+    String minutesStr = minutes.toString().padLeft(2, '0');
+    String secondsStr = secondsPart.toString().padLeft(2, '0');
+
+    return secondsStr;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
-    } else {
-      return onDesk(context);
-    }
+    return onDesk(context);
   }
 
   Widget onDesk(BuildContext context) {
-    int minutes = remainingTimeInSeconds ~/ 60;
-    int seconds = remainingTimeInSeconds % 60;
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListView(
@@ -87,10 +89,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
           Column(
             children: [
               Icon(Icons.timer, color: primary, size: 100),
-              Text(
-                '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                style: TextStyle(fontSize: h1, fontWeight: FontWeight.bold, color: Colors.black),
-              ),
+              Text(formatMinute(_remainingTime), style: TextStyle(fontSize: h1, fontWeight: FontWeight.bold, color: Colors.black)),
               Text(
                 'Lanjutkan TryOut atau Tunggu hingga\nwaktu selesai untuk kembali ke TryOut saya',
                 style: TextStyle(fontSize: h3, color: Colors.black),
@@ -132,7 +131,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
+  Widget onMo(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.white,
     );

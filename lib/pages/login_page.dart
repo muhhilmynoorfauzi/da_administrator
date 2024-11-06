@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 child: (isLoading)
-                    ? Center(child: Padding(padding: const EdgeInsets.all(5), child: AspectRatio(aspectRatio: 1, child: CircularProgressIndicator(color: primary))))
+                    ? Center(child: Padding(padding: const EdgeInsets.all(5), child: AspectRatio(aspectRatio: 1, child: CircularProgressIndicator(color: primary, strokeWidth: 3))))
                     : Stack(
                         alignment: Alignment.centerLeft,
                         children: [
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
               textAlign: TextAlign.center,
               text: TextSpan(
                 text: 'By clicking continue, you agree to our ',
-                style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.w100),
+                style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.normal),
                 children: [
                   TextSpan(
                     text: 'Terms of Service',
@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   TextSpan(
                     text: ' and ',
-                    style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.w100),
+                    style: TextStyle(color: Colors.black, fontSize: h4 - 2, fontWeight: FontWeight.normal),
                   ),
                   TextSpan(
                     text: 'Privacy Policy',

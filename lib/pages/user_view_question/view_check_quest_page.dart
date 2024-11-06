@@ -22,11 +22,7 @@ class _ViewCheckQuestPageState extends State<ViewCheckQuestPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
-    } else {
-      return onDesk(context);
-    }
+    return onDesk(context);
   }
 
   @override
@@ -54,7 +50,7 @@ class _ViewCheckQuestPageState extends State<ViewCheckQuestPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: ListView(
           children: [
             Container(
@@ -77,7 +73,7 @@ class _ViewCheckQuestPageState extends State<ViewCheckQuestPage> {
                                 child: CachedNetworkImage(
                                   imageUrl: question.image[index]!,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                   errorWidget: (context, url, error) => const Icon(Icons.error),
                                 ),
                               ),
@@ -111,12 +107,12 @@ class _ViewCheckQuestPageState extends State<ViewCheckQuestPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        flex: 3,
+                        flex: 5,
                         child: Container(
                           margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: secondaryWhite),
-                          child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10),
+                          child: Text(options, style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
                         ),
                       ),
                       Expanded(

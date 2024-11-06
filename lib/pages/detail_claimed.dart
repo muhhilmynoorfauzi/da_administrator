@@ -34,7 +34,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
             height: tinggi(context),
             width: lebar(context),
             color: Colors.white,
-            child: Center(child: CircularProgressIndicator(color: primary)),
+            child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
           ),
       ],
     );
@@ -155,7 +155,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
                                   children: [
                                     Text('Name User', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('userUID', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    Text('Bukti Follow', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                    if (claimedUid[index0].imgFollow != '') Text('Bukti Follow', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Metode Pembayaran', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Harga', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Tanggal pembelian', style: TextStyle(fontSize: h4, color: Colors.black)),
@@ -168,22 +168,23 @@ class _DetailClaimedState extends State<DetailClaimed> {
                                   children: [
                                     Text(': ${claimedUid[index0].name}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                                     Text(': ${claimedUid[index0].userUID}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    InkWell(
-                                      onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: claimedUid[index0].imgFollow))),
-                                      child: SizedBox(
-                                        height: 60,
-                                        width: 60,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: CachedNetworkImage(
-                                            imageUrl: claimedUid[index0].imgFollow,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    if (claimedUid[index0].imgFollow != '')
+                                      InkWell(
+                                        onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: claimedUid[index0].imgFollow))),
+                                        child: SizedBox(
+                                          height: 60,
+                                          width: 60,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: CachedNetworkImage(
+                                              imageUrl: claimedUid[index0].imgFollow,
+                                              fit: BoxFit.cover,
+                                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeWidth: 3)),
+                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
                                     Text(': ${claimedUid[index0].payment}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                                     Text(
                                       NumberFormat.currency(locale: 'id', decimalDigits: 0, name: ': Rp ').format(claimedUid[index0].price),

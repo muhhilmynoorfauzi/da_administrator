@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
 
   void getDataProduct() async {
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v1');
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
 
       listTryOut = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
@@ -146,9 +146,9 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Nama Tryout', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                       phase: false,
                       phaseIRT: false,
                       expired: false,
-                      totalTime: 30,
+                      totalTime: 0.0,
                       numberQuestions: 155,
                       listTest: [
                         TestModel(nameTest: 'TPS', listSubtest: []),
@@ -208,9 +208,9 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text(title, style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           actionsPadding: const EdgeInsets.all(10),
           actions: [
             TextButton(
@@ -220,13 +220,25 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () async {
                 setState(() => onLoading = true);
-                if (tryout!.listTest.isNotEmpty) {
-                  tryout!.listTest.forEach((test) => test.listSubtest.forEach((subTest) async {
-                        if (subTest.idQuestions.isNotEmpty) {
-                          await QuestionsService.delete(subTest.idQuestions);
-                        }
-                      }));
-                }
+                tryout?.listTest.forEach(
+                  (test) => test.listSubtest.where((subTest) => subTest.idQuestions.isNotEmpty).forEach(
+                        (subTest) async => await QuestionsService.delete(subTest.idQuestions),
+                      ),
+                );
+
+                /*if (tryout!.listTest.isNotEmpty) {
+                  for (var test in tryout!.listTest) {
+                    if (test.listSubtest.isNotEmpty) {
+                      test.listSubtest.forEach(
+                        (subTest) async {
+                          if (subTest.idQuestions.isNotEmpty) {
+                            await QuestionsService.delete(subTest.idQuestions);
+                          }
+                        },
+                      );
+                    }
+                  }
+                }*/
 
                 await TryoutService.delete(id);
                 expiredID = 0;
@@ -248,7 +260,7 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Yakin ingin Logout?', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
           actionsPadding: const EdgeInsets.all(10),
           actions: [
@@ -304,7 +316,14 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 (listTryOut == null)
-                    ? SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: primary)))
+                    ? SliverToBoxAdapter(
+                        child: Container(
+                          height: tinggi(context) - 300,
+                          width: lebar(context),
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(color: primary, strokeWidth: 3),
+                        ),
+                      )
                     : (listTryOut!.isNotEmpty)
                         ? SliverList(
                             delegate: SliverChildBuilderDelegate(
@@ -320,19 +339,19 @@ class _HomePageState extends State<HomePage> {
                                         child: Row(children: [expiredWidget(0, 'All'), expiredWidget(1, 'Expired'), expiredWidget(2, 'Publish'), expiredWidget(3, 'On-Going')]),
                                       ),
                                     Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       height: 90,
                                       width: double.infinity,
-                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
                                       child: TextButton(
                                         style: TextButton.styleFrom(
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                                          padding: const EdgeInsets.all(10),
                                         ),
                                         onPressed: () async {
                                           context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
 
-                                          Navigator.push(context, FadeRoute1(const DetailToPage()));
+                                          Navigator.push(context, SlideTransition1(const DetailToPage()));
                                         },
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -392,7 +411,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Container(
-              width: 150,
+              width: 160,
               height: 40,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), gradient: primaryGradient),
               margin: const EdgeInsets.all(15),
@@ -456,7 +475,14 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       (listTryOut == null)
-                          ? SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: primary)))
+                          ? SliverToBoxAdapter(
+                              child: Container(
+                                height: tinggi(context) - 300,
+                                width: lebar(context),
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(color: primary, strokeWidth: 3),
+                              ),
+                            )
                           : (listTryOut!.isNotEmpty)
                               ? SliverList(
                                   delegate: SliverChildBuilderDelegate(
@@ -633,7 +659,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       )
                     : onLoading
-                        ? Center(child: CircularProgressIndicator(color: primary))
+                        ? Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))
                         : const DetailToPage(),
               );
             },

@@ -97,7 +97,7 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -140,13 +140,13 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
                         controllers.removeAt(index);
                         trueAnswer.removeAt(index);
                       }),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   IconButton(
                     onPressed: () {
                       if (controllers[index].text.isNotEmpty) {
                         if (answerSelected) {
-                          setState(() => trueAnswer[index] = ' ');
+                          setState(() => trueAnswer[index] = '');
                         } else {
                           setState(() => trueAnswer[index] = controllers[index].text);
                         }
@@ -163,7 +163,7 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -200,72 +200,75 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != null && images[index] != ''
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != null && images[index] != ''
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -399,8 +402,8 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
                           type: 'banyak_pilihan',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: htmlDesk,
                         );
@@ -499,7 +502,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -539,7 +542,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
                   if (controllers.length > 1)
                     IconButton(
                       onPressed: () => setState(() => controllers.removeAt(index)),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   IconButton(
                     onPressed: () {
@@ -558,7 +561,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -595,72 +598,75 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != '' && images[index] != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != '' && images[index] != null
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -790,8 +796,8 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
                           type: 'pilihan_ganda',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: htmlDesk,
                         );
@@ -857,7 +863,7 @@ Future<void> editIsianDialog({required StuffingModel soal, required int index}) 
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -894,72 +900,75 @@ Future<void> editIsianDialog({required StuffingModel soal, required int index}) 
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != '' && images[index] != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != '' && images[index] != null
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -1094,8 +1103,8 @@ Future<void> editIsianDialog({required StuffingModel soal, required int index}) 
                           type: 'isian',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskHtml,
                         );
@@ -1128,7 +1137,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
       final QuillController deskController = QuillController(document: Document.fromHtml(soal.explanation), selection: const TextSelection(baseOffset: 0, extentOffset: 0));
 
       TextEditingController urlController = TextEditingController(text: soal.urlVideoExplanation);
-      List<bool> trueAnswer = List.generate(soal.trueAnswer.length, (index) => soal.trueAnswer[index].trueAnswer);
+      List<bool> trueAnswer = List.generate(soal.trueAnswer.length, (index) => soal.trueAnswer[index].trueAnswer!);
       List<TextEditingController> controllers = List.generate(soal.trueAnswer.length, (index) => TextEditingController(text: soal.trueAnswer[index].option));
 
       PlatformFile? pickedFileQuest;
@@ -1191,7 +1200,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -1234,7 +1243,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
                         controllers.removeAt(index);
                         trueAnswer.removeAt(index);
                       }),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   TextButton(
                     style: TextButton.styleFrom(backgroundColor: trueAnswer[index] ? primary : secondary),
@@ -1254,7 +1263,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -1291,72 +1300,75 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != ''
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != ''
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -1486,8 +1498,8 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
                           type: 'benar_salah',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskHtml,
                         );
@@ -1588,7 +1600,7 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -1631,13 +1643,13 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
                         controllers.removeAt(index);
                         trueAnswer.removeAt(index);
                       }),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   IconButton(
                     onPressed: () {
                       if (controllers[index].text.isNotEmpty) {
                         if (answerSelected) {
-                          setState(() => trueAnswer[index] = ' ');
+                          setState(() => trueAnswer[index] = '');
                         } else {
                           setState(() => trueAnswer[index] = controllers[index].text);
                         }
@@ -1654,7 +1666,7 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -1691,68 +1703,71 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) => Container(
-                                  width: 100,
-                                  height: 200,
-                                  margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Container(
-                                          color: Colors.white,
-                                          child: AspectRatio(
-                                            aspectRatio: 3 / 4,
-                                            child: images[index] != '' && images[index] != null
-                                                ? CachedNetworkImage(
-                                                    imageUrl: images[index]!,
-                                                    fit: BoxFit.cover,
-                                                    placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                  )
-                                                : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) => Container(
+                                    width: 100,
+                                    height: 200,
+                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: AspectRatio(
+                                              aspectRatio: 1,
+                                              child: images[index] != '' && images[index] != null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: images[index]!,
+                                                      fit: BoxFit.cover,
+                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                    )
+                                                  : const Icon(Icons.image, color: Colors.grey),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                        width: double.infinity,
-                                        child: OutlinedButton(
-                                          onPressed: () async {
-                                            try {
-                                              setState(() => onUploadQuest = !onUploadQuest);
-                                              await selectedImageQuest();
-                                              if (pickedFileQuest != null) {
-                                                await uploadImageQuest(index);
+                                        SizedBox(
+                                          height: 30,
+                                          width: double.infinity,
+                                          child: OutlinedButton(
+                                            onPressed: () async {
+                                              try {
+                                                setState(() => onUploadQuest = !onUploadQuest);
+                                                await selectedImageQuest();
+                                                if (pickedFileQuest != null) {
+                                                  await uploadImageQuest(index);
+                                                }
+                                                pickedFileQuest = null;
+                                                setState(() => onUploadQuest = !onUploadQuest);
+                                              } catch (e) {
+                                                print('salah ni $e');
                                               }
-                                              pickedFileQuest = null;
-                                              setState(() => onUploadQuest = !onUploadQuest);
-                                            } catch (e) {
-                                              print('salah ni $e');
-                                            }
-                                            setState(() {});
-                                          },
-                                          style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                          child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                              setState(() {});
+                                            },
+                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                        width: double.infinity,
-                                        child: OutlinedButton(
-                                          onPressed: () => setState(() {
-                                            jmlImage--;
-                                            images.removeAt(index);
-                                          }),
-                                          style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                          child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                        SizedBox(
+                                          height: 30,
+                                          width: double.infinity,
+                                          child: OutlinedButton(
+                                            onPressed: () => setState(() {
+                                              jmlImage--;
+                                              images.removeAt(index);
+                                            }),
+                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1883,8 +1898,8 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
                           type: 'banyak_pilihan',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskhtml,
                         );
@@ -1984,7 +1999,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -2024,7 +2039,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
                   if (controllers.length > 1)
                     IconButton(
                       onPressed: () => setState(() => controllers.removeAt(index)),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   IconButton(
                     onPressed: () {
@@ -2043,7 +2058,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -2080,72 +2095,75 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != '' && images[index] != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != '' && images[index] != null
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -2275,8 +2293,8 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
                           type: 'pilihan_ganda',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskHtml,
                         );
@@ -2341,7 +2359,7 @@ Future<void> editIsianDialogSmallDevice({required StuffingModel soal, required i
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -2378,72 +2396,75 @@ Future<void> editIsianDialogSmallDevice({required StuffingModel soal, required i
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != '' && images[index] != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != '' && images[index] != null
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -2578,8 +2599,8 @@ Future<void> editIsianDialogSmallDevice({required StuffingModel soal, required i
                           type: 'isian',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskHtml,
                         );
@@ -2613,7 +2634,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
 
       TextEditingController urlController = TextEditingController(text: soal.urlVideoExplanation);
 
-      List<bool> trueAnswer = List.generate(soal.trueAnswer.length, (index) => soal.trueAnswer[index].trueAnswer);
+      List<bool> trueAnswer = List.generate(soal.trueAnswer.length, (index) => soal.trueAnswer[index].trueAnswer!);
       List<TextEditingController> controllers = List.generate(soal.trueAnswer.length, (index) => TextEditingController(text: soal.trueAnswer[index].option));
 
       PlatformFile? pickedFileQuest;
@@ -2676,7 +2697,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
                             child: CachedNetworkImage(
                               imageUrl: controllers[index].text,
                               fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           )
@@ -2719,7 +2740,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
                         controllers.removeAt(index);
                         trueAnswer.removeAt(index);
                       }),
-                      icon: const Icon(Icons.delete, color: Colors.black),
+                      icon: const Icon(Icons.delete_outline, color: Colors.black),
                     ),
                   TextButton(
                     style: TextButton.styleFrom(backgroundColor: trueAnswer[index] ? primary : secondary),
@@ -2739,7 +2760,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             title: Row(
               children: [
                 Text('Masukkan Soal ', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
@@ -2776,72 +2797,75 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
                                 label: Text('Tambah Soal Gambar', style: TextStyle(color: Colors.black, fontSize: h4)),
                               ),
                             ),
-                            Row(
-                              children: List.generate(
-                                jmlImage,
-                                (index) {
-                                  return Container(
-                                    width: 100,
-                                    height: 200,
-                                    margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: AspectRatio(
-                                              aspectRatio: 3 / 4,
-                                              child: images[index] != '' && images[index] != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: images[index]!,
-                                                      fit: BoxFit.cover,
-                                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
-                                                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                    )
-                                                  : const Icon(Icons.image, color: Colors.grey),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(
+                                  jmlImage,
+                                  (index) {
+                                    return Container(
+                                      width: 100,
+                                      height: 170,
+                                      margin: const EdgeInsets.fromLTRB(10, 10, 5, 0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              color: Colors.white,
+                                              child: AspectRatio(
+                                                aspectRatio: 1,
+                                                child: images[index] != '' && images[index] != null
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: images[index]!,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      )
+                                                    : const Icon(Icons.image, color: Colors.grey),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () async {
-                                              try {
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                                await selectedImageQuest();
-                                                if (pickedFileQuest != null) {
-                                                  await uploadImageQuest(index);
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () async {
+                                                try {
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                  await selectedImageQuest();
+                                                  if (pickedFileQuest != null) {
+                                                    await uploadImageQuest(index);
+                                                  }
+                                                  pickedFileQuest = null;
+                                                  setState(() => onUploadQuest = !onUploadQuest);
+                                                } catch (e) {
+                                                  print('salah ni $e');
                                                 }
-                                                pickedFileQuest = null;
-                                                setState(() => onUploadQuest = !onUploadQuest);
-                                              } catch (e) {
-                                                print('salah ni $e');
-                                              }
-                                              setState(() {});
-                                            },
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                setState(() {});
+                                              },
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text(images[index] != '' ? 'Edit' : 'Tambah', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () => setState(() {
-                                              jmlImage--;
-                                              images.removeAt(index);
-                                            }),
-                                            style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-                                            child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          SizedBox(
+                                            height: 30,
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => setState(() {
+                                                jmlImage--;
+                                                images.removeAt(index);
+                                              }),
+                                              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                                              child: Text('Hapus', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             QuillToolbar.simple(
@@ -2971,8 +2995,8 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
                           type: 'benar_salah',
                           yourAnswer: [],
                           image: images,
-                          value: null,
-                          rating: 0,
+                          value: soal.value,
+                          rating: 1,
                           urlVideoExplanation: urlController.text,
                           explanation: deskHtml,
                         );

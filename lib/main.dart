@@ -1,5 +1,5 @@
 import 'package:da_administrator/pages/detail_claimed.dart';
-import 'package:da_administrator/pages/example.dart';
+import 'package:da_administrator/example.dart';
 import 'package:da_administrator/pages/home_page.dart';
 import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
@@ -95,17 +95,18 @@ class _MyAppState extends State<MyApp> {
                 return const HomeUserPage();
               }
             } else {
+              // return const Rating();
               // return const HomePage();
-              // return const ResultQuestUserPage();
               return const HomeUserPage();
               // return const TryoutUserPage(idPage: 0);
+              // return const WaitingUserPage(second: 10, isLast: true, idUserTo: 'widget.idUserTo');
+              // return const CountdownTimer(timeSecond: 600);
               // return const NavProfileUserPage();
               // return const AboutUserPage();
               // return const NavQuestUserPage(minutes: 30);
-              // return const WaitingUserPage(minutes: 1);
               // return const DetailMytryoutUserPage();
               // return const DetailTryoutUserPage();
-              // return const PayDoneUserPage();
+              // return const PayDoneUserPage(second: 100);
               // return const PayFreeUserPage();
               // return const PayCoinUserPage();
               // return const PayEwalletUserPage();

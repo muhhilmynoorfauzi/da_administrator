@@ -1,8 +1,18 @@
+import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
+import 'package:da_administrator/pages_user/component/nav_buttom.dart';
+import 'package:da_administrator/pages_user/profile/nav_profile_user_page.dart';
+import 'package:da_administrator/pages_user/rekomendasi_user_page.dart';
+import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
-import 'dart:html' as html;
+import 'package:da_administrator/service/state_manajement.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+
+// import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -16,8 +26,8 @@ class HomeUserPage extends StatefulWidget {
 }
 
 class _HomeUserPageState extends State<HomeUserPage> {
-  var isLogin = true;
-  late YoutubePlayerController _controller;
+  bool isLogin = true;
+  late YoutubePlayerController youtubeController;
 
   final ScrollController scrollController1 = ScrollController();
   final ScrollController scrollController2 = ScrollController();
@@ -26,30 +36,19 @@ class _HomeUserPageState extends State<HomeUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return homeUserMobile(context);
+    if (lebar(context) <= 800) {
+      return onMo(context);
     } else {
-      return homeUserDesk(context);
+      return onDesk(context);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
+    youtubeController = YoutubePlayerController(
       initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
-      params: const YoutubePlayerParams(
-          color: 'red',
-          privacyEnhanced: true,
-          showControls: true,
-          strictRelatedVideos: true,
-          enableKeyboard: true,
-          showFullscreenButton: true,
-          showVideoAnnotations: true,
-          useHybridComposition: true,
-          playsInline: true,
-          enableJavaScript: true,
-          autoPlay: false),
+      params: const YoutubePlayerParams(color: 'red', strictRelatedVideos: true, showFullscreenButton: true, autoPlay: false),
     );
     // WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
@@ -85,17 +84,38 @@ class _HomeUserPageState extends State<HomeUserPage> {
   @override
   void dispose() {
     scrollController1.dispose();
+    scrollController2.dispose();
+    youtubeController.stop();
     super.dispose();
   }
 
   void openNewTab(String contact) {
-    html.window.open('https://wa.me/+62$contact', '_blank');
+    // html.window.open('https://wa.me/+62$contact', '_blank');
   }
 
-  Widget homeUserDesk(BuildContext context) {
+  /*Future<void> toBankPage() async {
+    await Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
+  }
+
+  Future<void> toTryoutPage() async {
+    await Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage(idPage: 0)));
+  }
+
+  Future<void> toRekPage() async {
+    await Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
+  }*/
+
+  Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, homeActive: true, isLogin: isLogin),
+      appBar: appbarDesk(
+        context: context,
+        homeActive: true,
+        isLogin: isLogin,
+        actionProfile: () {
+          youtubeController.pause();
+        },
+      ),
       floatingActionButton: SizedBox(
         width: 180,
         height: 40,
@@ -156,7 +176,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
                         padding: const EdgeInsets.all(40),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: YoutubePlayerIFramePlus(controller: _controller, aspectRatio: 16 / 9),
+                          child: YoutubePlayerIFramePlus(controller: youtubeController, aspectRatio: 16 / 9),
                         ),
                       ),
                     ],
@@ -316,14 +336,15 @@ class _HomeUserPageState extends State<HomeUserPage> {
                                     'Berproses bersama kami',
                                     style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.w100),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 20),
-                                    child: TextButton(
-                                      onPressed: () {},
-                                      style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
-                                      child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
-                                    ),
-                                  )
+                                  if (!isLogin)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 20),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
+                                        child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                      ),
+                                    )
                                 ],
                               ),
                             ),
@@ -449,7 +470,15 @@ class _HomeUserPageState extends State<HomeUserPage> {
                             return InkWell(
                               borderRadius: BorderRadius.circular(10),
                               onHover: (value) => setState(() => onHover = value),
-                              onTap: () {},
+                              onTap: () {
+                                if (index == 0) {
+                                  Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
+                                } else if (index == 1) {
+                                  Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
+                                } else if (index == 2) {
+                                  Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
+                                }
+                              },
                               child: AnimatedContainer(
                                 margin: const EdgeInsets.all(10),
                                 duration: const Duration(milliseconds: 150),
@@ -486,9 +515,418 @@ class _HomeUserPageState extends State<HomeUserPage> {
     );
   }
 
-  Widget homeUserMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: appbarMo(context: context, isLogin: isLogin),
+      floatingActionButton: SizedBox(
+        width: 50,
+        height: 50,
+        child: FloatingActionButton(
+          backgroundColor: primary,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          onPressed: () => openNewTab('82195012789'),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset('assets/whatsapp.svg', height: 25),
+            ],
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          Image.asset('assets/bg1.png', width: lebar(context), fit: BoxFit.cover),
+          Scrollbar(
+            thumbVisibility: true,
+            trackVisibility: true,
+            interactive: false,
+            child: ListView(
+              children: [
+                Container(
+                  height: tinggi(context) * .6,
+                  width: lebar(context),
+                  margin: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Dream Academy', style: TextStyle(color: Colors.black, fontSize: h1, fontWeight: FontWeight.bold)),
+                      Text('Dream Academy Dream Academy Dream Academy', style: TextStyle(color: Colors.grey, fontSize: h3, fontWeight: FontWeight.normal)),
+                      Text(
+                        'Dream Academy Dream Academy Dream Academy '
+                        'Dream Academy Dream Academy Dream Academy '
+                        'Dream Academy Dream Academy Dream Academy '
+                        'Dream Academy Dream Academy Dream Academy '
+                        'Dream Academy Dream Academy Dream Academy',
+                        style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ],
+                  ),
+                ),
+                //youtube
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(40),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: YoutubePlayerIFramePlus(controller: youtubeController, aspectRatio: 16 / 9),
+                  ),
+                ),
+                //image dialog vector
+                Container(
+                  height: 300,
+                  width: lebar(context),
+                  margin: const EdgeInsets.all(10),
+                  child: Image.asset('assets/vec1.png'),
+                ),
+                //100+ pelajar telah berproses bersama kami
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      autoScroll1();
+                      autoScroll2();
+                    });
+                    return Container(
+                      height: 700,
+                      width: lebar(context),
+                      decoration: BoxDecoration(gradient: primaryGradient),
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 400,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    color: Colors.black12,
+                                    child: ListView(
+                                      controller: scrollController1,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      children: List.generate(
+                                        4,
+                                        (index) => SizedBox(
+                                          height: 200,
+                                          child: Card(
+                                            margin: const EdgeInsets.all(10),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(10),
+                                                  height: 70,
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection: Axis.horizontal,
+                                                    child: Row(
+                                                      children: [
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.circular(50),
+                                                          child: CircleAvatar(
+                                                            backgroundColor: Colors.grey,
+                                                            child: Image.network('https://avatars.githubusercontent.com/u/61872710?v=4'),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              'Muh. Hilmy Noor Fauzi',
+                                                              style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold),
+                                                            ),
+                                                            Text('20 Juli 2024', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 110,
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(10),
+                                                  child: Text(
+                                                    'Saya sangat senang belajar di Dream Academy karena memiliki banyak contoh soal dan penjelasan mudah dipahami',
+                                                    style: TextStyle(color: Colors.black, fontSize: h4),
+                                                    textAlign: TextAlign.justify,
+                                                    maxLines: 4,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    color: Colors.black12,
+                                    child: ListView(
+                                      controller: scrollController2,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      reverse: true,
+                                      children: List.generate(
+                                        4,
+                                        (index) => SizedBox(
+                                          height: 200,
+                                          child: Card(
+                                            margin: const EdgeInsets.all(10),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(10),
+                                                  height: 70,
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection: Axis.horizontal,
+                                                    child: Row(
+                                                      children: [
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.circular(50),
+                                                          child: CircleAvatar(
+                                                            backgroundColor: Colors.grey,
+                                                            child: Image.network('https://avatars.githubusercontent.com/u/61872710?v=4'),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text('Muh. Hilmy Noor Fauzi', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                            Text('20 Juli 2024', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 110,
+                                                  width: double.infinity,
+                                                  padding: const EdgeInsets.all(10),
+                                                  child: Text(
+                                                    'Saya sangat senang belajar di Dream Academy karena memiliki banyak contoh soal dan penjelasan mudah dipahami',
+                                                    style: TextStyle(color: Colors.black, fontSize: h4),
+                                                    maxLines: 4,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              width: lebar(context),
+                              margin: const EdgeInsets.symmetric(horizontal: 10),
+                              alignment: Alignment.centerLeft,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('1000++ Pelajar Telah', style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.bold)),
+                                  Text('Berproses bersama kami', style: TextStyle(color: Colors.white, fontSize: h1 + 5, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami'
+                                    'Berproses bersama kami',
+                                    style: TextStyle(color: Colors.white, fontSize: h4 + 5, fontWeight: FontWeight.w100),
+                                  ),
+                                  if (!isLogin)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 20),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
+                                        child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
+                                      ),
+                                    )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                //persiapkan semua untuk ujianmu
+                Container(
+                  // height: 800,
+                  width: lebar(context),
+                  margin: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  alignment: Alignment.center,
+                  child: Card(
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    elevation: 3,
+                    child: Container(
+                      // height: 1000,
+                      width: 1000,
+                      padding: const EdgeInsets.all(30),
+                      child: Column(
+                        children: [
+                          Text('SIAP MELEWATI RINTANGAN SNBT', style: TextStyle(color: Colors.black.withOpacity(.5), fontSize: h4, fontWeight: FontWeight.bold)),
+                          Text('Persiapkan semua untuk Ujianmu', style: TextStyle(color: Colors.black, fontSize: h2, fontWeight: FontWeight.bold)),
+                          Text('Fitur TryOut', style: TextStyle(color: Colors.black.withOpacity(.5), fontSize: h4, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            alignment: WrapAlignment.center,
+                            runAlignment: WrapAlignment.center,
+                            children: List.generate(
+                              8,
+                              (index) {
+                                var title = [
+                                  'Pembahasan Soal Lengkap',
+                                  'Hasil Instan',
+                                  'Sistem CBT',
+                                  'Tes minat, bakat dan jurusan',
+                                  'Akses dimana saja',
+                                  'Repot TO',
+                                  'Perangkingan Jurusan',
+                                  'Pembobotan Nilai / IRT',
+                                ];
+                                var subTitle = [
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                  'Membuat kamu makin paham konsep dalam mengerjakan soal-soal',
+                                ];
+                                var img = [
+                                  'assets/fitur1.svg',
+                                  'assets/fitur5.svg',
+                                  'assets/fitur2.svg',
+                                  'assets/fitur6.svg',
+                                  'assets/fitur3.svg',
+                                  'assets/fitur7.svg',
+                                  'assets/fitur4.svg',
+                                  'assets/fitur8.svg',
+                                ];
+                                return SizedBox(
+                                  height: 130,
+                                  width: 450,
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: CircleAvatar(backgroundColor: Colors.transparent, radius: 40, child: SvgPicture.asset(img[index])),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(title[index], style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                            Text(subTitle[index], style: TextStyle(color: Colors.black, fontSize: h4)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Fitur Utama
+                SizedBox(
+                  height: 400,
+                  width: lebar(context),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        3,
+                        (index) {
+                          var onHover = false;
+                          var title = [
+                            'Bank Soal',
+                            'TryOut',
+                            'Rekomendasi Belajar',
+                          ];
+                          var img = [
+                            'assets/bank.svg',
+                            'assets/tryout.svg',
+                            'assets/rekomendasi.svg',
+                          ];
+                          return StatefulBuilder(
+                            builder: (BuildContext context, StateSetter setState) {
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onHover: (value) => setState(() => onHover = value),
+                                onTap: () {
+                                  if (index == 0) {
+                                    Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
+                                  } else if (index == 1) {
+                                    Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
+                                  } else if (index == 2) {
+                                    Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
+                                  }
+                                },
+                                child: AnimatedContainer(
+                                  margin: const EdgeInsets.all(10),
+                                  duration: const Duration(milliseconds: 150),
+                                  height: onHover ? 300 : 250,
+                                  width: onHover ? 250 : 200,
+                                  decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(10), color: Colors.white),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 150),
+                                        height: onHover ? 150 : 100,
+                                        width: onHover ? 150 : 100,
+                                        child: SvgPicture.asset(img[index]),
+                                      ),
+                                      Text(title[index], style: TextStyle(fontWeight: FontWeight.bold, fontSize: h4), textAlign: TextAlign.center),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                //footer
+                footerMo(context: context),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, homeActive: true),
     );
   }
 }

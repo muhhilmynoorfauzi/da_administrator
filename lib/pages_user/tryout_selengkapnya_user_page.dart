@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:da_administrator/pages/example.dart';
+import 'package:da_administrator/example.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/service/color.dart';
@@ -15,7 +15,7 @@ class TryoutSelengkapnyaUserPage extends StatefulWidget {
 }
 
 class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage> {
-  var isLogin = true;
+  bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage>
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                       errorWidget: (context, url, error) => const Icon(Icons.error),
                     ),
                   ),

@@ -20,11 +20,7 @@ class _ViewStuffingQuestPageState extends State<ViewStuffingQuestPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
-    } else {
-      return onDesk(context);
-    }
+    return onDesk(context);
   }
 
   @override
@@ -51,7 +47,7 @@ class _ViewStuffingQuestPageState extends State<ViewStuffingQuestPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: ListView(
           children: [
             Container(
@@ -74,7 +70,7 @@ class _ViewStuffingQuestPageState extends State<ViewStuffingQuestPage> {
                                 child: CachedNetworkImage(
                                   imageUrl: widget.question.image[index]!,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                   errorWidget: (context, url, error) => const Icon(Icons.error),
                                 ),
                               ),

@@ -31,7 +31,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
   @override
   Widget build(BuildContext context) {
     contextF = context;
-    var page = (lebar(context) <= 1200) ? onMo(context) : onDesk(context);
+    var page = (lebar(context) <= 800) ? onMo(context) : onDesk(context);
     return Stack(
       children: [
         page,
@@ -41,7 +41,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
             height: tinggi(context),
             width: lebar(context),
             color: Colors.white,
-            child: Center(child: CircularProgressIndicator(color: primary)),
+            child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
           ),
       ],
     );
@@ -56,7 +56,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
 
   void getDataTryOut(String docId) async {
     try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v1').doc(docId);
+      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v2').doc(docId);
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
       if (docSnapshot.exists) {
         setState(() => question = QuestionsModel.fromSnapshot(docSnapshot));
@@ -69,7 +69,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
     }
   }
 
-//----------------------------------------------------------------
+//==============================================================================================================
 
   String formatType(String dataType) {
     var type = '';
@@ -85,7 +85,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
     return type;
   }
 
-//----------------------------------------------------------------
+//==============================================================================================================
   Future<void> deleteQuestion(int index) async {
     await showDialog(
       context: context,
@@ -97,11 +97,11 @@ class _QuestionsPageState extends State<QuestionsPage> {
               backgroundColor: Colors.white,
               surfaceTintColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
               title: SizedBox(
                 width: 1000,
                 child: loading
-                    ? Center(child: CircularProgressIndicator(color: primary))
+                    ? Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))
                     : QuillEditor.basic(
                         focusNode: FocusNode(),
                         configurations: QuillEditorConfigurations(
@@ -117,7 +117,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                         ),
                       ),
               ),
-              contentPadding: const EdgeInsets.all(20),
+              contentPadding: const EdgeInsets.all(10),
               actionsPadding: const EdgeInsets.all(10),
               actions: loading
                   ? []
@@ -154,13 +154,13 @@ class _QuestionsPageState extends State<QuestionsPage> {
     setState(() => isLoading = false);
   }
 
-//----------------------------------------------------------------
+//==============================================================================================================
   Document toStringHtml(String value) {
     var data = Document.fromHtml(value);
     return data;
   }
 
-//----------------------------------------------------------------
+//==============================================================================================================
   String? _selectedOption;
 
   Widget onMo(BuildContext context) {
@@ -250,6 +250,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                           ? ListView.builder(
                               itemCount: question!.listQuestions.length,
                               itemBuilder: (context, indexQuest) {
+                                int rating = question!.listQuestions[indexQuest].rating;
                                 return Card(
                                   color: Colors.white,
                                   surfaceTintColor: Colors.white,
@@ -265,8 +266,10 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
+                                                    height: 30,
                                                     margin: const EdgeInsets.only(bottom: 10),
-                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                    alignment: Alignment.center,
                                                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
                                                     child: Text(
                                                       formatType(question!.listQuestions[indexQuest].type),
@@ -274,6 +277,34 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                       textAlign: TextAlign.justify,
                                                     ),
                                                   ),
+                                                  const SizedBox(width: 10),
+                                                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                                                    return Stack(
+                                                      children: [
+                                                        Row(
+                                                          children: List.generate(
+                                                            3,
+                                                            (index) => const Padding(padding: EdgeInsets.all(3), child: Icon(Icons.star, size: 25, color: Colors.grey)),
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          children: List.generate(
+                                                            3,
+                                                            (index) => InkWell(
+                                                              onTap: () => setState(() {
+                                                                rating = index + 1;
+                                                                question!.listQuestions[indexQuest].rating = rating;
+                                                              }),
+                                                              child: Padding(
+                                                                padding: const EdgeInsets.all(3),
+                                                                child: Icon(Icons.star, size: 25, color: (rating >= index + 1) ? secondary : Colors.grey),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  }),
                                                   const Expanded(child: SizedBox()),
                                                   SizedBox(
                                                     height: 30,
@@ -338,14 +369,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                       }
                                                       setState(() {});
                                                     },
-                                                    icon: const Icon(Icons.edit),
+                                                    icon: const Icon(Icons.edit_outlined),
                                                   ),
                                                   IconButton(
                                                     onPressed: () {
                                                       print(question!.listQuestions[indexQuest]);
                                                       deleteQuestion(indexQuest);
                                                     },
-                                                    icon: const Icon(Icons.delete),
+                                                    icon: const Icon(Icons.delete_outline),
                                                   ),
                                                 ],
                                               )
@@ -372,7 +403,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                 ),
               ),
             )
-          : Center(child: CircularProgressIndicator(color: primary)),
+          : Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
     );
   }
 
@@ -463,6 +494,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                           ? ListView.builder(
                               itemCount: question!.listQuestions.length,
                               itemBuilder: (context, indexQuest) {
+                                int rating = question!.listQuestions[indexQuest].rating;
                                 return Card(
                                   color: Colors.white,
                                   surfaceTintColor: Colors.white,
@@ -473,10 +505,13 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                       children: [
                                         Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Container(
+                                              height: 30,
                                               margin: const EdgeInsets.only(bottom: 10),
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                                              alignment: Alignment.center,
                                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
                                               child: Text(
                                                 formatType(question!.listQuestions[indexQuest].type),
@@ -484,6 +519,34 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                 textAlign: TextAlign.justify,
                                               ),
                                             ),
+                                            const SizedBox(width: 10),
+                                            StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                                              return Stack(
+                                                children: [
+                                                  Row(
+                                                    children: List.generate(
+                                                      3,
+                                                      (index) => const Padding(padding: EdgeInsets.all(3), child: Icon(Icons.star, size: 25, color: Colors.grey)),
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    children: List.generate(
+                                                      3,
+                                                      (index) => InkWell(
+                                                        onTap: () => setState(() {
+                                                          rating = index + 1;
+                                                          question!.listQuestions[indexQuest].rating = rating;
+                                                        }),
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(3),
+                                                          child: Icon(Icons.star, size: 25, color: (rating >= index + 1) ? secondary : Colors.grey),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }),
                                             const Expanded(child: SizedBox()),
                                             SizedBox(
                                               height: 30,
@@ -548,14 +611,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                 }
                                                 setState(() {});
                                               },
-                                              icon: const Icon(Icons.edit),
+                                              icon: const Icon(Icons.edit_outlined),
                                             ),
                                             IconButton(
                                               onPressed: () {
                                                 print(question!.listQuestions[indexQuest]);
                                                 deleteQuestion(indexQuest);
                                               },
-                                              icon: const Icon(Icons.delete),
+                                              icon: const Icon(Icons.delete_outline),
                                             )
                                           ],
                                         ),
@@ -579,7 +642,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                 ),
               ),
             )
-          : Center(child: CircularProgressIndicator(color: primary)),
+          : Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
     );
   }
 }

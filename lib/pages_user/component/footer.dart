@@ -4,13 +4,95 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 Widget footerDesk({required BuildContext context}) => Container(
-    height: 200,
-    width: lebar(context),
-    color: secondaryWhite,
-    child: Row(
-      children: [
-        Expanded(
-          child: Container(
+      height: 200,
+      width: lebar(context),
+      color: secondaryWhite,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SvgPicture.asset('assets/logo1.svg', width: 300, height: 60),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {},
+                        icon: SvgPicture.asset('assets/facebook.svg', width: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () {},
+                        icon: SvgPicture.asset('assets/linkedin.svg', width: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () {},
+                        icon: SvgPicture.asset('assets/youtube.svg', width: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () {},
+                        icon: SvgPicture.asset('assets/instagram.svg', width: 20),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                      TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+Widget footerMo({required BuildContext context}) => Container(
+      height: 400,
+      width: lebar(context),
+      color: secondaryWhite,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
             margin: const EdgeInsets.all(30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,12 +125,10 @@ Widget footerDesk({required BuildContext context}) => Container(
               ],
             ),
           ),
-        ),
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.all(30),
+          Container(
+            margin: const EdgeInsets.all(10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -80,7 +160,6 @@ Widget footerDesk({required BuildContext context}) => Container(
               ],
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );

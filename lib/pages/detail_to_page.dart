@@ -45,7 +45,7 @@ class _DetailToPageState extends State<DetailToPage> {
             height: tinggi(context),
             width: lebar(context),
             color: Colors.white,
-            child: Center(child: CircularProgressIndicator(color: primary)),
+            child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
           ),
       ],
     );
@@ -64,7 +64,7 @@ class _DetailToPageState extends State<DetailToPage> {
 
   void getDataTryOut(String docId) async {
     try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('tryout_v1').doc(docId);
+      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('tryout_v2').doc(docId);
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
       if (docSnapshot.exists) {
         setState(() => tryout = TryoutModel.fromSnapshot(docSnapshot));
@@ -86,6 +86,11 @@ class _DetailToPageState extends State<DetailToPage> {
   String formatTime(DateTime dateTime) {
     final DateFormat formatter = DateFormat('hh:mm a');
     return formatter.format(dateTime);
+  }
+
+  String formatMinutes(double seconds) {
+    double minutes = seconds / 60; // Konversi detik ke menit
+    return minutes.toStringAsFixed(1); // Mengembalikan nilai string dengan 1 angka di belakang koma
   }
 
 //----------------------------------------------------------------
@@ -175,9 +180,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Total Waktu', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -193,7 +198,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.totalTime = int.parse(controller.text));
+                setState(() => tryout!.totalTime = double.parse(controller.text));
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -213,9 +218,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Jumlah Soal', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -284,9 +289,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Jenis Test', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             height: 150,
             width: 500,
@@ -332,9 +337,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Jenis TPS', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             height: 150,
             width: 500,
@@ -386,9 +391,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Jenis Sub Test', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             height: 150,
             width: 500,
@@ -409,7 +414,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     controller: minuteController,
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
-                      labelText: 'Menit',
+                      labelText: 'Detik',
                       labelStyle: TextStyle(color: Colors.black, fontSize: h4),
                     ),
                     style: TextStyle(color: Colors.black, fontSize: h4),
@@ -429,7 +434,7 @@ class _DetailToPageState extends State<DetailToPage> {
             TextButton(
               onPressed: () async {
                 setState(() {
-                  SubtestModel test = SubtestModel(nameSubTest: nameController.text, timeMinute: int.parse(minuteController.text), idQuestions: '');
+                  SubtestModel test = SubtestModel(nameSubTest: nameController.text, timeMinute: double.parse(minuteController.text), idQuestions: '');
                   tryout!.listTest[i].listSubtest.add(test);
                 });
                 Navigator.of(context).pop();
@@ -452,9 +457,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Jenis Sub Test', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             height: 150,
             width: 500,
@@ -474,7 +479,7 @@ class _DetailToPageState extends State<DetailToPage> {
                   controller: minuteController,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    labelText: 'Menit',
+                    labelText: 'Detik',
                     labelStyle: TextStyle(color: Colors.black, fontSize: h4),
                   ),
                   style: TextStyle(color: Colors.black, fontSize: h4),
@@ -494,7 +499,7 @@ class _DetailToPageState extends State<DetailToPage> {
               onPressed: () async {
                 setState(() {
                   tryout!.listTest[i].listSubtest[j].nameSubTest = nameController.text;
-                  tryout!.listTest[i].listSubtest[j].timeMinute = int.parse(minuteController.text);
+                  tryout!.listTest[i].listSubtest[j].timeMinute = double.parse(minuteController.text);
                 });
                 Navigator.of(context).pop();
               },
@@ -517,9 +522,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Deskripsi TryOut', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: SizedBox(
             height: 500,
             width: 500,
@@ -564,9 +569,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Deskripsi TryOut', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: InputDecoration(
@@ -606,9 +611,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Total Waktu', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -646,9 +651,9 @@ class _DetailToPageState extends State<DetailToPage> {
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           title: Text('Masukkan Tryout Code', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(10),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -704,7 +709,7 @@ class _DetailToPageState extends State<DetailToPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              IconButton(onPressed: () => editToName(), icon: const Icon(Icons.edit, color: Colors.black)),
+              IconButton(onPressed: () => editToName(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
             ],
           ),
           actions: [
@@ -754,7 +759,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                       child: CachedNetworkImage(
                                         imageUrl: tryout!.image,
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                         errorWidget: (context, url, error) => const Icon(Icons.error),
                                       ),
                                     ),
@@ -783,7 +788,7 @@ class _DetailToPageState extends State<DetailToPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: Text(tryout!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
-                          IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit, color: Colors.black)),
+                          IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                         ],
                       ),
                     ),
@@ -808,7 +813,7 @@ class _DetailToPageState extends State<DetailToPage> {
                           style: TextStyle(color: Colors.black, fontSize: h4),
                         ),
                         const Expanded(child: SizedBox()),
-                        IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit, color: Colors.black)),
+                        IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                       ],
                     );
                   },
@@ -903,7 +908,7 @@ class _DetailToPageState extends State<DetailToPage> {
                           ),
                         ),
                       ),
-                      IconButton(onPressed: () => mulai(), icon: const Icon(Icons.edit, color: Colors.black)),
+                      IconButton(onPressed: () => mulai(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
                   Container(
@@ -936,7 +941,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       ),
                       IconButton(
                         onPressed: () => berakhir(),
-                        icon: const Icon(Icons.edit, color: Colors.black),
+                        icon: const Icon(Icons.edit_outlined, color: Colors.black),
                       ),
                     ],
                   ),
@@ -1021,7 +1026,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       Text('Tryout Code', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
                       Text(tryout!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
-                      IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit, color: Colors.black)),
+                      IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
                 ],
@@ -1082,8 +1087,8 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
-                      Text('${tryout!.totalTime.toString()} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
-                      IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit, color: Colors.black)),
+                      Text('${formatMinutes(tryout!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
+                      IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
                   Container(
@@ -1097,7 +1102,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       Text('Jumlah Soal', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
                       Text('${tryout!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
-                      IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit, color: Colors.black)),
+                      IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
                 ],
@@ -1134,11 +1139,11 @@ class _DetailToPageState extends State<DetailToPage> {
                           const Expanded(child: SizedBox()),
                           IconButton(
                             onPressed: () => editTest(index: indexTest),
-                            icon: const Icon(Icons.edit, color: Colors.black),
+                            icon: const Icon(Icons.edit_outlined, color: Colors.black),
                           ),
                           IconButton(
                             onPressed: () => deleteTest(indexTest: indexTest),
-                            icon: const Icon(Icons.delete, color: Colors.black),
+                            icon: const Icon(Icons.delete_outline, color: Colors.black),
                           ),
                           IconButton(
                             onPressed: () => addSubtestDialog(i: indexTest),
@@ -1167,6 +1172,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                       margin: const EdgeInsets.symmetric(vertical: 10),
                                     ),
                                     Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         Expanded(
                                           child: Column(
@@ -1180,13 +1186,13 @@ class _DetailToPageState extends State<DetailToPage> {
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
-                                              const SizedBox(height: 10),
                                               Container(
+                                                height: 30,
+                                                width: 150,
                                                 decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(50)),
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                alignment: Alignment.center,
                                                 child: Text(
-                                                  '${tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute} Menit',
-                                                  // 'Dream Academy - Soal $questionLength',
+                                                  '${formatMinutes(tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
                                                   style: TextStyle(color: Colors.white, fontSize: h4),
                                                 ),
                                               ),
@@ -1200,44 +1206,47 @@ class _DetailToPageState extends State<DetailToPage> {
                                               children: [
                                                 IconButton(
                                                   onPressed: () => editSubtestDialog(i: indexTest, j: indexSubtest),
-                                                  icon: const Icon(Icons.edit, color: Colors.black),
+                                                  icon: const Icon(Icons.edit_outlined, color: Colors.black),
                                                 ),
                                                 IconButton(
                                                   onPressed: () => deleteSubtest(indexSubtest: indexSubtest, indexTest: indexTest),
-                                                  icon: const Icon(Icons.delete, color: Colors.black),
+                                                  icon: const Icon(Icons.delete_outline, color: Colors.black),
                                                 ),
                                               ],
                                             ),
-                                            OutlinedButton(
-                                              onPressed: () async {
-                                                setState(() => questionsloading = true);
+                                            SizedBox(
+                                              height: 30,
+                                              child: OutlinedButton(
+                                                onPressed: () async {
+                                                  setState(() => questionsloading = true);
 
-                                                if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
-                                                  await Future.delayed(const Duration(milliseconds: 500));
-                                                  Navigator.push(
-                                                    context,
-                                                    FadeRoute1(
-                                                      QuestionsPage(
-                                                        idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                        subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                  if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
+                                                    await Future.delayed(const Duration(milliseconds: 500));
+                                                    Navigator.push(
+                                                      context,
+                                                      FadeRoute1(
+                                                        QuestionsPage(
+                                                          idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
+                                                          subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
+                                                    );
+                                                  } else {
+                                                    String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
 
-                                                  tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
-                                                  await btnSimpan(context, id);
-                                                }
+                                                    tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
+                                                    await btnSimpan(context, id);
+                                                  }
 
-                                                setState(() => questionsloading = false);
-                                              },
-                                              child: questionsloading
-                                                  ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary))
-                                                  : Text(
-                                                      tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
-                                                      style: TextStyle(color: Colors.black, fontSize: h4),
-                                                    ),
+                                                  setState(() => questionsloading = false);
+                                                },
+                                                child: questionsloading
+                                                    ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary, strokeWidth: 3))
+                                                    : Text(
+                                                        tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
+                                                        style: TextStyle(color: Colors.black, fontSize: h4),
+                                                      ),
+                                              ),
                                             ),
                                           ],
                                         )
@@ -1262,7 +1271,7 @@ class _DetailToPageState extends State<DetailToPage> {
     } else {
       return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator(color: primary)),
+        body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
       );
     }
   }
@@ -1286,7 +1295,7 @@ class _DetailToPageState extends State<DetailToPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              IconButton(onPressed: () => editToName(), icon: const Icon(Icons.edit, color: Colors.black)),
+              IconButton(onPressed: () => editToName(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
             ],
           ),
           actions: [
@@ -1342,7 +1351,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                       child: CachedNetworkImage(
                                         imageUrl: tryout!.image,
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                         errorWidget: (context, url, error) => const Icon(Icons.error),
                                       ),
                                     ),
@@ -1371,7 +1380,7 @@ class _DetailToPageState extends State<DetailToPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: Text(tryout!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
-                          IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit, color: Colors.black)),
+                          IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                         ],
                       ),
                     ),
@@ -1393,7 +1402,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                 style: TextStyle(color: Colors.black, fontSize: h4),
                               ),
                               const Expanded(child: SizedBox()),
-                              IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit, color: Colors.black)),
+                              IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                             ],
                           );
                         },
@@ -1496,7 +1505,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                 ),
                               ),
                             ),
-                            IconButton(onPressed: () => mulai(), icon: const Icon(Icons.edit, color: Colors.black)),
+                            IconButton(onPressed: () => mulai(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                           ],
                         ),
                         Container(
@@ -1529,7 +1538,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             ),
                             IconButton(
                               onPressed: () => berakhir(),
-                              icon: const Icon(Icons.edit, color: Colors.black),
+                              icon: const Icon(Icons.edit_outlined, color: Colors.black),
                             ),
                           ],
                         ),
@@ -1621,7 +1630,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             Text('Tryout Code', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             const Expanded(child: SizedBox()),
                             Text(tryout!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
-                            IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit, color: Colors.black)),
+                            IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                           ],
                         ),
                       ],
@@ -1685,8 +1694,8 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               const Expanded(child: SizedBox()),
-                              Text('${tryout!.totalTime.toString()} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
-                              IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit, color: Colors.black)),
+                              Text('${formatMinutes(tryout!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
+                              IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                             ],
                           ),
                         ),
@@ -1701,7 +1710,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             Text('Jumlah Soal', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             const Expanded(child: SizedBox()),
                             Text('${tryout!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
-                            IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit, color: Colors.black)),
+                            IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                           ],
                         ),
                       ],
@@ -1741,11 +1750,11 @@ class _DetailToPageState extends State<DetailToPage> {
                           const Expanded(child: SizedBox()),
                           IconButton(
                             onPressed: () => editTest(index: indexTest),
-                            icon: const Icon(Icons.edit, color: Colors.black),
+                            icon: const Icon(Icons.edit_outlined, color: Colors.black),
                           ),
                           IconButton(
                             onPressed: () => deleteTest(indexTest: indexTest),
-                            icon: const Icon(Icons.delete, color: Colors.black),
+                            icon: const Icon(Icons.delete_outline, color: Colors.black),
                           ),
                           IconButton(
                             onPressed: () => addSubtestDialog(i: indexTest),
@@ -1764,7 +1773,7 @@ class _DetailToPageState extends State<DetailToPage> {
                               QuestionsModel questions = QuestionsModel(idTryOut: '', listQuestions: []);
 
                               try {
-                                DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v1').doc(docId);
+                                DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v2').doc(docId);
                                 DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
                                 if (docSnapshot.exists) {
                                   questions = QuestionsModel.fromSnapshot(docSnapshot);
@@ -1804,67 +1813,71 @@ class _DetailToPageState extends State<DetailToPage> {
                                             ),
                                             const SizedBox(width: 10),
                                             Container(
+                                              height: 30,
                                               decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(50)),
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                              alignment: Alignment.center,
                                               child: Text(
-                                                '${tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute} Menit',
-                                                // 'Dream Academy - Soal $questionLength',
+                                                '${formatMinutes(tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
                                                 style: TextStyle(color: Colors.white, fontSize: h4),
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          setState(() => questionsloading = true);
+                                      SizedBox(
+                                        height: 30,
+                                        child: OutlinedButton(
+                                          onPressed: () async {
+                                            setState(() => questionsloading = true);
 
-                                          if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
-                                            await Future.delayed(const Duration(milliseconds: 500));
-                                            Navigator.push(
-                                              context,
-                                              FadeRoute1(
-                                                QuestionsPage(
-                                                  idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                  subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                            if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
+                                              await Future.delayed(const Duration(milliseconds: 500));
+                                              Navigator.push(
+                                                context,
+                                                FadeRoute1(
+                                                  QuestionsPage(
+                                                    idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
+                                                    subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          } else {
-                                            String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
+                                              );
+                                            } else {
+                                              String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
 
-                                            tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
-                                            await btnSimpan(context, id);
+                                              tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
+                                              await btnSimpan(context, id);
 
-                                            await Future.delayed(const Duration(milliseconds: 500));
+                                              await Future.delayed(const Duration(milliseconds: 500));
 
-                                            Navigator.push(
-                                              context,
-                                              FadeRoute1(
-                                                QuestionsPage(
-                                                  idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                  subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                              Navigator.push(
+                                                context,
+                                                FadeRoute1(
+                                                  QuestionsPage(
+                                                    idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
+                                                    subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          }
+                                              );
+                                            }
 
-                                          setState(() => questionsloading = false);
-                                        },
-                                        child: questionsloading
-                                            ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary))
-                                            : Text(
-                                                tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
-                                                style: TextStyle(color: Colors.black, fontSize: h4),
-                                              ),
+                                            setState(() => questionsloading = false);
+                                          },
+                                          child: questionsloading
+                                              ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary, strokeWidth: 3))
+                                              : Text(
+                                                  tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
+                                                  style: TextStyle(color: Colors.black, fontSize: h4),
+                                                ),
+                                        ),
                                       ),
                                       IconButton(
                                         onPressed: () => editSubtestDialog(i: indexTest, j: indexSubtest),
-                                        icon: const Icon(Icons.edit, color: Colors.black),
+                                        icon: const Icon(Icons.edit_outlined, color: Colors.black),
                                       ),
                                       IconButton(
                                         onPressed: () => deleteSubtest(indexSubtest: indexSubtest, indexTest: indexTest),
-                                        icon: const Icon(Icons.delete, color: Colors.black),
+                                        icon: const Icon(Icons.delete_outline, color: Colors.black),
                                       ),
                                     ],
                                   ),
@@ -1885,7 +1898,7 @@ class _DetailToPageState extends State<DetailToPage> {
     } else {
       return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator(color: primary)),
+        body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
       );
     }
   }

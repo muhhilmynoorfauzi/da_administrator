@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
-import 'package:da_administrator/pages/example.dart';
+import 'package:da_administrator/example.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
@@ -21,7 +21,7 @@ class TryoutSayaUserPage extends StatefulWidget {
 }
 
 class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
-  var userUid = 'userUID123';
+  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
   TextEditingController foundController = TextEditingController();
 
   // var claimed = false;
@@ -37,8 +37,8 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
+    if (lebar(context) <= 800) {
+      return onMo(context);
     } else {
       return onDesk(context);
     }
@@ -64,7 +64,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     doneTryout = [];
     idDoneTryout = [];
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v1');
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
 
       allTryout = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
@@ -142,7 +142,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary)),
+                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                       errorWidget: (context, url, error) => const Icon(Icons.error),
                     ),
                   ),
@@ -268,6 +268,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
           Container(
             width: double.infinity,
             alignment: Alignment.center,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.only(top: 50),
             child: SizedBox(
               width: 1000,
@@ -300,7 +301,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                       myTryout.length,
                       (index) {
                         var approval = false;
-
                         for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
                           if (myTryout[index].claimedUid[i].userUID == userUid) {
                             approval = myTryout[index].claimedUid[i].approval;
@@ -315,7 +315,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
                           },
                         );
                       },
@@ -329,6 +329,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
           Container(
             width: double.infinity,
             alignment: Alignment.center,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.only(top: 50, bottom: 50),
             child: SizedBox(
               width: 1000,
@@ -376,7 +377,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(docId: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
                           },
                         );
                       },
@@ -393,9 +394,222 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     );
   }
 
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
+  Widget onMo(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
+      body: ListView(
+        children: [
+          Container(
+            height: 500,
+            width: double.infinity,
+            color: primary,
+            alignment: Alignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text('Grafik Nilai Try Out UTBK', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text('Lihat Progresmu disini', style: TextStyle(color: Colors.white, fontSize: h4)),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Container(
+                      width: 1000,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                      child: Row(
+                        children: [
+                          const Expanded(child: _LineChart()),
+                          SizedBox(
+                            width: 150,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text('Jurusan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text('Teknik Informatika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text('Matematika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text('Sasta Inggris', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text('Desain Komunikasi Visual', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          //Tryout Tersedia
+          Container(
+            width: double.infinity,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.only(top: 50, left: 10, right: 10, bottom: 30),
+            child: SizedBox(
+              width: 1000,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('TryOut Belum Selesai', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                      if (myTryout.isNotEmpty)
+                        SizedBox(
+                          height: 30,
+                          child: OutlinedButton.icon(
+                            onPressed: () => selengkapnya(context),
+                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                            iconAlignment: IconAlignment.end,
+                            icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
+                            label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Text('Lihat somua TO kamu milikl korjakan TO nya sokarang!', style: TextStyle(fontSize: h4, color: Colors.black)),
+                  const SizedBox(height: 5),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: List.generate(
+                      myTryout.length,
+                      (index) {
+                        var approval = false;
+                        for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
+                          if (myTryout[index].claimedUid[i].userUID == userUid) {
+                            approval = myTryout[index].claimedUid[i].approval;
+                          }
+                        }
+                        return cardTryout(
+                          imageUrl: myTryout[index].image,
+                          title: myTryout[index].toName,
+                          desk: myTryout[index].desk,
+                          readyOnFree: myTryout[index].showFreeMethod,
+                          claimed: approval,
+                          ended: myTryout[index].ended,
+                          started: myTryout[index].started,
+                          onTap: () {
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          //Tryout Selesai
+          Container(
+            width: double.infinity,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.only(top: 50, left: 10, right: 10, bottom: 50),
+            child: SizedBox(
+              width: 1000,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('TryOut Selesai', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                      if (doneTryout.isNotEmpty)
+                        SizedBox(
+                          height: 30,
+                          child: OutlinedButton.icon(
+                            onPressed: () => selengkapnya(context),
+                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                            iconAlignment: IconAlignment.end,
+                            icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
+                            label: Text('Selengkapnya', style: TextStyle(fontSize: h4, color: primary)),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Text('Lihat semua TryOut yang telah kamu ikuti', style: TextStyle(fontSize: h4, color: Colors.black)),
+                  const SizedBox(height: 5),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: List.generate(
+                      doneTryout.length,
+                      (index) {
+                        var approval = false;
+
+                        for (int i = 0; i < doneTryout[index].claimedUid.length; i++) {
+                          if (doneTryout[index].claimedUid[i].userUID == userUid) {
+                            approval = doneTryout[index].claimedUid[i].approval;
+                          }
+                        }
+                        return cardTryout(
+                          imageUrl: doneTryout[index].image,
+                          title: doneTryout[index].toName,
+                          desk: doneTryout[index].desk,
+                          readyOnFree: doneTryout[index].showFreeMethod,
+                          claimed: approval,
+                          started: doneTryout[index].started,
+                          ended: doneTryout[index].ended,
+                          onTap: () {
+                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          //footer
+          footerMo(context: context)
+        ],
+      ),
     );
   }
 }

@@ -47,11 +47,7 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMobile(context);
-    } else {
-      return onDesk(context);
-    }
+    return onDesk(context);
   }
 
   Widget onDesk(BuildContext context) {
@@ -69,7 +65,9 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
               SizedBox(
                 height: 35,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
+                  },
                   style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 20)),
                   child: Text('Kembali Ke TryOut Saya', style: TextStyle(fontSize: h4, color: Colors.white)),
                 ),
@@ -80,12 +78,6 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
           Center(child: SizedBox(height: 300, width: 300, child: Image.asset(imageVec))),
         ],
       ),
-    );
-  }
-
-  Widget onMobile(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
     );
   }
 }
