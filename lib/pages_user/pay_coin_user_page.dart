@@ -21,7 +21,7 @@ class PayCoinUserPage extends StatefulWidget {
 }
 
 class _PayCoinUserPageState extends State<PayCoinUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,7 @@ class _PayCoinUserPageState extends State<PayCoinUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin = true),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           //tombol kembali
@@ -216,7 +216,7 @@ class _PayCoinUserPageState extends State<PayCoinUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(context: context, ),
       body: ListView(
         children: [
           //tombol kembali

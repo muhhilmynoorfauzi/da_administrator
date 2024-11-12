@@ -17,7 +17,7 @@ class ResultStuffingUserPage extends StatefulWidget {
 }
 
 class _ResultStuffingUserPageState extends State<ResultStuffingUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   String? selected;
 

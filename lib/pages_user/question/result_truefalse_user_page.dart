@@ -19,7 +19,7 @@ class ResultTruefalseUserPage extends StatefulWidget {
 }
 
 class _ResultTruefalseUserPageState extends State<ResultTruefalseUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   String? selected;
 

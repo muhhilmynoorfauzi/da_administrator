@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
 import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/home_user_page.dart';
@@ -12,30 +13,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-// import 'dart:html' as html;
+import 'dart:html' as html;
 import 'package:provider/provider.dart';
-
-void getDataUserTo() async {
-  try {
-    CollectionReference collectionRef = FirebaseFirestore.instance.collection('user_profile_v1');
-    QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-    // allUserTo = querySnapshot.docs.map((doc) => UserToModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-    // idAllUserTo = querySnapshot.docs.map((doc) => doc.id).toList();
-  } catch (e) {
-    print('salah detail_tryout_user_page user tryout: $e');
-  }
-}
 
 AppBar appbarDesk({
   required BuildContext context,
-  required bool isLogin,
   bool homeActive = false,
   bool featureActive = false,
   bool aboutActive = false,
   double elevation = 1,
   VoidCallback? actionProfile,
 }) {
+  void onReload() {
+    // html.window.location.reload();
+  }
+  final profider = Provider.of<CounterProvider>(context, listen: false);
+  bool isLogin = (/*profider.getCurrentUser != null*/true);
   final List<String> action = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return AppBar(
     backgroundColor: Colors.white,
@@ -45,7 +38,7 @@ AppBar appbarDesk({
     leadingWidth: 200,
     toolbarHeight: 40,
     leading: InkWell(
-      // onTap: () => html.window.location.reload(),
+      onTap: () => onReload(),
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       child: SvgPicture.asset('assets/logo1.svg'),
@@ -57,7 +50,7 @@ AppBar appbarDesk({
         child: TextButton(
           style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           onPressed: () {
-            context.read<CounterProvider>().setTitleUserPage('Dream Academy - Home');
+            profider.setTitleUserPage('Dream Academy - Home');
             Navigator.pushReplacement(context, FadeRoute1(const HomeUserPage()));
           },
           child: Text('Home', style: TextStyle(color: homeActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
@@ -76,13 +69,13 @@ AppBar appbarDesk({
           hint: Text('Feature', style: TextStyle(color: featureActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
           onChanged: (String? newValue) {
             if (newValue == 'Bank Soal') {
-              context.read<CounterProvider>().setTitleUserPage('Dream Academy - Bank Soal');
+              profider.setTitleUserPage('Dream Academy - Bank Soal');
               Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
             } else if (newValue == 'TryOut') {
-              context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Dream Academy');
+              profider.setTitleUserPage('Dream Academy - TryOut Dream Academy');
               Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
             } else if (newValue == 'Rekomendasi Belajar') {
-              context.read<CounterProvider>().setTitleUserPage('Dream Academy - Rekomendasi Belajar');
+              profider.setTitleUserPage('Dream Academy - Rekomendasi Belajar');
               Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
             }
           },
@@ -99,7 +92,7 @@ AppBar appbarDesk({
         child: TextButton(
           style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           onPressed: () {
-            context.read<CounterProvider>().setTitleUserPage('Dream Academy - About');
+            profider.setTitleUserPage('Dream Academy - About');
             Navigator.pushReplacement(context, FadeRoute1(const AboutUserPage()));
           },
           child: Text('About', style: TextStyle(color: aboutActive ? Colors.black : Colors.black.withOpacity(.3), fontSize: h4, fontWeight: FontWeight.bold)),
@@ -109,27 +102,22 @@ AppBar appbarDesk({
       isLogin
           ? InkWell(
               onTap: () async {
-                actionProfile!();
-                /*
-                  1. get data user
-                  2. jika collection sudah ada isinya, cari berdasarkan uid yang sudah di collection
-                  3. jika ditemukan yang sesuai dengan uid, masukkan id collection dan data ke parameter NavProfileUserPage
-                  4. jika tidak ditemukan yang sesuai dengan uid, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
-                  3. jika collection belum ada isinya, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
-                */
+                if (actionProfile != null) {
+                  actionProfile();
+                }
                 Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
               },
               borderRadius: BorderRadius.circular(100),
               child: Container(
                 height: 40,
-                width: 130,
+                width: profider.getProfile == null ? 100 : 130,
                 margin: const EdgeInsets.all(3),
                 decoration: BoxDecoration(color: Colors.black.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
                 padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
                 child: Row(
                   children: [
                     const Icon(CupertinoIcons.money_dollar_circle_fill, color: Colors.orange),
-                    Text('120', style: TextStyle(color: Colors.black, fontSize: h4)),
+                    Text((profider.getProfile == null) ? ' 0' : ' ${profider.getProfile!.koin}', style: TextStyle(color: Colors.black, fontSize: h4)),
                     const Expanded(child: SizedBox()),
                     const Icon(CupertinoIcons.person_crop_circle_fill, color: Colors.black),
                   ],
@@ -139,27 +127,20 @@ AppBar appbarDesk({
           : Container(
               height: 50,
               // width: 200,
-              margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(3),
+              // decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(10)),
               child: Row(
                 children: [
                   TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
                     ),
-                    onPressed: () {},
-                    child: Text('Login', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                    ),
-                    onPressed: () {},
-                    child: Text('Register', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.push(context, FadeRoute1(const LoginPage()));
+                    },
+                    child: Text('Login', style: TextStyle(color: Colors.white, fontSize: h4)),
                   ),
                 ],
               ),
@@ -171,10 +152,13 @@ AppBar appbarDesk({
 
 AppBar appbarMo({
   required BuildContext context,
-  required bool isLogin,
   double elevation = 1,
   VoidCallback? actionProfile,
 }) {
+  final profider = Provider.of<CounterProvider>(context, listen: false);
+
+  bool isLogin = (/*profider.getCurrentUser != null*/true);
+
   return AppBar(
     backgroundColor: Colors.white,
     surfaceTintColor: Colors.white,
@@ -183,12 +167,7 @@ AppBar appbarMo({
     leadingWidth: 0,
     leading: const SizedBox(),
     toolbarHeight: 40,
-    title: InkWell(
-      // onTap: () => html.window.location.reload(),
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      child: SvgPicture.asset('assets/logo1.svg', width: 120),
-    ),
+    title: SvgPicture.asset('assets/logo1.svg', width: 120),
     actions: [
       isLogin
           ? InkWell(

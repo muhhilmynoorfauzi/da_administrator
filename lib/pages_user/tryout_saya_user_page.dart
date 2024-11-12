@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/example.dart';
+import 'package:da_administrator/model/user_profile/rationalization_user_model.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
@@ -21,10 +22,11 @@ class TryoutSayaUserPage extends StatefulWidget {
 }
 
 class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
-  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
   TextEditingController foundController = TextEditingController();
 
-  // var claimed = false;
+  List<RationalizationUserModel> rationalUser = [];
+  List<double> onlyValue = [];
 
   List<TryoutModel> allTryout = [];
   List<String> idAllTryout = [];
@@ -37,46 +39,77 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 800) {
-      return onMo(context);
+    if (rationalUser.isNotEmpty) {
+      if (lebar(context) <= 800) {
+        return onMo(context);
+      } else {
+        return onDesk(context);
+      }
     } else {
-      return onDesk(context);
+      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
     }
   }
 
   @override
   void initState() {
-    // TODO: implement initState
-    final profider = Provider.of<CounterProvider>(context, listen: false);
+    // final profider = Provider.of<CounterProvider>(context, listen: false);
     super.initState();
-
+    getDataRational();
     getDataProduct();
-    profider.addListener(() => getDataProduct());
+    /*profider.addListener(() {
+      getDataProduct();
+    });*/
+  }
+
+  void getDataRational() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('rationalization_v2');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: true).get();
+
+      List<RationalizationUserModel> allRationalUser = querySnapshot.docs.map((doc) {
+        return RationalizationUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>);
+      }).toList();
+
+      //mencari yang punya user
+      for (int i = 0; i < allRationalUser.length; i++) {
+        if (allRationalUser[i].userUID == userUid) {
+          if (allRationalUser[i].created.year == DateTime.now().year) {
+            rationalUser.add(allRationalUser[i]);
+          }
+        }
+      }
+
+      for (int i = 0; i < rationalUser.length; i++) {
+        for (int j = 0; j < rationalUser[i].jurusan.length; j++) {
+          onlyValue.add(rationalUser[i].jurusan[j].value);
+        }
+      }
+      setState(() {});
+    } catch (e) {
+      print('salah getDataRational : $e');
+    }
   }
 
   void getDataProduct() async {
-    allTryout = [];
-    idAllTryout = [];
-
-    myTryout = [];
-    idMyTryout = [];
-
-    doneTryout = [];
-    idDoneTryout = [];
     try {
       CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
+      allTryout = [];
+      idAllTryout = [];
+
+      myTryout = [];
+      idMyTryout = [];
+
+      doneTryout = [];
+      idDoneTryout = [];
 
       allTryout = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
       idAllTryout = querySnapshot.docs.map((doc) => doc.id).toList();
 
       for (int i = 0; i < allTryout.length; i++) {
         if (allTryout[i].claimedUid.isNotEmpty) {
-          //jika list data tryout tidak kosong
           for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
-            //jika menemukan di dalam claimedUId ada UID yang sama
             if (allTryout[i].claimedUid[j].userUID == userUid) {
-              //jika fasenya belum selesai
               if (!(allTryout[i].phase)) {
                 myTryout.add(allTryout[i]);
                 idMyTryout.add(idAllTryout[i]);
@@ -88,12 +121,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
           }
         }
       }
-
-      /*if (myTryout.isNotEmpty) {
-        for (int i = 0; i < myTryout.length; i++) {
-          if (myTryout[i].phase) {}
-        }
-      }*/
 
       setState(() {});
     } catch (e) {
@@ -116,6 +143,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     required String desk,
     required bool readyOnFree,
     required bool claimed,
+    required bool phase,
     required VoidCallback onTap,
     required DateTime started,
     required DateTime ended,
@@ -160,18 +188,27 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                       const SizedBox(height: 5),
                       Text(desk, style: TextStyle(fontSize: h4, color: Colors.black), overflow: TextOverflow.ellipsis, maxLines: 3, textAlign: TextAlign.justify),
                       const Expanded(child: SizedBox()),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
-                            decoration: BoxDecoration(color: claimed ? primary : secondary, borderRadius: BorderRadius.circular(50)),
-                            child: Text(
-                              claimed ? 'Joined' : 'Process',
-                              style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                              decoration: BoxDecoration(color: claimed ? primary : secondary, borderRadius: BorderRadius.circular(50)),
+                              child: Text(
+                                claimed ? 'Joined' : 'Process',
+                                style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
                             ),
-                          ),
-                        ],
+                            if (phase)
+                              Container(
+                                margin: const EdgeInsets.only(left: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
+                                decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                child: Text('Tryout Selesai', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.bold, color: Colors.white)),
+                              ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -208,7 +245,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
                     child: Row(
                       children: [
-                        const Expanded(child: _LineChart()),
+                        Expanded(child: _LineChart(rationalUser: rationalUser, onlyValue: onlyValue)),
                         SizedBox(
                           width: 150,
                           child: Column(
@@ -222,7 +259,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                                 children: [
                                   Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
                                   Expanded(
-                                    child: Text('Teknik Informatika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    child: Text(rationalUser.first.jurusan[0].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(height: 30)
                                 ],
@@ -231,7 +268,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                                 children: [
                                   Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
                                   Expanded(
-                                    child: Text('Matematika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    child: Text(rationalUser.first.jurusan[1].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(height: 30)
                                 ],
@@ -240,7 +277,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                                 children: [
                                   Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
                                   Expanded(
-                                    child: Text('Sasta Inggris', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    child: Text(rationalUser.first.jurusan[2].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(height: 30)
                                 ],
@@ -249,7 +286,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                                 children: [
                                   Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
                                   Expanded(
-                                    child: Text('Desain Komunikasi Visual', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    child: Text(rationalUser.first.jurusan[3].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(height: 30)
                                 ],
@@ -264,7 +301,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ],
             ),
           ),
-          //Tryout Tersedia
           Container(
             width: double.infinity,
             alignment: Alignment.center,
@@ -312,6 +348,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           desk: myTryout[index].desk,
                           readyOnFree: myTryout[index].showFreeMethod,
                           claimed: approval,
+                          phase: myTryout[index].phase,
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
@@ -325,7 +362,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ),
             ),
           ),
-          //Tryout Selesai
           Container(
             width: double.infinity,
             alignment: Alignment.center,
@@ -374,6 +410,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           desk: doneTryout[index].desk,
                           readyOnFree: doneTryout[index].showFreeMethod,
                           claimed: approval,
+                          phase: doneTryout[index].phase,
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
@@ -387,7 +424,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ),
             ),
           ),
-          //footer
           footerDesk(context: context),
         ],
       ),
@@ -427,7 +463,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
                       child: Row(
                         children: [
-                          const Expanded(child: _LineChart()),
+                          Expanded(child: _LineChart(rationalUser: rationalUser, onlyValue: onlyValue)),
                           SizedBox(
                             width: 150,
                             child: Column(
@@ -485,7 +521,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ],
             ),
           ),
-          //Tryout Tersedia
           Container(
             width: double.infinity,
             alignment: Alignment.center,
@@ -532,6 +567,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           desk: myTryout[index].desk,
                           readyOnFree: myTryout[index].showFreeMethod,
                           claimed: approval,
+                          phase: myTryout[index].phase,
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
@@ -545,7 +581,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ),
             ),
           ),
-          //Tryout Selesai
           Container(
             width: double.infinity,
             alignment: Alignment.center,
@@ -593,6 +628,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           desk: doneTryout[index].desk,
                           readyOnFree: doneTryout[index].showFreeMethod,
                           claimed: approval,
+                          phase: doneTryout[index].phase,
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
@@ -606,7 +642,6 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
               ),
             ),
           ),
-          //footer
           footerMo(context: context)
         ],
       ),
@@ -614,20 +649,44 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
   }
 }
 
-//chart
-class _LineChart extends StatelessWidget {
-  const _LineChart();
+class _LineChart extends StatefulWidget {
+  const _LineChart({required this.rationalUser, required this.onlyValue});
+
+  final List<RationalizationUserModel> rationalUser;
+  final List<double> onlyValue;
 
   @override
-  Widget build(BuildContext context) => LineChart(
-        sampleData1,
-        duration: const Duration(milliseconds: 200),
-      );
+  State<_LineChart> createState() => _LineChartState();
+}
 
-  LineChartData get sampleData1 => LineChartData(
+class _LineChartState extends State<_LineChart> {
+  List<RationalizationUserModel> rationalUser = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    rationalUser = widget.rationalUser;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (rationalUser.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: LineChart(sampleData1, duration: const Duration(milliseconds: 200)),
+      );
+    } else {
+      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
+    }
+  }
+
+  LineChartData get sampleData1 {
+    double maxNumber = widget.onlyValue.reduce((current, next) => current > next ? current : next);
+    return LineChartData(
         minX: 0,
-        maxX: 13,
-        maxY: 5,
+        maxX: 12 + 1,
+        maxY: maxNumber + 3,
         minY: 0,
         gridData: const FlGridData(show: true),
         lineTouchData: LineTouchData(
@@ -635,16 +694,9 @@ class _LineChart extends StatelessWidget {
           touchTooltipData: LineTouchTooltipData(getTooltipColor: (touchedSpot) => Colors.black.withOpacity(0)),
         ),
         titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 35,
-              interval: 1,
-              getTitlesWidget: bottomTitleWidgets,
-            ),
-          ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true)),
+          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 35, interval: 1, getTitlesWidget: bottomTitleWidgets)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles()),
+          topTitles: const AxisTitles(sideTitles: SideTitles()),
           leftTitles: AxisTitles(sideTitles: SideTitles(getTitlesWidget: leftTitleWidgets, showTitles: true, interval: 1, reservedSize: 40)),
         ),
         borderData: FlBorderData(
@@ -659,48 +711,45 @@ class _LineChart extends StatelessWidget {
         lineBarsData: [
           LineChartBarData(
             isCurved: true,
-            color: Colors.green,
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: true),
-            belowBarData: BarAreaData(show: false),
-            spots: const [
-              FlSpot(1, 1),
-              FlSpot(3, 1.5),
-              FlSpot(5, 1.4),
-              FlSpot(7, 3.4),
-              FlSpot(10, 2),
-              FlSpot(12, 2.2),
-            ],
-          ),
-          LineChartBarData(
-            isCurved: true,
             color: Colors.pink,
             barWidth: 2,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(show: false),
-            spots: const [
-              FlSpot(1, 0),
-              FlSpot(3, 2.8),
-              FlSpot(7, 1.2),
-              FlSpot(10, 2.8),
-              FlSpot(12, 2.6),
-            ],
+            spots: List.generate(
+              rationalUser.length,
+              (index1) {
+                return FlSpot(rationalUser[index1].created.month.toDouble(), rationalUser[index1].jurusan[0].value);
+              },
+            ),
           ),
           LineChartBarData(
             isCurved: true,
-            color: Colors.orangeAccent,
+            color: Colors.green,
             barWidth: 2,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(show: false),
-            spots: const [
-              FlSpot(1, 2.8),
-              FlSpot(3, 1.9),
-              FlSpot(6, 3),
-              FlSpot(10, 1.3),
-            ],
+            spots: List.generate(
+              rationalUser.length,
+              (index1) {
+                return FlSpot(rationalUser[index1].created.month.toDouble(), rationalUser[index1].jurusan[1].value);
+              },
+            ),
+          ),
+          LineChartBarData(
+            isCurved: true,
+            barWidth: 2,
+            color: Colors.orangeAccent,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: true),
+            belowBarData: BarAreaData(show: false),
+            spots: List.generate(
+              rationalUser.length,
+              (index1) {
+                return FlSpot(rationalUser[index1].created.month.toDouble(), rationalUser[index1].jurusan[2].value);
+              },
+            ),
           ),
           LineChartBarData(
             isCurved: true,
@@ -709,71 +758,65 @@ class _LineChart extends StatelessWidget {
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(show: false),
-            spots: const [
-              FlSpot(1, 2),
-              FlSpot(4, 3),
-              FlSpot(7, 2.6),
-              FlSpot(10, 3),
-              FlSpot(12, 3),
-            ],
+            spots: List.generate(
+              rationalUser.length,
+              (index1) {
+                return FlSpot(rationalUser[index1].created.month.toDouble(), rationalUser[index1].jurusan[3].value);
+              },
+            ),
           ),
-        ],
-      );
+        ]);
+  }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
-    String text = '${value}m';
-    return Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), textAlign: TextAlign.center);
+    String text = '$value';
+    return Text(text, style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5), textAlign: TextAlign.center);
   }
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    Widget text;
+    Widget text = Text(value.toDouble().toString(), style: TextStyle(fontSize: h5));
     switch (value.toInt()) {
       case 1:
-        text = const Text('Jan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Jan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 2:
-        text = const Text('Feb', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Feb', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 3:
-        text = const Text('Mar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Mar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 4:
-        text = const Text('Apr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Apr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 5:
-        text = const Text('May', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('May', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 6:
-        text = const Text('Jun', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Jun', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 7:
-        text = const Text('Jul', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Jul', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 8:
-        text = const Text('Aug', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Aug', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 9:
-        text = const Text('Sep', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Sep', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 10:
-        text = const Text('Oct', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Oct', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 11:
-        text = const Text('Nov', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Nov', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       case 12:
-        text = const Text('Dec', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16));
+        text = Text('Dec', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h5));
         break;
       default:
         text = const Text('');
         break;
     }
 
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      // space: 20,
-      // angle: 10,
-      child: text,
-    );
+    return SideTitleWidget(axisSide: meta.axisSide, child: text);
   }
 }

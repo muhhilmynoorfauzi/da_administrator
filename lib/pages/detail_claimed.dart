@@ -22,7 +22,7 @@ class DetailClaimed extends StatefulWidget {
 
 class _DetailClaimedState extends State<DetailClaimed> {
   bool isLoading = false;
-  late List<ClaimedModel> claimedUid;
+  late List<ClaimedModel> listClaimedUid;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +42,16 @@ class _DetailClaimedState extends State<DetailClaimed> {
 
   @override
   void initState() {
-    claimedUid = widget.claimedUid;
+    listClaimedUid = widget.claimedUid;
 
     // TODO: implement initState
     super.initState();
+  }
+
+//----------------------------------------------------------------
+  void deleteClaimed(int index) {
+    listClaimedUid.removeAt(index);
+    setState(() {});
   }
 
 //----------------------------------------------------------------
@@ -71,7 +77,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
       totalTime: tryout!.totalTime,
       numberQuestions: tryout!.numberQuestions,
       listTest: tryout!.listTest,
-      claimedUid: claimedUid,
+      claimedUid: listClaimedUid,
       listPrice: tryout!.listPrice,
     );
     await Future.delayed(const Duration(milliseconds: 500));
@@ -86,7 +92,8 @@ class _DetailClaimedState extends State<DetailClaimed> {
   }
 
   Widget onMo(BuildContext context) {
-    var id = context.watch<CounterProvider>().getIdDetailPage!;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    var id = profider.getIdDetailPage!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -113,7 +120,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
       ),
       body: ListView(
         children: List.generate(
-          claimedUid.length,
+          listClaimedUid.length,
           (index0) => Container(
             height: 250,
             alignment: Alignment.center,
@@ -130,6 +137,16 @@ class _DetailClaimedState extends State<DetailClaimed> {
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: () => deleteClaimed(index0),
+                                label: Text('Hapus User Claimed'.toString(), style: TextStyle(fontSize: h4, color: Colors.black)),
+                                icon: const Icon(Icons.delete, color: Colors.black),
+                              ),
+                            ],
+                          ),
                           SwitchListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Row(
@@ -137,14 +154,14 @@ class _DetailClaimedState extends State<DetailClaimed> {
                               children: [
                                 Text('Setujui Pembelian'.toString(), style: TextStyle(fontSize: h4, color: Colors.black)),
                                 Text(
-                                  claimedUid[index0].approval ? 'Disetujui' : 'Belum\nDisetujui',
+                                  listClaimedUid[index0].approval ? 'Disetujui' : 'Belum\nDisetujui',
                                   style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
-                            value: claimedUid[index0].approval,
-                            onChanged: (bool value) => setState(() => claimedUid[index0].approval = value),
+                            value: listClaimedUid[index0].approval,
+                            onChanged: (bool value) => setState(() => listClaimedUid[index0].approval = value),
                           ),
                           Expanded(
                             child: Row(
@@ -155,7 +172,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
                                   children: [
                                     Text('Name User', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('userUID', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    if (claimedUid[index0].imgFollow != '') Text('Bukti Follow', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                    if (listClaimedUid[index0].imgFollow != '') Text('Bukti Follow', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Metode Pembayaran', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Harga', style: TextStyle(fontSize: h4, color: Colors.black)),
                                     Text('Tanggal pembelian', style: TextStyle(fontSize: h4, color: Colors.black)),
@@ -166,18 +183,18 @@ class _DetailClaimedState extends State<DetailClaimed> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(': ${claimedUid[index0].name}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    Text(': ${claimedUid[index0].userUID}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    if (claimedUid[index0].imgFollow != '')
+                                    Text(': ${listClaimedUid[index0].name}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                                    Text(': ${listClaimedUid[index0].userUID}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                                    if (listClaimedUid[index0].imgFollow != '')
                                       InkWell(
-                                        onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: claimedUid[index0].imgFollow))),
+                                        onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: listClaimedUid[index0].imgFollow))),
                                         child: SizedBox(
                                           height: 60,
                                           width: 60,
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(10),
                                             child: CachedNetworkImage(
-                                              imageUrl: claimedUid[index0].imgFollow,
+                                              imageUrl: listClaimedUid[index0].imgFollow,
                                               fit: BoxFit.cover,
                                               placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeWidth: 3)),
                                               errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -185,12 +202,12 @@ class _DetailClaimedState extends State<DetailClaimed> {
                                           ),
                                         ),
                                       ),
-                                    Text(': ${claimedUid[index0].payment}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                                    Text(': ${listClaimedUid[index0].payment}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                                     Text(
-                                      NumberFormat.currency(locale: 'id', decimalDigits: 0, name: ': Rp ').format(claimedUid[index0].price),
+                                      NumberFormat.currency(locale: 'id', decimalDigits: 0, name: ': Rp ').format(listClaimedUid[index0].price),
                                       style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
                                     ),
-                                    Text(": ${formatDate(claimedUid[index0].created)}", style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                                    Text(": ${formatDate(listClaimedUid[index0].created)}", style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
                                   ],
                                 ),
                               ],

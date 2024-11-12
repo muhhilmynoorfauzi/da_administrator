@@ -5,6 +5,7 @@ class CheckModel {
   List<String> options;
   List<String> trueAnswer;
   String type;
+  String subjectRelevance;
   List<String> yourAnswer;
   List<String?> image;
   int value;
@@ -17,6 +18,7 @@ class CheckModel {
     required this.options,
     required this.trueAnswer,
     required this.type,
+    required this.subjectRelevance,
     required this.yourAnswer,
     required this.image,
     required this.value,
@@ -30,6 +32,7 @@ class CheckModel {
         'options': options,
         'trueAnswer': trueAnswer,
         'type': type,
+        'subjectRelevance': subjectRelevance,
         'yourAnswer': yourAnswer,
         'image': image,
         'value': value,
@@ -43,6 +46,7 @@ class CheckModel {
         options: List<String>.from(json['options']),
         trueAnswer: List<String>.from(json['trueAnswer']),
         type: json['type'],
+        subjectRelevance: json['subjectRelevance'],
         yourAnswer: List<String>.from(json['yourAnswer']),
         image: List<String>.from(json['image']),
         value: json['value'],

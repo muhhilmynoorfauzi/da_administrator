@@ -22,7 +22,7 @@ class RekomendasiUserPage extends StatefulWidget {
 }
 
 class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
-  bool isLogin =true;
+  // bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: true),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           Container(
@@ -101,7 +101,9 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(
+        context: context, 
+      ),
       body: ListView(
         children: [
           Container(
@@ -163,7 +165,7 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
           footerMo(context: context)
         ],
       ),
-      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, featureActive: true),
+      bottomNavigationBar: NavBottomMo(context: context, featureActive: true),
     );
   }
 }

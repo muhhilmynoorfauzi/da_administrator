@@ -15,7 +15,7 @@ class TryoutSelengkapnyaUserPage extends StatefulWidget {
 }
 
 class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage>
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin),
+      appBar: appbarDesk(context: context, featureActive: true, ),
       body: ListView(
         children: [
           //Tryout Tersedia

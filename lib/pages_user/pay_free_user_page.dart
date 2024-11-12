@@ -22,7 +22,7 @@ class PayFreeUserPage extends StatefulWidget {
 }
 
 class _PayFreeUserPageState extends State<PayFreeUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _PayFreeUserPageState extends State<PayFreeUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin = true),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           //tombol kembali
@@ -280,7 +280,7 @@ class _PayFreeUserPageState extends State<PayFreeUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(context: context, ),
       body: ListView(
         children: [
           //tombol kembali

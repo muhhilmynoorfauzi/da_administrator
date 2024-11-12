@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   ScrollController homeController = ScrollController();
 
   bool onLoading = false;
+  bool onLoadingAll = false;
   final List<String> menuOptions = ['Delete'];
   List<TryoutModel>? listTryOut;
   List<String> idListTryOut = [];
@@ -34,10 +35,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 700) {
-      return onMo(context);
+    if (!onLoadingAll) {
+      if (lebar(context) <= 700) {
+        return onMo(context);
+      } else {
+        return onDesk(context);
+      }
     } else {
-      return onDesk(context);
+      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
     }
   }
 
@@ -46,13 +51,11 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
     final profider = Provider.of<CounterProvider>(context, listen: false);
-    profider.addListener(() {
-      getDataProduct();
-    });
-    getDataProduct();
+    profider.addListener(() => getDataTryout());
+    getDataTryout();
   }
 
-  void getDataProduct() async {
+  void getDataTryout() async {
     try {
       CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
@@ -69,7 +72,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget expiredWidget(int id, String title) {
+  Widget categories(int id, String title) {
     bool selected = (id == expiredID);
     return Padding(
       padding: const EdgeInsets.only(right: 5),
@@ -173,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                       started: nowTime,
                       public: false,
                       showFreeMethod: false,
-                      desk: '',
+                      desk: 'Deskripsi',
                       image: img,
                       phase: false,
                       phaseIRT: false,
@@ -181,14 +184,13 @@ class _HomePageState extends State<HomePage> {
                       totalTime: 0.0,
                       numberQuestions: 155,
                       listTest: [
-                        TestModel(nameTest: 'TPS', listSubtest: []),
-                        TestModel(nameTest: 'Tes Literasi', listSubtest: []),
+                        TestModel(nameTest: 'Nama Test', listSubtest: []),
                       ],
                       claimedUid: [],
                       listPrice: [200000, 400000, 700000, 1000000],
                     ),
                   );
-                  getDataProduct();
+                  getDataTryout();
                 }
                 Navigator.of(context).pop();
               },
@@ -219,30 +221,16 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () async {
+                final profider = Provider.of<CounterProvider>(context, listen: false);
                 setState(() => onLoading = true);
                 tryout?.listTest.forEach(
                   (test) => test.listSubtest.where((subTest) => subTest.idQuestions.isNotEmpty).forEach(
                         (subTest) async => await QuestionsService.delete(subTest.idQuestions),
                       ),
                 );
-
-                /*if (tryout!.listTest.isNotEmpty) {
-                  for (var test in tryout!.listTest) {
-                    if (test.listSubtest.isNotEmpty) {
-                      test.listSubtest.forEach(
-                        (subTest) async {
-                          if (subTest.idQuestions.isNotEmpty) {
-                            await QuestionsService.delete(subTest.idQuestions);
-                          }
-                        },
-                      );
-                    }
-                  }
-                }*/
-
                 await TryoutService.delete(id);
                 expiredID = 0;
-                context.read<CounterProvider>().setPage(idPage: null, idDetailPage: null);
+                profider.setPage(idPage: null, idDetailPage: null);
                 setState(() => onLoading = false);
                 Navigator.of(context).pop();
               },
@@ -281,11 +269,19 @@ class _HomePageState extends State<HomePage> {
       );
 
   void refresh() async {
+    setState(() => onLoadingAll = true);
+
+    await Future.delayed(const Duration(milliseconds: 200));
     expiredID = 0;
-    context.read<CounterProvider>().setPage(idPage: null, idDetailPage: null);
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    profider.setPage(idPage: null, idDetailPage: null);
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    setState(() => onLoadingAll = false);
   }
 
   Widget onMo(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -304,14 +300,8 @@ class _HomePageState extends State<HomePage> {
                   floating: true,
                   snap: true,
                   actions: [
-                    IconButton(
-                      onPressed: () => refresh(),
-                      icon: const Icon(Icons.refresh, color: Colors.black),
-                    ),
-                    OutlinedButton(
-                      onPressed: () => logout(),
-                      child: Text('Logout', style: TextStyle(color: Colors.black, fontSize: h4)),
-                    ),
+                    IconButton(onPressed: () => refresh(), icon: const Icon(Icons.refresh, color: Colors.black)),
+                    OutlinedButton(onPressed: () => logout(), child: Text('Logout', style: TextStyle(color: Colors.black, fontSize: h4))),
                     const SizedBox(width: 10),
                   ],
                 ),
@@ -336,11 +326,18 @@ class _HomePageState extends State<HomePage> {
                                     if (index == 0)
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        child: Row(children: [expiredWidget(0, 'All'), expiredWidget(1, 'Expired'), expiredWidget(2, 'Publish'), expiredWidget(3, 'On-Going')]),
+                                        child: Row(
+                                          children: [
+                                            categories(0, 'All'),
+                                            categories(1, 'Expired'),
+                                            categories(2, 'Publish'),
+                                            categories(3, 'On-Going'),
+                                          ],
+                                        ),
                                       ),
                                     Container(
                                       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      height: 90,
+                                      height: 100,
                                       width: double.infinity,
                                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
                                       child: TextButton(
@@ -349,22 +346,51 @@ class _HomePageState extends State<HomePage> {
                                           padding: const EdgeInsets.all(10),
                                         ),
                                         onPressed: () async {
-                                          context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
+                                          profider.setPage(idPage: index, idDetailPage: id);
 
                                           Navigator.push(context, SlideTransition1(const DetailToPage()));
                                         },
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Row(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text(tryOut.toName, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(tryOut.toName, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        if (tryOut.public)
+                                                          Container(
+                                                            margin: const EdgeInsets.only(right: 5),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                            decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                            child: Text('Public', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                          ),
+                                                        if (tryOut.phaseIRT)
+                                                          Container(
+                                                            margin: const EdgeInsets.only(right: 5),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                            decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                            child: Text('IRT', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                          ),
+                                                        if (tryOut.phase)
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                            decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                            child: Text('Selesai', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
                                                 PopupMenuButton<String>(
                                                   onSelected: (String value) async {
                                                     if (value == 'Delete') {
-                                                      context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
+                                                      profider.setPage(idPage: index, idDetailPage: id);
 
                                                       deleteTryout(title: "Hapus ${tryOut.toName}?", id: id);
                                                     }
@@ -378,6 +404,7 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               ],
                                             ),
+                                            const Expanded(child: SizedBox()),
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
@@ -401,9 +428,21 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    child: Row(children: [expiredWidget(0, 'All'), expiredWidget(1, 'Expired'), expiredWidget(2, 'Publish'), expiredWidget(3, 'On-Going')]),
+                                    child: Row(
+                                      children: [
+                                        categories(0, 'All'),
+                                        categories(1, 'Expired'),
+                                        categories(2, 'Publish'),
+                                        categories(3, 'On-Going'),
+                                      ],
+                                    ),
                                   ),
-                                  Text('Tidak ada data TryOut', style: TextStyle(color: Colors.grey, fontSize: h4), textAlign: TextAlign.center),
+                                  Container(
+                                    height: tinggi(context) - 300,
+                                    width: lebar(context),
+                                    alignment: Alignment.center,
+                                    child: Text('Tidak ada data TryOut', style: TextStyle(color: Colors.grey, fontSize: h4), textAlign: TextAlign.center),
+                                  ),
                                 ],
                               ),
                             ),
@@ -439,6 +478,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget onDesk(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     bool onTablet = (lebar(context) >= 700 && lebar(context) <= 1200);
 
     return Scaffold(
@@ -495,16 +535,25 @@ class _HomePageState extends State<HomePage> {
                                           if (index == 0)
                                             Padding(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                              child:
-                                                  Row(children: [expiredWidget(0, 'All'), expiredWidget(1, 'Expired'), expiredWidget(2, 'Publish'), expiredWidget(3, 'On-Going')]),
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Row(
+                                                  children: [
+                                                    categories(0, 'All'),
+                                                    categories(1, 'Expired'),
+                                                    categories(2, 'Publish'),
+                                                    categories(3, 'On-Going'),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           Container(
                                             margin: const EdgeInsets.symmetric(horizontal: 10),
-                                            height: 90,
+                                            height: 100,
                                             width: double.infinity,
                                             decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(10),
-                                              gradient: context.watch<CounterProvider>().getPage == index ? primaryGradient : null,
+                                              gradient: profider.getPage == index ? primaryGradient : null,
                                             ),
                                             child: TextButton(
                                               style: TextButton.styleFrom(
@@ -512,32 +561,61 @@ class _HomePageState extends State<HomePage> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                                               ),
                                               onPressed: () async {
-                                                context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
-                                                if (context.read<CounterProvider>().getPage != null) {
+                                                profider.setPage(idPage: index, idDetailPage: id);
+                                                if (profider.getPage != null) {
                                                   setState(() => onLoading = true);
                                                   await Future.delayed(const Duration(milliseconds: 500));
                                                   setState(() => onLoading = false);
                                                 }
                                               },
                                               child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
                                                   Row(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Text(
-                                                        tryOut.toName,
-                                                        style: TextStyle(
-                                                          color: context.watch<CounterProvider>().getPage == index ? Colors.white : Colors.black,
-                                                          fontSize: h4,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
+                                                      Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            tryOut.toName,
+                                                            style: TextStyle(
+                                                              color: profider.getPage == index ? Colors.white : Colors.black,
+                                                              fontSize: h4,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                            children: [
+                                                              if (tryOut.public)
+                                                                Container(
+                                                                  margin: const EdgeInsets.only(right: 5),
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                                  decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                                  child: Text('Public', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                                ),
+                                                              if (tryOut.phaseIRT)
+                                                                Container(
+                                                                  margin: const EdgeInsets.only(right: 5),
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                                  decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                                  child: Text('IRT', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                                ),
+                                                              if (tryOut.phase)
+                                                                Container(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                                                  decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
+                                                                  child: Text('Selesai', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        ],
                                                       ),
                                                       PopupMenuButton<String>(
                                                         onSelected: (String value) async {
                                                           if (value == "Delete") {
-                                                            context.read<CounterProvider>().setPage(idPage: index, idDetailPage: id);
+                                                            profider.setPage(idPage: index, idDetailPage: id);
 
                                                             deleteTryout(title: "Hapus ${tryOut.toName}?", id: id);
                                                           }
@@ -546,7 +624,7 @@ class _HomePageState extends State<HomePage> {
                                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                                         icon: Icon(
                                                           Icons.more_vert_rounded,
-                                                          color: context.watch<CounterProvider>().getPage == index ? Colors.white : Colors.black,
+                                                          color: profider.getPage == index ? Colors.white : Colors.black,
                                                           size: 20,
                                                         ),
                                                         itemBuilder: (BuildContext context) => menuOptions.map((String option) {
@@ -558,16 +636,17 @@ class _HomePageState extends State<HomePage> {
                                                       ),
                                                     ],
                                                   ),
+                                                  const Expanded(child: SizedBox()),
                                                   Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
                                                       Text(
                                                         '${tryOut.claimedUid.length} member',
-                                                        style: TextStyle(color: context.watch<CounterProvider>().getPage == index ? Colors.white : Colors.black, fontSize: h5),
+                                                        style: TextStyle(color: profider.getPage == index ? Colors.white : Colors.black, fontSize: h5),
                                                       ),
                                                       Text(
                                                         formatDateTime(tryOut.created),
-                                                        style: TextStyle(color: context.watch<CounterProvider>().getPage == index ? Colors.white : Colors.black, fontSize: h5),
+                                                        style: TextStyle(color: profider.getPage == index ? Colors.white : Colors.black, fontSize: h5),
                                                       ),
                                                     ],
                                                   ),
@@ -587,9 +666,24 @@ class _HomePageState extends State<HomePage> {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                          child: Row(children: [expiredWidget(0, 'All'), expiredWidget(1, 'Expired'), expiredWidget(2, 'Publish'), expiredWidget(3, 'On-Going')]),
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                              children: [
+                                                categories(0, 'All'),
+                                                categories(1, 'Expired'),
+                                                categories(2, 'Publish'),
+                                                categories(3, 'On-Going'),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        Text('Tidak ada data TryOut', style: TextStyle(color: Colors.grey, fontSize: h4), textAlign: TextAlign.center),
+                                        Container(
+                                          height: tinggi(context) - 300,
+                                          width: lebar(context),
+                                          alignment: Alignment.center,
+                                          child: Text('Tidak ada data TryOut', style: TextStyle(color: Colors.grey, fontSize: h4), textAlign: TextAlign.center),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -632,7 +726,7 @@ class _HomePageState extends State<HomePage> {
               });
               return Expanded(
                 flex: 6,
-                child: context.read<CounterProvider>().getPage == null
+                child: profider.getPage == null
                     ? Scaffold(
                         backgroundColor: Colors.white,
                         body: Center(

@@ -16,6 +16,7 @@ class PayDoneUserPage extends StatefulWidget {
 }
 
 class _PayDoneUserPageState extends State<PayDoneUserPage> {
+
   int remainingTime = 5; // Durasi awal 5 detik
   Timer? timerRun;
   final imageVec = 'assets/vec3.png';
@@ -34,12 +35,13 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
   }
 
   void startTimer() {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     timerRun = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingTime > 0) {
         setState(() => remainingTime--);
       } else {
         timerRun?.cancel(); // Hentikan timer saat mencapai 0
-        context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Saya');
+        profider.setTitleUserPage('Dream Academy - TryOut Saya');
         Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
       }
     });

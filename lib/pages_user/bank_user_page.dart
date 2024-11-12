@@ -17,8 +17,8 @@ class BankUserPage extends StatefulWidget {
 }
 
 class _BankUserPageState extends State<BankUserPage> {
-  var isLogin=true;
-  
+  // bool isLogin = true;
+
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 700) {
@@ -31,7 +31,7 @@ class _BankUserPageState extends State<BankUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: true),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           Container(
@@ -96,7 +96,9 @@ class _BankUserPageState extends State<BankUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(
+        context: context, 
+      ),
       body: ListView(
         children: [
           Container(
@@ -158,7 +160,7 @@ class _BankUserPageState extends State<BankUserPage> {
           footerMo(context: context),
         ],
       ),
-      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, featureActive: true),
+      bottomNavigationBar: NavBottomMo(context: context, featureActive: true),
     );
   }
 }

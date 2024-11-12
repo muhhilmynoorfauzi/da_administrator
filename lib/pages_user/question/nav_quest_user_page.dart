@@ -98,7 +98,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
       }
       setState(() {});
     } catch (e) {
-      print('salah detail_tryout_user_page user tryout: $e');
+      print('salah nav quest: $e');
     }
   }
 

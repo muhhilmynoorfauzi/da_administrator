@@ -23,7 +23,7 @@ class AboutUserPage extends StatefulWidget {
 }
 
 class _AboutUserPageState extends State<AboutUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +35,14 @@ class _AboutUserPageState extends State<AboutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    bool isLogin = (/*profider.getCurrentUser != null*/true);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, aboutActive: true, isLogin: isLogin),
+      appBar: appbarDesk(
+        context: context,
+        aboutActive: true,
+      ),
       body: ListView(
         children: [
           Container(
@@ -143,9 +148,11 @@ class _AboutUserPageState extends State<AboutUserPage> {
   }
 
   Widget onMo(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    bool isLogin = (/*profider.getCurrentUser != null*/true);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(context: context),
       body: ListView(
         children: [
           Container(
@@ -247,7 +254,7 @@ class _AboutUserPageState extends State<AboutUserPage> {
           footerMo(context: context)
         ],
       ),
-      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, aboutActive: true),
+      bottomNavigationBar: NavBottomMo(context: context, aboutActive: true),
     );
   }
 }

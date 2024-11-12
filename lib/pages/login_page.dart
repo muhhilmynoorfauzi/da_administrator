@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'package:da_administrator/pages/home_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
@@ -25,6 +26,9 @@ class _LoginPageState extends State<LoginPage> {
     return loginDesk(context);
   }
 
+  void onReload(){
+    // html.window.location.reload();
+  }
   Widget loginDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -85,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   } catch (e) {
                     print(e);
                   }
+                  onReload();
                 },
                 child: (isLoading)
                     ? Center(child: Padding(padding: const EdgeInsets.all(5), child: AspectRatio(aspectRatio: 1, child: CircularProgressIndicator(color: primary, strokeWidth: 3))))

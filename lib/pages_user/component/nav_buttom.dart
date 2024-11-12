@@ -11,13 +11,15 @@ import 'package:provider/provider.dart';
 
 Widget NavBottomMo({
   required BuildContext context,
-  required bool isLogin,
   bool homeActive = false,
   bool featureActive = false,
   bool aboutActive = false,
   double elevation = 1,
   VoidCallback? actionProfile,
 }) {
+  final profider = Provider.of<CounterProvider>(context, listen: false);
+  bool isLogin = (/*profider.getCurrentUser != null*/true);
+
   final List<String> action = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return Container(
     height: 60,
@@ -30,7 +32,7 @@ Widget NavBottomMo({
             height: 50,
             child: InkWell(
               onTap: () {
-                context.read<CounterProvider>().setTitleUserPage('Dream Academy - Home');
+                profider.setTitleUserPage('Dream Academy - Home');
                 Navigator.pushReplacement(context, FadeRoute1(const HomeUserPage()));
               },
               child: Column(
@@ -80,13 +82,13 @@ Widget NavBottomMo({
               ),
               onChanged: (String? newValue) {
                 if (newValue == 'Bank Soal') {
-                  context.read<CounterProvider>().setTitleUserPage('Dream Academy - Bank Soal');
+                  profider.setTitleUserPage('Dream Academy - Bank Soal');
                   Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
                 } else if (newValue == 'TryOut') {
-                  context.read<CounterProvider>().setTitleUserPage('Dream Academy - TryOut Dream Academy');
+                  profider.setTitleUserPage('Dream Academy - TryOut Dream Academy');
                   Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage()));
                 } else if (newValue == 'Rekomendasi Belajar') {
-                  context.read<CounterProvider>().setTitleUserPage('Dream Academy - Rekomendasi Belajar');
+                  profider.setTitleUserPage('Dream Academy - Rekomendasi Belajar');
                   Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
                 }
               },
@@ -106,7 +108,7 @@ Widget NavBottomMo({
             height: 50,
             child: InkWell(
               onTap: () {
-                context.read<CounterProvider>().setTitleUserPage('Dream Academy - About');
+                profider.setTitleUserPage('Dream Academy - About');
                 Navigator.pushReplacement(context, FadeRoute1(const AboutUserPage()));
               },
               child: Column(

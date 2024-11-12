@@ -22,7 +22,7 @@ class PayEwalletUserPage extends StatefulWidget {
 }
 
 class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
   var total = 0;
 
   @override
@@ -109,7 +109,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin = true),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           //tombol kembali
@@ -278,7 +278,7 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(context: context, ),
       body: ListView(
         children: [
           //tombol kembali

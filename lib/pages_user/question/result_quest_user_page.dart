@@ -37,9 +37,9 @@ class ResultQuestUserPage extends StatefulWidget {
 }
 
 class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
-  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
 
-  bool isLogin = true;
+  // bool isLogin = true;
   var onLoading = true;
 
   late int userIndex;
@@ -90,7 +90,6 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     allUserTo = widget.allUserTo;
     idUserTo = widget.idUserTo;
     userIndex = widget.userIndex;
-    // allQuestion = widget.allQuestion;
 
     counting();
   }
@@ -103,7 +102,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
         allUserTo[userIndex]!.valuesDiscussion == 0 &&
         allUserTo[userIndex]!.average == 0) {
       if (widget.myTryout.phaseIRT) {
-        // calculateIRT;
+        calculateIRT();
       } else {
         calculateNoIRT();
       }
@@ -111,16 +110,17 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     onLoading = false;
 
     await Future.delayed(const Duration(milliseconds: 300));
-    // onSave();
+    onSave();
     setState(() {});
     return;
   }
 
+  //============================================= NoIRT =============================================
   void calculateNoIRT() {
     int totalScore = 0;
     int totalQuestions = 0;
 
-    print("=============== Nilai setelah di hitung ===============");
+    // print("=============== Nilai setelah di hitung ===============");
     for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
       var test = allUserTo[userIndex]!.listTest[i];
 
@@ -136,9 +136,16 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.toSet().containsAll(question.trueAnswer)) {
               allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
+              if (question.rating == 1) {
+                question.value = 1;
+              } else if (question.rating == 2) {
+                question.value = 1;
+              } else if (question.rating == 3) {
+                question.value = 3;
+              }
+
+              totalScore += question.value;
+              subtestScore += question.value;
             } else {
               allUserTo[userIndex]!.wrongAnswer++;
             }
@@ -147,9 +154,16 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.contains(question.trueAnswer)) {
               allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
+              if (question.rating == 1) {
+                question.value = 1;
+              } else if (question.rating == 2) {
+                question.value = 1;
+              } else if (question.rating == 3) {
+                question.value = 3;
+              }
+
+              totalScore += question.value;
+              subtestScore += question.value;
             } else {
               allUserTo[userIndex]!.wrongAnswer++;
             }
@@ -158,9 +172,16 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.contains(question.trueAnswer)) {
               allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
+              if (question.rating == 1) {
+                question.value = 1;
+              } else if (question.rating == 2) {
+                question.value = 1;
+              } else if (question.rating == 3) {
+                question.value = 3;
+              }
+
+              totalScore += question.value;
+              subtestScore += question.value;
             } else {
               allUserTo[userIndex]!.wrongAnswer++;
             }
@@ -177,28 +198,35 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               }
               if (isCorrect) {
                 allUserTo[userIndex]!.correctAnswer++;
-                question.value = 4;
-                totalScore += question.value ?? 0;
-                subtestScore += question.value ?? 0;
+                if (question.rating == 1) {
+                  question.value = 1;
+                } else if (question.rating == 2) {
+                  question.value = 1;
+                } else if (question.rating == 3) {
+                  question.value = 3;
+                }
+
+                totalScore += question.value;
+                subtestScore += question.value;
               } else {
                 allUserTo[userIndex]!.wrongAnswer++;
               }
             }
           }
         }
-        print('ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
+        // print('ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
         allUserTo[userIndex]!.listTest[i].listSubtest[j].totalSubtest = subtestScore;
       }
     }
 
     allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
-    print("Total Questions: $totalQuestions");
-    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
-    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
-    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
-    print("Average Score: ${allUserTo[userIndex]!.average}");
-
     allUserTo[userIndex]!.valuesDiscussion = totalScore;
+
+    // print("Total Questions: $totalQuestions");
+    // print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    // print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    // print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    // print("Average Score: ${allUserTo[userIndex]!.average}");
 
     //=============== cari peringakat keseluruhan ===============
     List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
@@ -207,7 +235,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     int rank = position != -1 ? position + 1 : -1;
     if (rank != -1) {
       allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: allUserTo.length, tryoutRating: rank));
-      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
+      // print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
     }
 
     //=============== cari peringkat berdasarkan tryout yang diambil ===============
@@ -218,17 +246,18 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
     if (rankTO != -1) {
       allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: filteredList.length, tryoutRating: rankTO));
-      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
+      // print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
     }
   }
 
   //============================================= IRT =============================================
-
   void calculateIRT() {
     int totalScore = 0;
     int totalQuestions = 0;
 
-    print("=============== Nilai setelah di hitung ===============");
+    List<UserToModel?> sameTryoutUsers = allUserTo.where((user) => user!.toName == allUserTo[userIndex]!.toName).toList();
+
+    // print("=============== Nilai setelah di hitung dengan IRT ===============");
     for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
       var test = allUserTo[userIndex]!.listTest[i];
 
@@ -239,74 +268,95 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
         for (int k = 0; k < subtest.listQuestions.length; k++) {
           var question = subtest.listQuestions[k];
           totalQuestions++;
-          if (question is CheckModel) {
-            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
-              allUserTo[userIndex]!.unanswered++;
-            } else if (question.yourAnswer.toSet().containsAll(question.trueAnswer)) {
-              allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
-            } else {
-              allUserTo[userIndex]!.wrongAnswer++;
-            }
-          } else if (question is PgModel) {
-            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
-              allUserTo[userIndex]!.unanswered++;
-            } else if (question.yourAnswer.contains(question.trueAnswer)) {
-              allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
-            } else {
-              allUserTo[userIndex]!.wrongAnswer++;
-            }
-          } else if (question is StuffingModel) {
-            if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
-              allUserTo[userIndex]!.unanswered++;
-            } else if (question.yourAnswer.contains(question.trueAnswer)) {
-              allUserTo[userIndex]!.correctAnswer++;
-              question.value = 4;
-              totalScore += question.value ?? 0;
-              subtestScore += question.value ?? 0;
-            } else {
-              allUserTo[userIndex]!.wrongAnswer++;
-            }
-          } else if (question is TrueFalseModel) {
-            if (question.yourAnswer.isEmpty || question.yourAnswer.first.option == '') {
-              allUserTo[userIndex]!.unanswered++;
-            } else {
-              bool isCorrect = true;
-              for (int l = 0; l < question.trueAnswer.length; l++) {
-                if (question.yourAnswer[l].option != question.trueAnswer[l].option || question.yourAnswer[l].trueAnswer != question.trueAnswer[l].trueAnswer) {
-                  isCorrect = false;
+
+          int correctAnswersCount = 0;
+          for (var user in sameTryoutUsers) {
+            var userQuestion = user!.listTest[i].listSubtest[j].listQuestions[k];
+            bool userCorrect;
+
+            if (userQuestion is CheckModel) {
+              userCorrect = userQuestion.yourAnswer.toSet().containsAll(userQuestion.trueAnswer);
+            } else if (userQuestion is PgModel || userQuestion is StuffingModel) {
+              userCorrect = userQuestion.yourAnswer.contains(userQuestion.trueAnswer);
+            } else if (userQuestion is TrueFalseModel) {
+              userCorrect = true;
+              for (int l = 0; l < userQuestion.trueAnswer.length; l++) {
+                if (userQuestion.yourAnswer[l].option != userQuestion.trueAnswer[l].option || userQuestion.yourAnswer[l].trueAnswer != userQuestion.trueAnswer[l].trueAnswer) {
+                  userCorrect = false;
                   break;
                 }
               }
-              if (isCorrect) {
-                allUserTo[userIndex]!.correctAnswer++;
-                question.value = 4;
-                totalScore += question.value ?? 0;
-                subtestScore += question.value ?? 0;
-              } else {
-                allUserTo[userIndex]!.wrongAnswer++;
+            } else {
+              userCorrect = false;
+            }
+
+            if (userCorrect) correctAnswersCount++;
+          }
+
+          double correctPercentage = correctAnswersCount / sameTryoutUsers.length;
+
+          int questionScore;
+          int difficultyRating;
+
+          if (correctPercentage < 0.2) {
+            difficultyRating = 3;
+            questionScore = 3;
+          } else if (correctPercentage >= 0.2 && correctPercentage <= 0.5) {
+            difficultyRating = 2;
+            questionScore = 2;
+          } else {
+            difficultyRating = 1;
+            questionScore = 1;
+          }
+
+          bool isCorrect;
+          bool isUnanswered = false;
+
+          if (question is CheckModel) {
+            isCorrect = question.yourAnswer.toSet().containsAll(question.trueAnswer);
+            isUnanswered = question.yourAnswer.isEmpty;
+          } else if (question is PgModel || question is StuffingModel) {
+            isUnanswered = question.yourAnswer.isEmpty;
+            isCorrect = question.yourAnswer.contains(question.trueAnswer);
+          } else if (question is TrueFalseModel) {
+            isUnanswered = question.yourAnswer.isEmpty;
+            isCorrect = true;
+            for (int l = 0; l < question.trueAnswer.length; l++) {
+              if (question.yourAnswer[l].option != question.trueAnswer[l].option || question.yourAnswer[l].trueAnswer != question.trueAnswer[l].trueAnswer) {
+                isCorrect = false;
+                break;
               }
             }
+          } else {
+            isCorrect = false;
+          }
+
+          if (isUnanswered) {
+            allUserTo[userIndex]!.unanswered++;
+          } else if (isCorrect) {
+            allUserTo[userIndex]!.correctAnswer++;
+            question.value = questionScore;
+            question.rating = difficultyRating;
+            totalScore += questionScore;
+            subtestScore += questionScore;
+          } else {
+            allUserTo[userIndex]!.wrongAnswer++;
           }
         }
-        print('ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
+
+        // print('Ini nilai total dari ${test.nameTest} subtest ${subtest.nameSubTest} = $subtestScore');
         allUserTo[userIndex]!.listTest[i].listSubtest[j].totalSubtest = subtestScore;
       }
     }
 
     allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
-    print("Total Questions: $totalQuestions");
-    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
-    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
-    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
-    print("Average Score: ${allUserTo[userIndex]!.average}");
-
     allUserTo[userIndex]!.valuesDiscussion = totalScore;
+
+    // print("Total Questions: $totalQuestions");
+    // print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    // print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    // print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    // print("Average Score: ${allUserTo[userIndex]!.average}");
 
     //=============== cari peringakat keseluruhan ===============
     List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
@@ -315,7 +365,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     int rank = position != -1 ? position + 1 : -1;
     if (rank != -1) {
       allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: allUserTo.length, tryoutRating: rank));
-      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
+      // print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rank dari keseluruhan user");
     }
 
     //=============== cari peringkat berdasarkan tryout yang diambil ===============
@@ -326,7 +376,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
     if (rankTO != -1) {
       allUserTo[userIndex]!.leaderBoard.add(LeaderBoardModel(overallRating: filteredList.length, tryoutRating: rankTO));
-      print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
+      // print("User dengan userUID = ${allUserTo[userIndex]!.userUID} berada di peringkat ke: $rankTO di tryout ${allUserTo[userIndex]!.toName}");
     }
   }
 
@@ -375,7 +425,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, isLogin: true),
+      appBar: appbarDesk(context: context),
       body: Row(
         children: [
           SizedBox(height: tinggi(context), width: lebar(context) <= 1100 ? 300 : 500, child: sideInfo(context)),
@@ -387,7 +437,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
   Widget onMo(BuildContext context) => Scaffold(
         backgroundColor: Colors.white,
-        appBar: appbarMo(context: context, isLogin: isLogin),
+        appBar: appbarMo(context: context, ),
         body: sideInfo(context),
       );
 
@@ -504,7 +554,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                       children: [
                         Text('Peringkat Keseluruhan', style: TextStyle(fontSize: h5 + 2, color: Colors.black), textAlign: TextAlign.start),
                         Text(
-                          '100/${allUserTo[userIndex]!.leaderBoard[0].overallRating} peserta',
+                          '${allUserTo[userIndex]!.leaderBoard[0].tryoutRating}/${allUserTo[userIndex]!.leaderBoard[0].overallRating} peserta',
                           style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.end,
                         ),
@@ -516,7 +566,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                       children: [
                         Text('Peringkat Tryout', style: TextStyle(fontSize: h5 + 2, color: Colors.black), textAlign: TextAlign.start),
                         Text(
-                          '100/${allUserTo[userIndex]!.leaderBoard[1].overallRating} peserta',
+                          '${allUserTo[userIndex]!.leaderBoard[1].tryoutRating}/${allUserTo[userIndex]!.leaderBoard[1].overallRating} peserta',
                           style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.end,
                         ),
@@ -693,8 +743,8 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                                                       color: Colors.white,
                                                     ),
                                                     child: Icon(
-                                                      (question.value != 4) ? Icons.cancel : Icons.check_circle_rounded,
-                                                      color: (question.value != 4) ? secondary : primary,
+                                                      (question.value != 0) ? Icons.check_circle_rounded : Icons.cancel,
+                                                      color: (question.value != 0) ? primary : secondary,
                                                       size: 20,
                                                     ),
                                                   ),

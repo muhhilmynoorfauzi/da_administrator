@@ -17,7 +17,7 @@ class ResultCheckUserPage extends StatefulWidget {
 }
 
 class _ResultCheckUserPageState extends State<ResultCheckUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   late List<String> listJawaban;
   late YoutubePlayerController _controller;

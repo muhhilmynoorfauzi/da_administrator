@@ -1,3 +1,4 @@
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -30,7 +31,6 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
 
   void setCurrentUser(User? user) {
     _currentUser = user;
-    notifyListeners();
   }
 
 //-------------------------------------------------
@@ -77,36 +77,17 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
     _titleUserPage = value;
     notifyListeners();
   }
-/*
-
 //-------------------------------------------------
-  int _sizeCup = 1;
 
-  int get sizeCup => _sizeCup;
+  ProfileUserModel? _profile;
 
-  void setSizeCup({int index = 0}) {
-    _sizeCup = index;
-    notifyListeners();
+  ProfileUserModel? get getProfile => _profile;
+
+  void setProfile(ProfileUserModel? profile) {
+    _profile = profile;
   }
-*/
-//-------------------------------------------------
-/*bool _isLogin = false;
 
-  bool get getLogin => _isLogin;
-
-  void setLogin(bool value) {
-    _isLogin = value;
-    notifyListeners();
-  }*/
-//-------------------------------------------------
-/*String? _uid;
-
-  String? get getUID => _uid;
-
-  void setUID(String? value) {
-    _uid = value;
-    notifyListeners();
-  }*/
+// final profider = Provider.of<CounterProvider>(context, listen: false);
 // context.watch<CounterProvider>().isLight
 // context.read<CounterProvider>().setUID()
 }

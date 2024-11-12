@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/firebase_service/profile_user_service.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages/detail_claimed.dart';
 import 'package:da_administrator/example.dart';
 import 'package:da_administrator/pages/home_page.dart';
@@ -44,23 +47,79 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   User? currentUser;
+  String userUid = 'z';
+  ProfileUserModel? profile;
 
   @override
   void initState() {
     super.initState();
-    _checkCurrentUser();
+
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+
+    checkCurrentUser();
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       currentUser = user;
+      profider.setCurrentUser(user);
+      profider.setProfile(profile);
+      profider.setReload();
       if (currentUser != null) {
-        context.read<CounterProvider>().setCurrentUser(user);
+        getDataProfile();
       }
       setState(() {});
     });
   }
 
-  void _checkCurrentUser() {
+  void checkCurrentUser() {
     final user = FirebaseAuth.instance.currentUser;
     setState(() => currentUser = user);
+  }
+
+  Future<void> getDataProfile() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v2');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      List<ProfileUserModel> allProfile = querySnapshot.docs.map((doc) => ProfileUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      bool userFound = false;
+      // List<String> idAllProfile = querySnapshot.docs.map((doc) => doc.id).toList();
+
+      for (int i = 0; i < allProfile.length; i++) {
+        if (allProfile[i].userUID == currentUser!.uid) {
+          profile = allProfile[i];
+          userFound = true;
+          setState(() {});
+          return;
+        }
+      }
+      if (!userFound) {
+        await ProfileUserService.add(
+          ProfileUserModel(
+            userUID: userUid,
+            imageProfile: '',
+            userName: 'Muh Hilmy Noor Fauzi',
+            uniqueUserName: 'muhhilmynoorfauzi',
+            asalSekolah: 'MAN',
+            listPlan: [
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+            ],
+            email: 'fauzizaelano@gmail.com',
+            role: 'user',
+            koin: 0,
+            kontak: '082195012789',
+            motivasi: '-',
+            tempatTinggal: 'Makassar',
+            created: DateTime.now(),
+            update: DateTime.now(),
+          ),
+        );
+        getDataProfile();
+      }
+    } catch (e) {
+      print('salah getDataProfile: $e');
+    }
   }
 
   @override
@@ -95,25 +154,11 @@ class _MyAppState extends State<MyApp> {
                 return const HomeUserPage();
               }
             } else {
-              // return const Rating();
+              // return const Example();
               // return const HomePage();
               return const HomeUserPage();
               // return const TryoutUserPage(idPage: 0);
-              // return const WaitingUserPage(second: 10, isLast: true, idUserTo: 'widget.idUserTo');
-              // return const CountdownTimer(timeSecond: 600);
-              // return const NavProfileUserPage();
-              // return const AboutUserPage();
-              // return const NavQuestUserPage(minutes: 30);
-              // return const DetailMytryoutUserPage();
-              // return const DetailTryoutUserPage();
-              // return const PayDoneUserPage(second: 100);
-              // return const PayFreeUserPage();
-              // return const PayCoinUserPage();
-              // return const PayEwalletUserPage();
-              // return const AutoScrollListView();
-              // return const DetailClaimed();
-              // return const ShowImagePage();
-              // return const HomePage();
+              // return const NavProfileUserPage(idPage: 1);
               // return const LoginPage();
             }
           },

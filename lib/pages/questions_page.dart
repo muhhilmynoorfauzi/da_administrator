@@ -13,6 +13,8 @@ import 'package:da_administrator/service/component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
+import '../model/other/other_model.dart';
+
 class QuestionsPage extends StatefulWidget {
   final String idQuestion;
   final String subTest;
@@ -27,11 +29,12 @@ QuestionsModel? question;
 
 class _QuestionsPageState extends State<QuestionsPage> {
   bool isLoading = false;
+  OtherModel? otherModel;
 
   @override
   Widget build(BuildContext context) {
     contextF = context;
-    var page = (lebar(context) <= 800) ? onMo(context) : onDesk(context);
+    var page = (lebar(context) <= 700) ? onMo(context) : onDesk(context);
     return Stack(
       children: [
         page,
@@ -52,6 +55,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
     // TODO: implement initState
     super.initState();
     getDataTryOut(widget.idQuestion);
+    getDataOther();
   }
 
   void getDataTryOut(String docId) async {
@@ -66,6 +70,21 @@ class _QuestionsPageState extends State<QuestionsPage> {
       }
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  void getDataOther() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('other_v2');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      var listAll = querySnapshot.docs.map((doc) => OtherModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      var idListAll = querySnapshot.docs.map((doc) => doc.id).toList();
+      otherModel = listAll.first;
+
+      setState(() {});
+    } catch (e) {
+      print('salah home_page: $e');
     }
   }
 
@@ -341,8 +360,47 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                   sharedConfigurations: const QuillSharedConfigurations(locale: Locale('id')),
                                                 ),
                                               ),
+                                              if (otherModel != null)
+                                                SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: Container(
+                                                    height: 40,
+                                                    margin: const EdgeInsets.only(top: 10),
+                                                    decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(50)),
+                                                    child: DropdownButton<String>(
+                                                      dropdownColor: Colors.white,
+                                                      focusColor: Colors.white,
+                                                      borderRadius: BorderRadius.circular(10),
+                                                      value: _selectedOption,
+                                                      padding: const EdgeInsets.only(left: 20, right: 10),
+                                                      hint: Text(
+                                                        (question!.listQuestions[indexQuest].subjectRelevance != '')
+                                                            ? question!.listQuestions[indexQuest].subjectRelevance
+                                                            : 'Pilih Mapel Terkait',
+                                                        style: TextStyle(color: Colors.black, fontSize: h4),
+                                                      ),
+                                                      icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black),
+                                                      underline: const SizedBox(),
+                                                      items: otherModel!.subjectRelevance.map((String value) {
+                                                        return DropdownMenuItem<String>(
+                                                          value: value,
+                                                          child: Text(value, style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                        );
+                                                      }).toList(),
+                                                      onChanged: (String? newValue) async {
+                                                        if (newValue != null) {
+                                                          if (question!.listQuestions[indexQuest].subjectRelevance == '') {
+                                                            question!.listQuestions[indexQuest].subjectRelevance = newValue;
+                                                          } else {
+                                                            question!.listQuestions[indexQuest].subjectRelevance = '';
+                                                          }
+                                                          setState(() {});
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.end,
                                                 children: [
                                                   IconButton(
                                                     onPressed: () async {
@@ -585,7 +643,47 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.end,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
+                                            //
+                                            if (otherModel != null)
+                                              Container(
+                                                height: 40,
+                                                margin: const EdgeInsets.only(top: 10),
+                                                decoration: BoxDecoration(border: Border.all(color: Colors.grey, width: 1), borderRadius: BorderRadius.circular(50)),
+                                                child: DropdownButton<String>(
+                                                  dropdownColor: Colors.white,
+                                                  focusColor: Colors.white,
+                                                  borderRadius: BorderRadius.circular(10),
+                                                  value: _selectedOption,
+                                                  padding: const EdgeInsets.only(left: 20, right: 10),
+                                                  hint: Text(
+                                                    (question!.listQuestions[indexQuest].subjectRelevance != '')
+                                                        ? question!.listQuestions[indexQuest].subjectRelevance
+                                                        : 'Pilih Mapel Terkait',
+                                                    style: TextStyle(color: Colors.black, fontSize: h4),
+                                                  ),
+                                                  icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black),
+                                                  underline: const SizedBox(),
+                                                  items: otherModel!.subjectRelevance.map((String value) {
+                                                    return DropdownMenuItem<String>(
+                                                      value: value,
+                                                      child: Text(value, style: TextStyle(color: Colors.black, fontSize: h4)),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (String? newValue) async {
+                                                    if (newValue != null) {
+                                                      if (question!.listQuestions[indexQuest].subjectRelevance == '') {
+                                                        question!.listQuestions[indexQuest].subjectRelevance = newValue;
+                                                      } else {
+                                                        question!.listQuestions[indexQuest].subjectRelevance = '';
+                                                      }
+                                                      setState(() {});
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            const Expanded(child: SizedBox()),
                                             IconButton(
                                               onPressed: () async {
                                                 if (lebar(context) <= 700) {
@@ -619,7 +717,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                 deleteQuestion(indexQuest);
                                               },
                                               icon: const Icon(Icons.delete_outline),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],

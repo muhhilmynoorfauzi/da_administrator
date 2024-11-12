@@ -19,7 +19,7 @@ class ResultPgUserPage extends StatefulWidget {
 }
 
 class _ResultPgUserPageState extends State<ResultPgUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
 
   String? selected;
 

@@ -22,7 +22,7 @@ class TryoutPublicUserPage extends StatefulWidget {
 }
 
 class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
-  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
   TextEditingController foundController = TextEditingController();
   List<TryoutModel> allTryout = [];
   List<String> idAllTryout = [];
@@ -48,10 +48,8 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
   @override
   void initState() {
     // TODO: implement initState
-    final profider = Provider.of<CounterProvider>(context, listen: false);
     super.initState();
 
-    profider.addListener(() => getDataProduct());
     getDataProduct();
   }
 

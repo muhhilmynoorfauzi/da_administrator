@@ -56,9 +56,6 @@ class _DetailToPageState extends State<DetailToPage> {
     super.initState();
 
     final profider = Provider.of<CounterProvider>(context, listen: false);
-    /*profider.addListener(() {
-      getDataTryOut(profider.getIdDetailPage!);
-    });*/
     getDataTryOut(profider.getIdDetailPage!);
   }
 
@@ -116,7 +113,7 @@ class _DetailToPageState extends State<DetailToPage> {
     if (kIsWeb) {
       // Pada platform web, gunakan bytes untuk mengupload berkas
       final bytes = pickedFileTO!.bytes!;
-      final ref = FirebaseStorage.instance.ref().child('question/${pickedFileTO?.name}');
+      final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileTO?.name}');
       uploadTaskTO = ref.putData(bytes);
 
       final snapshot = await uploadTaskTO!.whenComplete(() {});
@@ -682,8 +679,8 @@ class _DetailToPageState extends State<DetailToPage> {
 //----------------------------------------------------------------
 
   Widget onMo(BuildContext context) {
-    var id = context.watch<CounterProvider>().getIdDetailPage!;
-    // bool smallDevice = lebar(context) <= 700;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    var id = profider.getIdDetailPage!;
 
     if (tryout != null) {
       return Scaffold(
@@ -694,7 +691,7 @@ class _DetailToPageState extends State<DetailToPage> {
           shadowColor: Colors.black,
           leading: IconButton(
             onPressed: () {
-              // context.read<CounterProvider>().setPage(idPage: null, idDetailPage: null);
+              // profider.setPage(idPage: null, idDetailPage: null);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
@@ -714,7 +711,7 @@ class _DetailToPageState extends State<DetailToPage> {
           ),
           actions: [
             IconButton(
-              onPressed: () => context.read<CounterProvider>().setReload(),
+              onPressed: () => profider.setReload(),
               icon: const Icon(Icons.close, color: Colors.black),
             ),
             IconButton(
@@ -1277,7 +1274,8 @@ class _DetailToPageState extends State<DetailToPage> {
   }
 
   Widget onDesk(BuildContext context) {
-    var id = context.watch<CounterProvider>().getIdDetailPage!;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    var id = profider.getIdDetailPage!;
 
     if (tryout != null) {
       return Scaffold(
@@ -1301,7 +1299,7 @@ class _DetailToPageState extends State<DetailToPage> {
           actions: [
             TextButton.icon(
               style: TextButton.styleFrom(backgroundColor: Colors.grey, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              onPressed: () => context.read<CounterProvider>().setReload(),
+              onPressed: () => profider.setReload(),
               label: Text('Batal', style: TextStyle(color: Colors.white, fontSize: h4)),
               icon: const Icon(Icons.close, color: Colors.white, size: 20),
             ),
@@ -1768,28 +1766,8 @@ class _DetailToPageState extends State<DetailToPage> {
                           (indexSubtest) {
                             bool questionsloading = false;
 
-                            /*int questionLength = 0;
-                            void getLength(String docId) async {
-                              QuestionsModel questions = QuestionsModel(idTryOut: '', listQuestions: []);
-
-                              try {
-                                DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v2').doc(docId);
-                                DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-                                if (docSnapshot.exists) {
-                                  questions = QuestionsModel.fromSnapshot(docSnapshot);
-                                  setState(() => questionLength = questions.listQuestions.length);
-                                }
-                              } catch (e) {
-                                print('Error ini we: $e');
-                              }
-                            }*/
-
                             return StatefulBuilder(
                               builder: (BuildContext context, StateSetter setState) {
-                                /*if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
-                                  getLength(tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions);
-                                }*/
-
                                 return Container(
                                   width: double.infinity,
                                   alignment: Alignment.center,
@@ -1847,18 +1825,6 @@ class _DetailToPageState extends State<DetailToPage> {
 
                                               tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
                                               await btnSimpan(context, id);
-
-                                              await Future.delayed(const Duration(milliseconds: 500));
-
-                                              Navigator.push(
-                                                context,
-                                                FadeRoute1(
-                                                  QuestionsPage(
-                                                    idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                    subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
-                                                  ),
-                                                ),
-                                              );
                                             }
 
                                             setState(() => questionsloading = false);

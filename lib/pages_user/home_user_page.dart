@@ -26,7 +26,7 @@ class HomeUserPage extends StatefulWidget {
 }
 
 class _HomeUserPageState extends State<HomeUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
   late YoutubePlayerController youtubeController;
 
   final ScrollController scrollController1 = ScrollController();
@@ -93,25 +93,14 @@ class _HomeUserPageState extends State<HomeUserPage> {
     // html.window.open('https://wa.me/+62$contact', '_blank');
   }
 
-  /*Future<void> toBankPage() async {
-    await Navigator.pushReplacement(context, FadeRoute1(const BankUserPage()));
-  }
-
-  Future<void> toTryoutPage() async {
-    await Navigator.pushReplacement(context, FadeRoute1(const TryoutUserPage(idPage: 0)));
-  }
-
-  Future<void> toRekPage() async {
-    await Navigator.pushReplacement(context, FadeRoute1(const RekomendasiUserPage()));
-  }*/
-
   Widget onDesk(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    bool isLogin = (/*profider.getCurrentUser != null*/true);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarDesk(
         context: context,
         homeActive: true,
-        isLogin: isLogin,
         actionProfile: () {
           youtubeController.pause();
         },
@@ -516,9 +505,11 @@ class _HomeUserPageState extends State<HomeUserPage> {
   }
 
   Widget onMo(BuildContext context) {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    bool isLogin = (/*profider.getCurrentUser != null*/true);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(context: context, ),
       floatingActionButton: SizedBox(
         width: 50,
         height: 50,
@@ -926,7 +917,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
           ),
         ],
       ),
-      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, homeActive: true),
+      bottomNavigationBar: NavBottomMo(context: context,homeActive: true),
     );
   }
 }

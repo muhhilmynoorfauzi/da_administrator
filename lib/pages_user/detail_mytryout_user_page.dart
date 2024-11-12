@@ -1,8 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/firebase_service/profile_user_service.dart';
 import 'package:da_administrator/firebase_service/user_to_service.dart';
+import 'package:da_administrator/model/jurusan/univ_model.dart';
 import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
+import 'package:da_administrator/model/user_to/rationalization_model.dart';
 import 'package:da_administrator/model/user_to/user_subtest_model.dart';
 import 'package:da_administrator/model/user_to/user_test_model.dart';
 import 'package:da_administrator/model/user_to/user_to_model.dart';
@@ -13,8 +17,10 @@ import 'package:da_administrator/pages_user/question/result_quest_user_page.dart
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/show_image_page.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class DetailMytryoutUserPage extends StatefulWidget {
   final String idTryOut;
@@ -28,8 +34,8 @@ class DetailMytryoutUserPage extends StatefulWidget {
 }
 
 class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
-  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
-  bool isLogin = true;
+  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  ProfileUserModel? profile;
 
   List<QuestionsModel> allQuestion = [];
   List<String> idAllQuestion = [];
@@ -52,6 +58,11 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    profile = profider.getProfile;
+    if (profider.getProfile == null) {
+      getDataProfile();
+    }
     getDataQuestion();
     getDataUserTo();
   }
@@ -116,8 +127,60 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
 
       setState(() {});
     } catch (e) {
-      print('salah detail_tryout_user_page user tryout: $e');
+      print('salah detail_mytryout : $e');
     }
+  }
+
+  void getDataProfile() async {
+    profile = null;
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v2');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      List<ProfileUserModel> allProfile = querySnapshot.docs.map((doc) => ProfileUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      bool userFound = false;
+
+      for (int i = 0; i < allProfile.length; i++) {
+        if (allProfile[i].userUID == userUid) {
+          print('User Ditemukan');
+          profile = allProfile[i];
+          userFound = true;
+
+          setState(() {});
+          return;
+        }
+      }
+      if (!userFound) {
+        await ProfileUserService.add(
+          ProfileUserModel(
+            userUID: userUid,
+            imageProfile: '',
+            userName: 'Muh Hilmy Noor Fauzi',
+            uniqueUserName: 'muhhilmynoorfauzi',
+            asalSekolah: 'MAN',
+            listPlan: [
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+              PlanOptions(universitas: '', jurusan: ''),
+            ],
+            email: 'fauzizaelano@gmail.com',
+            role: 'user',
+            koin: 0,
+            kontak: '082195012789',
+            motivasi: '-',
+            tempatTinggal: 'Makassar',
+            created: DateTime.now(),
+            update: DateTime.now(),
+          ),
+        );
+
+        getDataProfile();
+      }
+    } catch (e) {
+      print('salah getDataProfile: $e');
+    }
+    setState(() {});
   }
 
   Future<void> onPressMulai(BuildContext context) async {
@@ -134,29 +197,39 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
       endWork: DateTime(0),
       created: DateTime.now(),
       leaderBoard: [],
-      rationalization: [],
+      rationalization: [
+        RationalizationModel(value: 0, jurusan: profile!.listPlan[0].jurusan, universitas: profile!.listPlan[0].universitas),
+        RationalizationModel(value: 0, jurusan: profile!.listPlan[1].jurusan, universitas: profile!.listPlan[1].universitas),
+        RationalizationModel(value: 0, jurusan: profile!.listPlan[2].jurusan, universitas: profile!.listPlan[2].universitas),
+        RationalizationModel(value: 0, jurusan: profile!.listPlan[3].jurusan, universitas: profile!.listPlan[3].universitas),
+      ],
       listTest: listTest,
     );
     if (allUserTo.isNotEmpty) {
+      bool isFound = false;
+      String id = '';
       for (int i = 0; i < allUserTo.length; i++) {
         if (allUserTo[i].userUID == userUid) {
+          isFound = true;
+          id = idAllUserTo[i];
           print('sudah ada');
-          Navigator.pushAndRemoveUntil(
-            context,
-            FadeRoute1(NavQuestUserPage(idUserTo: idAllUserTo[i])),
-            (Route<dynamic> route) => false,
-          );
-          return;
-        } else {
-          print('sudah ada uid tapi bukan punya dia');
-          String idUserToModel = await UserToService.addGetId(userToModel);
-          Navigator.pushAndRemoveUntil(
-            context,
-            FadeRoute1(NavQuestUserPage(idUserTo: idUserToModel)),
-            (Route<dynamic> route) => false,
-          );
           return;
         }
+      }
+      if (isFound) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          FadeRoute1(NavQuestUserPage(idUserTo: id)),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        print('sudah ada tapi bukan punya dia');
+        String idUserToModel = await UserToService.addGetId(userToModel);
+        Navigator.pushAndRemoveUntil(
+          context,
+          FadeRoute1(NavQuestUserPage(idUserTo: idUserToModel)),
+          (Route<dynamic> route) => false,
+        );
       }
     } else {
       print('belum ada list, userTO masih kosong');
@@ -198,7 +271,10 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin),
+      appBar: appbarDesk(
+        context: context,
+        featureActive: true,
+      ),
       body: ListView(
         children: [
           //tombol kembali
@@ -520,7 +596,9 @@ class _DetailMytryoutUserPageState extends State<DetailMytryoutUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(
+        context: context,
+      ),
       body: ListView(
         children: [
           //tombol kembali

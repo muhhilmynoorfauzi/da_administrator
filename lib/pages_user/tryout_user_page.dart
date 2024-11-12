@@ -22,7 +22,7 @@ class TryoutUserPage extends StatefulWidget {
 }
 
 class _TryoutUserPageState extends State<TryoutUserPage> {
-  bool isLogin = true;
+  bool onLoading = false;
   var idPage = 1;
 
   @override
@@ -42,11 +42,12 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
+    bool isLogin = (/*profider.getCurrentUser != null*/ true);
     var listHeaders = ['TryOut Saya', 'TryOut Dream Academy', 'Bundling TryOut Dream Academy'];
     var listPage = [const TryoutSayaUserPage(), const TryoutPublicUserPage(), const BundlingUserPage()];
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin, elevation: 0),
+      appBar: appbarDesk(context: context, featureActive: true, elevation: 0),
       body: (isLogin)
           ? Column(
               children: [
@@ -61,9 +62,15 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                       listHeaders.length,
                       (index) => InkWell(
                         onTap: () async {
-                          context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listPage[idPage]}');
+                          setState(() => onLoading = true);
+
+                          await Future.delayed(const Duration(milliseconds: 100));
+                          final profider = Provider.of<CounterProvider>(context, listen: false);
+                          profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
                           idPage = index;
-                          setState(() {});
+                          await Future.delayed(const Duration(milliseconds: 100));
+
+                          setState(() => onLoading = false);
                         },
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -77,10 +84,8 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                     ),
                   ),
                 ),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Expanded(child: listPage[idPage]);
-                  },
+                Expanded(
+                  child: (onLoading) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
                 ),
               ],
             )
@@ -143,11 +148,12 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
   }
 
   Widget onMo(BuildContext context) {
+    bool isLogin = (/*profider.getCurrentUser != null*/ true);
     var listHeaders = ['TryOut Saya', 'TryOut Dream Academy', 'Bundling TryOut Dream Academy'];
     var listPage = [const TryoutSayaUserPage(), const TryoutPublicUserPage(), const BundlingUserPage()];
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin, elevation: 0),
+      appBar: appbarMo(context: context, elevation: 0),
       body: (isLogin)
           ? Column(
               children: [
@@ -166,9 +172,15 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                           listHeaders.length,
                           (index) => InkWell(
                             onTap: () async {
+                              setState(() => onLoading = true);
+
+                              await Future.delayed(const Duration(milliseconds: 100));
+                              final profider = Provider.of<CounterProvider>(context, listen: false);
+                              profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
                               idPage = index;
-                              context.read<CounterProvider>().setTitleUserPage('Dream Academy - ${listPage[idPage]}');
-                              setState(() {});
+                              await Future.delayed(const Duration(milliseconds: 100));
+
+                              setState(() => onLoading = false);
                             },
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
@@ -184,7 +196,9 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                     ),
                   ),
                 ),
-                Expanded(child: listPage[idPage])
+                Expanded(
+                  child: (onLoading) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
+                ),
               ],
             )
           : ListView(
@@ -239,10 +253,10 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
                   ),
                 ),
                 //footer
-                footerDesk(context: context),
+                footerMo(context: context),
               ],
             ),
-      bottomNavigationBar: NavBottomMo(context: context, isLogin: isLogin, elevation: 1, featureActive: true),
+      bottomNavigationBar: NavBottomMo(context: context, elevation: 1, featureActive: true),
     );
   }
 }

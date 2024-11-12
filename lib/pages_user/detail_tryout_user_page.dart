@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/pay_coin_user_page.dart';
 import 'package:da_administrator/pages_user/pay_ewallet_user_page.dart';
 import 'package:da_administrator/pages_user/pay_free_user_page.dart';
+import 'package:da_administrator/pages_user/profile/nav_profile_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
@@ -26,13 +28,13 @@ class DetailTryoutUserPage extends StatefulWidget {
 }
 
 class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
-  bool isLogin = true;
+  // bool isLogin = true;
   final imageVec2 = 'assets/vec2.png';
   final imageVec4 = 'assets/vec4.png';
-  var jurusanNotReady = false;
   var claimed = false;
-  var userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
 
+  ProfileUserModel? profile;
   TryoutModel? tryoutUser;
   List<QuestionsModel> allQuestion = [];
   List<String> idAllQuestion = [];
@@ -52,15 +54,38 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
 
   @override
   void initState() {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     // TODO: implement initState
     super.initState();
     getDataQuestion();
     getDataTryOut(widget.docId);
+    profile = profider.getProfile;
+    if (profider.getProfile == null) {
+      getDataProfile();
+    }
   }
 
   String formatMinutes(double seconds) {
     double minutes = seconds / 60; // Konversi detik ke menit
     return minutes.toStringAsFixed(1); // Mengembalikan nilai string dengan 1 angka di belakang koma
+  }
+
+  void getDataProfile() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v2');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      var allProfile = querySnapshot.docs.map((doc) => ProfileUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+
+      for (int i = 0; i < allProfile.length; i++) {
+        if (allProfile[i].listPlan != []) {
+          profile = allProfile[i];
+        }
+      }
+      setState(() {});
+    } catch (e) {
+      print('salah nav quest: $e');
+    }
   }
 
   void getDataTryOut(String docId) async {
@@ -79,7 +104,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
 
       setState(() {});
     } catch (e) {
-      print('salah detail_tryout_user_page: $e');
+      print('salah detail_tryout_user_page getDataTryOut : $e');
     }
   }
 
@@ -95,7 +120,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
 
       setState(() {});
     } catch (e) {
-      print('salah detail_tryout_user_page: $e');
+      print('salah detail_tryout_user_page getDataQuestion : $e');
     }
   }
 
@@ -114,9 +139,55 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
+//widget belum isi plan jurusan profile
+    Widget planEmpty() => Center(
+          child: Container(
+            height: 150,
+            width: 700,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Anda belum mengatur target Jurusan Anda',
+                        style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Expanded(child: SizedBox(width: 10)),
+                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 30,
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
+                          },
+                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, isLogin: isLogin),
+      appBar: appbarDesk(context: context, featureActive: true),
       body: ListView(
         children: [
           //tombol kembali
@@ -331,150 +402,116 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    (jurusanNotReady)
-                        ? Container(
-                            height: 300,
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 10),
-                                      Wrap(
-                                        children: List.generate(
-                                          4,
-                                          (index) {
-                                            var jurusan = ['Teknik Informatika', 'Matematika', 'Sasta Inggris', 'Desain Komunikasi Visual'];
-                                            var univ = ['Universitas Hasanudin', 'Universitas Hasanudin', 'Universitas Muslim Indonesia', 'Universitas Muslim Indonesia'];
-                                            return Container(
-                                              width: 300,
-                                              padding: const EdgeInsets.all(3),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.check_circle, color: primary, size: 30),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          jurusan[index],
-                                                          style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                        Text(
-                                                          univ[index],
-                                                          style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      Container(
-                                        width: 450,
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.info, color: primary),
-                                            const SizedBox(width: 10),
-                                            Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
-                                          ],
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      Column(
+                    (profile != null)
+                        ? (profile!.listPlan.every((element) => element.jurusan.isEmpty))
+                            ? planEmpty()
+                            : Container(
+                                height: 300,
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                          Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
                                           const SizedBox(height: 10),
-                                          SizedBox(
-                                            height: 30,
-                                            width: double.infinity,
-                                            child: OutlinedButton(
-                                              onPressed: () {},
-                                              style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                              child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                          Wrap(
+                                            children: List.generate(
+                                              4,
+                                              (index) {
+                                                var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
+                                                var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
+                                                return Container(
+                                                  width: 300,
+                                                  padding: const EdgeInsets.all(3),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        (jurusan[index].isEmpty) ? Icons.cancel : Icons.check_circle,
+                                                        color: (jurusan[index].isEmpty) ? secondary : primary,
+                                                        size: 30,
+                                                      ),
+                                                      const SizedBox(width: 10),
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              (jurusan[index].isEmpty) ? '-' : jurusan[index],
+                                                              style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
+                                                              overflow: TextOverflow.ellipsis,
+                                                              maxLines: 1,
+                                                            ),
+                                                            Text(
+                                                              (univ[index].isEmpty) ? '-' : univ[index],
+                                                              style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
+                                                              overflow: TextOverflow.ellipsis,
+                                                              maxLines: 1,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
                                             ),
+                                          ),
+                                          const Expanded(child: SizedBox()),
+                                          Container(
+                                            width: 450,
+                                            padding: const EdgeInsets.all(3),
+                                            decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.info, color: primary),
+                                                const SizedBox(width: 10),
+                                                Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                                              ],
+                                            ),
+                                          ),
+                                          const Expanded(child: SizedBox()),
+                                          Column(
+                                            children: [
+                                              Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                height: 30,
+                                                width: double.infinity,
+                                                child: OutlinedButton(
+                                                  onPressed: () {},
+                                                  style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                                                  child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Center(
-                            child: Container(
-                              height: 150,
-                              width: 700,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Anda belum mengatur target Jurusan Anda',
-                                          style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const Expanded(child: SizedBox(width: 10)),
-                                        Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                        const SizedBox(height: 10),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () {},
-                                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                            child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                          ),
-                                        ),
-                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 40,
-                      child: TextButton(
-                        onPressed: () => showDaftarSekarang(context: context),
-                        style: TextButton.styleFrom(backgroundColor: primary),
-                        child: Text('Daftar Sekarang', style: TextStyle(fontSize: h4, color: Colors.white)),
+                                  ],
+                                ),
+                              )
+                        : planEmpty(),
+                    if (profile != null)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 40,
+                        child: TextButton(
+                          onPressed: () => showDaftarSekarang(context: context),
+                          style: TextButton.styleFrom(backgroundColor: primary),
+                          child: Text('Daftar Sekarang', style: TextStyle(fontSize: h4, color: Colors.white)),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -487,9 +524,54 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   }
 
   Widget onMo(BuildContext context) {
+    //
+    Widget planEmpty() => Center(
+          child: Container(
+            height: 180,
+            width: 700,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Anda belum mengatur target Jurusan Anda',
+                        style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Expanded(child: SizedBox(width: 10)),
+                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 30,
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, isLogin: isLogin),
+      appBar: appbarMo(
+        context: context,
+      ),
       body: ListView(
         children: [
           //tombol kembali
@@ -685,141 +767,102 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    (jurusanNotReady)
-                        ? Container(
-                            height: 300,
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 10),
-                                      Wrap(
-                                        children: List.generate(
-                                          4,
-                                          (index) {
-                                            var jurusan = ['Teknik Informatika', 'Matematika', 'Sasta Inggris', 'Desain Komunikasi Visual'];
-                                            var univ = ['Universitas Hasanudin', 'Universitas Hasanudin', 'Universitas Muslim Indonesia', 'Universitas Muslim Indonesia'];
-                                            return Container(
-                                              width: 300,
-                                              padding: const EdgeInsets.all(3),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.check_circle, color: primary, size: 30),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          jurusan[index],
-                                                          style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                        Text(
-                                                          univ[index],
-                                                          style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      Container(
-                                        width: 450,
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.info, color: primary),
-                                            const SizedBox(width: 10),
-                                            Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
-                                          ],
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      Column(
+                    (profile != null)
+                        ? (profile!.listPlan.every((element) => element.jurusan.isEmpty))
+                            ? planEmpty()
+                            : Container(
+                                height: 300,
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                          Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
                                           const SizedBox(height: 10),
-                                          SizedBox(
-                                            height: 30,
-                                            width: double.infinity,
-                                            child: OutlinedButton(
-                                              onPressed: () {},
-                                              style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                              child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                          Wrap(
+                                            children: List.generate(
+                                              4,
+                                              (index) {
+                                                var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
+                                                var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
+                                                return Container(
+                                                  width: 300,
+                                                  padding: const EdgeInsets.all(3),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.check_circle, color: primary, size: 30),
+                                                      const SizedBox(width: 10),
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              jurusan[index],
+                                                              style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
+                                                              overflow: TextOverflow.ellipsis,
+                                                              maxLines: 1,
+                                                            ),
+                                                            Text(
+                                                              univ[index],
+                                                              style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
+                                                              overflow: TextOverflow.ellipsis,
+                                                              maxLines: 1,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
                                             ),
+                                          ),
+                                          const Expanded(child: SizedBox()),
+                                          Container(
+                                            width: 450,
+                                            padding: const EdgeInsets.all(3),
+                                            decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.info, color: primary),
+                                                const SizedBox(width: 10),
+                                                Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                                              ],
+                                            ),
+                                          ),
+                                          const Expanded(child: SizedBox()),
+                                          Column(
+                                            children: [
+                                              Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                height: 30,
+                                                width: double.infinity,
+                                                child: OutlinedButton(
+                                                  onPressed: () {},
+                                                  style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                                                  child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Center(
-                            child: Container(
-                              height: 180,
-                              width: 700,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Anda belum mengatur target Jurusan Anda',
-                                          style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const Expanded(child: SizedBox(width: 10)),
-                                        Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                        const SizedBox(height: 10),
-                                        SizedBox(
-                                          height: 30,
-                                          width: double.infinity,
-                                          child: OutlinedButton(
-                                            onPressed: () {},
-                                            style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                            child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                          ),
-                                        ),
-                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                                  ],
+                                ),
+                              )
+                        : planEmpty(),
                     SizedBox(
                       width: double.infinity,
                       height: 40,
@@ -841,6 +884,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   }
 
   Future<void> showDaftarSekarang({required BuildContext context}) async {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -965,7 +1009,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                               width: 250,
                               child: TextButton(
                                 onPressed: () {
-                                  context.read<CounterProvider>().setTitleUserPage('Dream Academy - Payment');
+                                  profider.setTitleUserPage('Dream Academy - Payment');
                                   Navigator.push(context, FadeRoute1(PayFreeUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
                                 },
                                 style: TextButton.styleFrom(backgroundColor: primary),
@@ -994,7 +1038,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                 width: 250,
                                 child: TextButton(
                                   onPressed: () {
-                                    context.read<CounterProvider>().setTitleUserPage('Dream Academy - Payment');
+                                    profider.setTitleUserPage('Dream Academy - Payment');
                                     Navigator.push(context, FadeRoute1(PayCoinUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
                                   },
                                   style: TextButton.styleFrom(backgroundColor: primary),
@@ -1026,7 +1070,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                 width: 250,
                                 child: TextButton(
                                   onPressed: () {
-                                    context.read<CounterProvider>().setTitleUserPage('Dream Academy - Payment');
+                                    profider.setTitleUserPage('Dream Academy - Payment');
                                     Navigator.push(context, FadeRoute1(PayEwalletUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
                                   },
                                   style: TextButton.styleFrom(backgroundColor: primary),
@@ -1057,7 +1101,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                   width: 250,
                                   child: TextButton(
                                     onPressed: () {
-                                      context.read<CounterProvider>().setTitleUserPage('Dream Academy - Payment');
+                                      profider.setTitleUserPage('Dream Academy - Payment');
                                       Navigator.push(context, FadeRoute1(PayCoinUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
                                     },
                                     style: TextButton.styleFrom(backgroundColor: primary),
@@ -1086,7 +1130,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                   width: 250,
                                   child: TextButton(
                                     onPressed: () {
-                                      context.read<CounterProvider>().setTitleUserPage('Dream Academy - Payment');
+                                      profider.setTitleUserPage('Dream Academy - Payment');
                                       Navigator.push(context, FadeRoute1(PayEwalletUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
                                     },
                                     style: TextButton.styleFrom(backgroundColor: primary),

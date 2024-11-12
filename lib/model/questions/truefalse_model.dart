@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TrueFalseModel {
   String question;
+  String subjectRelevance;
   String type;
   List<String?> image;
   List<TrueFalseOption> trueAnswer;
@@ -13,6 +14,7 @@ class TrueFalseModel {
 
   TrueFalseModel({
     required this.question,
+    required this.subjectRelevance,
     required this.type,
     required this.image,
     required this.trueAnswer,
@@ -25,6 +27,7 @@ class TrueFalseModel {
 
   Map<String, dynamic> toJson() => {
         'question': question,
+        'subjectRelevance': subjectRelevance,
         'type': type,
         'image': image,
         'trueAnswer': trueAnswer.map((content) => content.toJson()).toList(),
@@ -37,6 +40,7 @@ class TrueFalseModel {
 
   factory TrueFalseModel.fromJson(Map<String, dynamic> json) => TrueFalseModel(
         question: json['question'],
+        subjectRelevance: json['subjectRelevance'],
         type: json['type'],
         image: List<String>.from(json['image']),
         trueAnswer: (json['trueAnswer'] as List<dynamic>).map((content) => TrueFalseOption.fromJson(content)).toList(),

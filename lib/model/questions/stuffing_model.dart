@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class StuffingModel {
   String question;
   String trueAnswer;
+  String subjectRelevance;
   String type;
   List<String> yourAnswer;
   List<String?> image;
@@ -14,6 +15,7 @@ class StuffingModel {
   StuffingModel({
     required this.question,
     required this.trueAnswer,
+    required this.subjectRelevance,
     required this.type,
     required this.yourAnswer,
     required this.image,
@@ -26,6 +28,7 @@ class StuffingModel {
   Map<String, dynamic> toJson() => {
         'question': question,
         'trueAnswer': trueAnswer,
+        'subjectRelevance': subjectRelevance,
         'type': type,
         'yourAnswer': yourAnswer,
         'image': image,
@@ -38,6 +41,7 @@ class StuffingModel {
   factory StuffingModel.fromJson(Map<String, dynamic> json) => StuffingModel(
         question: json['question'],
         trueAnswer: json['trueAnswer'],
+        subjectRelevance: json['subjectRelevance'],
         type: json['type'],
         yourAnswer: List<String>.from(json['yourAnswer']),
         image: List<String>.from(json['image']),
