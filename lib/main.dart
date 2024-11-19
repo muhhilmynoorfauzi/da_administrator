@@ -137,8 +137,8 @@ class _MyAppState extends State<MyApp> {
               // return const NavSetPage();
               // return const NavProfileUserPage(idPage: 0);
               // return const TryoutUserPage(idPage: 1);
-              // return const HomeUserPage();
-                return const HomePage();
+              return const HomeUserPage();
+                // return const HomePage();
               // return const LoginPage();
             }
           },
