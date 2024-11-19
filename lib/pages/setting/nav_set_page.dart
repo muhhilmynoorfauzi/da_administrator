@@ -55,7 +55,7 @@ class _NavSetPageState extends State<NavSetPage> {
         UnivSetPage(allUniv: allUniv, idAllUniv: idAllUniv),
         JurusanSetPage(allJurusan: allJurusan, idAllJurusan: idAllJurusan, other: allMapel.first, idOther: idAllMapel.first),
         MapelSetPage(allOther: allMapel, idAllOther: idAllMapel),
-        UserSetPage(allUserTo: allUserTo, idAllUserTo: idAllUserTo),
+        // UserSetPage(allUserTo: allUserTo, idAllUserTo: idAllUserTo),
       ];
       if (lebar(context) <= 700) {
         return onMo(context);
@@ -111,6 +111,7 @@ class _NavSetPageState extends State<NavSetPage> {
 
       allMapel = querySnapshot.docs.map((doc) => OtherModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
       idAllMapel = querySnapshot.docs.map((doc) => doc.id).toList();
+      print('dapat Mapel');
     } catch (e) {
       print('salah getDataOther: $e');
     }

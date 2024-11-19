@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/firebase_service/profile_user_service.dart';
 import 'package:da_administrator/pages/login_page.dart';
@@ -5,22 +6,16 @@ import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/component/nav_buttom.dart';
-import 'package:da_administrator/pages_user/profile/nav_profile_user_page.dart';
 import 'package:da_administrator/pages_user/rekomendasi_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
-
 import '../model/user_profile/profile_user_model.dart';
 
 class HomeUserPage extends StatefulWidget {
@@ -198,7 +193,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
             child: ListView(
               children: [
                 SizedBox(
-                  height: tinggi(context) - (tinggi(context) * .1),
+                  height: tinggi(context),
                   width: lebar(context),
                   child: Row(
                     children: [
@@ -212,14 +207,18 @@ class _HomeUserPageState extends State<HomeUserPage> {
                           children: [
                             Text('Dream Academy', style: TextStyle(color: Colors.black, fontSize: h1 + 20, fontWeight: FontWeight.bold)),
                             Text('Dream AcademyDream AcademyDream Academy', style: TextStyle(color: Colors.grey, fontSize: h3, fontWeight: FontWeight.normal)),
-                            Text(
-                              'Dream AcademyDream AcademyDream Academy'
-                              'Dream AcademyDream AcademyDream Academy'
-                              'Dream AcademyDream AcademyDream Academy'
-                              'Dream AcademyDream AcademyDream Academy'
-                              'Dream AcademyDream AcademyDream Academy',
-                              style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.justify,
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  'Dream AcademyDream AcademyDream Academy'
+                                  'Dream AcademyDream AcademyDream Academy'
+                                  'Dream AcademyDream AcademyDream Academy'
+                                  'Dream AcademyDream AcademyDream Academy'
+                                  'Dream AcademyDream AcademyDream Academy',
+                                  style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.justify,
+                                ),
+                              ),
                             ),
                           ],
                         ),

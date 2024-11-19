@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       onGenerateRoute: (settings) {
-        Uri uri = Uri.parse(settings.name!);
+        // Uri uri = Uri.parse(settings.name!);
 /*
         TryoutModel? tryoutUser;
         List<QuestionsModel> allQuestion = [];
@@ -130,7 +130,6 @@ class _MyAppState extends State<MyApp> {
                 return const HomePage();
               } else {
                 return const HomeUserPage();
-                // return const HomePage();
                 // return const TryoutUserPage(idPage: 1);
               }
             } else {
@@ -138,7 +137,8 @@ class _MyAppState extends State<MyApp> {
               // return const NavSetPage();
               // return const NavProfileUserPage(idPage: 0);
               // return const TryoutUserPage(idPage: 1);
-              return const HomeUserPage();
+              // return const HomeUserPage();
+                return const HomePage();
               // return const LoginPage();
             }
           },

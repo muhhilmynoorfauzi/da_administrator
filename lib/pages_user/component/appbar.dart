@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:html' as html;
 import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/about_user_page.dart';
 import 'package:da_administrator/pages_user/bank_user_page.dart';
@@ -13,8 +13,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import 'dart:html' as html;
 import 'package:provider/provider.dart';
 
 AppBar appbarDesk({

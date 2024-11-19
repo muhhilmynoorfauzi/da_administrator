@@ -290,41 +290,39 @@ class _MapelSetPageState extends State<MapelSetPage> {
               textAlign: TextAlign.center,
             ),
           ),
-          if (allOther.isNotEmpty)
-            if (allOther.first.subjectRelevance.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  reverse: true,
-                  shrinkWrap: true,
-                  itemCount: allOther.first.subjectRelevance.length,
-                  itemBuilder: (context, i) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    width: lebar(context),
-                    child: Card(
-                      surfaceTintColor: Colors.white,
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(allOther.first.subjectRelevance[i], style: TextStyle(fontSize: h4, color: Colors.black)),
-                            ),
-                            IconButton(
-                              onPressed: () => funEdit(context, idAllOther.first, allOther.first.subjectRelevance, i),
-                              icon: const Icon(Icons.edit_outlined, color: Colors.black),
-                            ),
-                            IconButton(
-                              onPressed: () => funDelete(context, idAllOther.first, allOther.first.subjectRelevance, i),
-                              icon: const Icon(Icons.delete_outline_rounded, color: Colors.black),
-                            ),
-                          ],
-                        ),
+          // if (allOther.isNotEmpty)
+          // if (allOther.first.subjectRelevance.isNotEmpty)
+          ListView.builder(
+            reverse: true,
+            shrinkWrap: true,
+            itemCount: allOther.first.subjectRelevance.length,
+            itemBuilder: (context, i) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              width: lebar(context),
+              child: Card(
+                surfaceTintColor: Colors.white,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(allOther.first.subjectRelevance[i], style: TextStyle(fontSize: h4, color: Colors.black)),
                       ),
-                    ),
+                      IconButton(
+                        onPressed: () => funEdit(context, idAllOther.first, allOther.first.subjectRelevance, i),
+                        icon: const Icon(Icons.edit_outlined, color: Colors.black),
+                      ),
+                      IconButton(
+                        onPressed: () => funDelete(context, idAllOther.first, allOther.first.subjectRelevance, i),
+                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.black),
+                      ),
+                    ],
                   ),
                 ),
               ),
+            ),
+          ),
         ],
       ),
     );

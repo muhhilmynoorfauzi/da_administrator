@@ -98,7 +98,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
   }
 
   void selengkapnya(BuildContext context, {required List<TryoutModel> allTryout, required List<String> idAllTryout}) {
-    Navigator.push(context, FadeRoute1(TryoutSelengkapnyaUserPage(allTryout: allTryout, idAllTryout: idAllTryout)));
+    Navigator.push(
+      context,
+      FadeRoute1(
+        TryoutSelengkapnyaUserPage(
+          allTryout: allTryout,
+          idAllTryout: idAllTryout,
+          allSubtest: widget.allSubtest,
+          idAllSubtest: widget.idAllSubtest,
+          allReview: widget.allReview,
+          idAllReview: widget.idAllReview,
+        ),
+      ),
+    );
   }
 
   Widget onDesk(BuildContext context) {

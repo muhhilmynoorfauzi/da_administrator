@@ -118,7 +118,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
     idAllTryout = widget.idAllTryout;
 
     for (int i = 0; i < allTryout.length; i++) {
-      if (allTryout[i].claimedUid.isNotEmpty) {
+      if (allTryout[i].claimedUid.isNotEmpty && allTryout[i].public) {
         for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
           if (allTryout[i].claimedUid[j].userUID == user!.uid) {
             if (!(allTryout[i].phase)) {
@@ -136,7 +136,19 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
   }
 
   void selengkapnya(BuildContext context, {required List<TryoutModel> allTryout, required List<String> idAllTryout}) {
-    Navigator.push(context, FadeRoute1(TryoutSelengkapnyaUserPage(allTryout: allTryout, idAllTryout: idAllTryout)));
+    Navigator.push(
+      context,
+      FadeRoute1(
+        TryoutSelengkapnyaUserPage(
+          allTryout: allTryout,
+          idAllTryout: idAllTryout,
+          allSubtest: widget.allSubtest,
+          idAllSubtest: widget.idAllSubtest,
+          allReview: widget.allReview,
+          idAllReview: widget.idAllReview,
+        ),
+      ),
+    );
   }
 
   String formatDateTime(DateTime dateTime) {

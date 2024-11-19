@@ -49,33 +49,28 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (allSubtest.isNotEmpty && allTryout.isNotEmpty && allReview.isNotEmpty) {
-      listPage = [
-        TryoutSayaUserPage(
-          idAllTryout: idAllTryout,
-          allTryout: allTryout,
-          idAllSubtest: idAllSubtest,
-          allSubtest: allSubtest,
-          allReview: allReview,
-          idAllReview: idAllReview,
-        ),
-        TryoutPublicUserPage(
-          idAllTryout: idAllTryout,
-          allTryout: allTryout,
-          idAllSubtest: idAllSubtest,
-          allSubtest: allSubtest,
-          allReview: allReview,
-          idAllReview: idAllReview,
-        ),
-        const BundlingUserPage(),
-      ];
-      if (lebar(context) <= 800) {
-        return onMo(context);
+    bool isLogin = (user != null);
+    if (isLogin) {
+      if (allSubtest.isNotEmpty && allTryout.isNotEmpty && allReview.isNotEmpty) {
+        listPage = [
+          TryoutSayaUserPage(idAllTryout: idAllTryout, allTryout: allTryout, idAllSubtest: idAllSubtest, allSubtest: allSubtest, allReview: allReview, idAllReview: idAllReview),
+          TryoutPublicUserPage(idAllTryout: idAllTryout, allTryout: allTryout, idAllSubtest: idAllSubtest, allSubtest: allSubtest, allReview: allReview, idAllReview: idAllReview),
+          const BundlingUserPage(),
+        ];
+        if (lebar(context) <= 800) {
+          return onMo(context);
+        } else {
+          return onDesk(context);
+        }
       } else {
-        return onDesk(context);
+        return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
       }
     } else {
-      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
+      if (lebar(context) <= 800) {
+        return onMoNotLogin(context);
+      } else {
+        return onDeskNotLogin(context);
+      }
     }
   }
 
@@ -164,232 +159,240 @@ class _TryoutUserPageState extends State<TryoutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
-    bool isLogin = (user != null);
+    // bool isLogin = (user != null);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarDesk(context: context, featureActive: true, elevation: 0),
-      body: (isLogin)
-          ? Column(
+      body: Column(
+        children: [
+          Container(
+            height: 40,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  height: 40,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: List.generate(
-                          listHeaders.length,
-                          (index) => InkWell(
-                            onTap: () async {
-                              setState(() => onLoadingDetail = true);
+                IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(
+                    listHeaders.length,
+                    (index) => InkWell(
+                      onTap: () async {
+                        setState(() => onLoadingDetail = true);
 
-                              await Future.delayed(const Duration(milliseconds: 200));
-                              final profider = Provider.of<CounterProvider>(context, listen: false);
-                              profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
-                              idPage = index;
-                              await Future.delayed(const Duration(milliseconds: 200));
+                        await Future.delayed(const Duration(milliseconds: 200));
+                        final profider = Provider.of<CounterProvider>(context, listen: false);
+                        profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
+                        idPage = index;
+                        await Future.delayed(const Duration(milliseconds: 200));
 
-                              setState(() => onLoadingDetail = false);
-                            },
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            child: Container(
-                              height: 30,
-                              margin: const EdgeInsets.symmetric(horizontal: 30),
-                              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2))),
-                              child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
-                            ),
-                          ),
-                        ),
+                        setState(() => onLoadingDetail = false);
+                      },
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      child: Container(
+                        height: 30,
+                        margin: const EdgeInsets.symmetric(horizontal: 30),
+                        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2))),
+                        child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
                       ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: (onLoadingDetail) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
-                ),
-              ],
-            )
-          : ListView(
-              children: [
-                Container(
-                  height: tinggi(context) - 200,
-                  padding: const EdgeInsets.all(20),
-                  alignment: Alignment.center,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 50),
-                    width: 1000,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(height: 80, width: 80, decoration: BoxDecoration(color: secondary.withOpacity(.5), borderRadius: BorderRadius.circular(100))),
-                              SvgPicture.asset('assets/tryout.svg', height: 60)
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 80,
-                                alignment: Alignment.centerLeft,
-                                child: Text('TryOut', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
-                              ),
-                              Text(
-                                'Soal TryOut dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
-                                style: TextStyle(color: Colors.black, fontSize: h3),
-                              ),
-                              Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),
-                              const SizedBox(height: 30),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(context, FadeRoute1(const LoginPage()));
-                                },
-                                style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-                                child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h3, fontWeight: FontWeight.normal)),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-                //footer
-                footerDesk(context: context),
               ],
             ),
+          ),
+          Expanded(
+            child: (onLoadingDetail) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
+          ),
+        ],
+      ),
     );
   }
 
   Widget onMo(BuildContext context) {
-    bool isLogin = (user != null);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarMo(context: context, elevation: 0),
-      body: (isLogin)
-          ? Column(
+      body: Column(
+        children: [
+          Container(
+            height: 50,
+            width: double.infinity,
+            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  height: 50,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey, width: 1))),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: List.generate(
-                              listHeaders.length,
-                              (index) => InkWell(
-                                onTap: () async {
-                                  setState(() => onLoadingDetail = true);
-                                  final profider = Provider.of<CounterProvider>(context, listen: false);
-                                  profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
-                                  idPage = index;
-                                  await Future.delayed(const Duration(milliseconds: 200));
-                                  setState(() => onLoadingDetail = false);
-                                },
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                child: Container(
-                                  height: 30,
-                                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2)),
-                                  ),
-                                  child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
-                                ),
-                              ),
+                IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: List.generate(
+                        listHeaders.length,
+                        (index) => InkWell(
+                          onTap: () async {
+                            setState(() => onLoadingDetail = true);
+                            final profider = Provider.of<CounterProvider>(context, listen: false);
+                            profider.setTitleUserPage('Dream Academy - ${listPage[idPage]}');
+                            idPage = index;
+                            await Future.delayed(const Duration(milliseconds: 200));
+                            setState(() => onLoadingDetail = false);
+                          },
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          child: Container(
+                            height: 30,
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            decoration: BoxDecoration(
+                              border: Border(bottom: BorderSide(color: (index == idPage) ? Colors.black : Colors.transparent, width: 2)),
                             ),
+                            child: Text(listHeaders[index], style: TextStyle(color: Colors.black, fontSize: h4)),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: (onLoadingDetail) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
-                ),
-              ],
-            )
-          : ListView(
-              children: [
-                Container(
-                  height: tinggi(context) - 200,
-                  padding: const EdgeInsets.all(20),
-                  alignment: Alignment.center,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 50),
-                    width: 1000,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 80,
-                          width: 80,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(height: 80, width: 80, decoration: BoxDecoration(color: secondary.withOpacity(.5), borderRadius: BorderRadius.circular(100))),
-                              SvgPicture.asset('assets/tryout.svg', height: 60)
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 80,
-                                alignment: Alignment.centerLeft,
-                                child: Text('TryOut', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
-                              ),
-                              Text(
-                                'Soal TryOut dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
-                                style: TextStyle(color: Colors.black, fontSize: h3),
-                              ),
-                              Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),
-                              const SizedBox(height: 30),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(context, FadeRoute1(const LoginPage()));
-                                },
-                                style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-                                child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h3, fontWeight: FontWeight.normal)),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-                //footer
-                footerMo(context: context),
               ],
             ),
+          ),
+          Expanded(
+            child: (onLoadingDetail) ? Center(child: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))) : listPage[idPage],
+          ),
+        ],
+      ),
       bottomNavigationBar: NavBottomMo(context: context, elevation: 1, featureActive: true),
     );
   }
+
+  Widget onDeskNotLogin(BuildContext context) => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: appbarDesk(context: context, featureActive: true, elevation: 0),
+        body: ListView(
+          children: [
+            Container(
+              height: tinggi(context) - 200,
+              padding: const EdgeInsets.all(20),
+              alignment: Alignment.center,
+              child: Container(
+                margin: const EdgeInsets.only(top: 50),
+                width: 1000,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(height: 80, width: 80, decoration: BoxDecoration(color: secondary.withOpacity(.5), borderRadius: BorderRadius.circular(100))),
+                          SvgPicture.asset('assets/tryout.svg', height: 60)
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 80,
+                            alignment: Alignment.centerLeft,
+                            child: Text('TryOut', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
+                          ),
+                          Text(
+                            'Soal TryOut dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
+                            style: TextStyle(color: Colors.black, fontSize: h3),
+                          ),
+                          Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),
+                          const SizedBox(height: 30),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(context, FadeRoute1(const LoginPage()));
+                            },
+                            style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
+                            child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h3, fontWeight: FontWeight.normal)),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            //footer
+            footerDesk(context: context),
+          ],
+        ),
+      );
+
+  Widget onMoNotLogin(BuildContext context) => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: appbarMo(context: context, elevation: 0),
+        body: ListView(
+          children: [
+            Container(
+              height: tinggi(context) - 200,
+              padding: const EdgeInsets.all(20),
+              alignment: Alignment.center,
+              child: Container(
+                margin: const EdgeInsets.only(top: 50),
+                width: 1000,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(height: 80, width: 80, decoration: BoxDecoration(color: secondary.withOpacity(.5), borderRadius: BorderRadius.circular(100))),
+                          SvgPicture.asset('assets/tryout.svg', height: 60)
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 80,
+                            alignment: Alignment.centerLeft,
+                            child: Text('TryOut', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h1 + 10)),
+                          ),
+                          Text(
+                            'Soal TryOut dibuat oleh alumni PTN terbaik dengan sistem penilaian IRT untuk membantu kamu masuk PTN impian!\n',
+                            style: TextStyle(color: Colors.black, fontSize: h3),
+                          ),
+                          Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),
+                          const SizedBox(height: 30),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(context, FadeRoute1(const LoginPage()));
+                            },
+                            style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
+                            child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h3, fontWeight: FontWeight.normal)),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            //footer
+            footerMo(context: context),
+          ],
+        ),
+        bottomNavigationBar: NavBottomMo(context: context, elevation: 1, featureActive: true),
+      );
 }
