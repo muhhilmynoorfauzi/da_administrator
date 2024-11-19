@@ -1,19 +1,22 @@
 import 'dart:async';
+import 'package:da_administrator/model/user_to/user_to_model.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class WaitingUserPage extends StatefulWidget {
-  const WaitingUserPage({super.key, required this.second, required this.isLast, required this.idUserTo});
+  const WaitingUserPage({super.key, required this.second, required this.isLast, required this.idUserTo, required this.userTo});
 
   final String idUserTo;
   final double second;
   final bool isLast;
+  final UserToModel userTo;
 
   @override
   _WaitingUserPageState createState() => _WaitingUserPageState();
@@ -28,6 +31,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
     testKe = 0;
     subTestKe = 0;
@@ -50,17 +54,17 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
         if (_remainingTime <= 0) {
           timer.cancel();
           print("Waktu habis");
-          kembaliTryOutSaya();
+          kembaliTryOutSaya(context);
         }
       });
     });
   }
 
   void lanjutKerja(BuildContext context) {
-    Navigator.pushAndRemoveUntil(context, FadeRoute1(NavQuestUserPage(idUserTo: widget.idUserTo)), (Route<dynamic> route) => false);
+    Navigator.pushAndRemoveUntil(context, FadeRoute1(NavQuestUserPage(idUserTo: widget.idUserTo,userTo: widget.userTo)), (Route<dynamic> route) => false);
   }
 
-  Future<void> kembaliTryOutSaya() async {
+  Future<void> kembaliTryOutSaya(BuildContext context) async {
     Navigator.pushAndRemoveUntil(context, FadeRoute1(const TryoutUserPage(idPage: 0)), (Route<dynamic> route) => false);
   }
 
@@ -104,7 +108,7 @@ class _WaitingUserPageState extends State<WaitingUserPage> {
                     SizedBox(
                       width: 220,
                       child: TextButton(
-                        onPressed: () => kembaliTryOutSaya(),
+                        onPressed: () => kembaliTryOutSaya(context),
                         style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 20)),
                         child: Text('Kembali ke TryOut saya', style: TextStyle(fontSize: h4, color: Colors.white)),
                       ),

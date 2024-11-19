@@ -17,18 +17,18 @@ import '../model/other/other_model.dart';
 
 class QuestionsPage extends StatefulWidget {
   final String idQuestion;
-  final String subTest;
+  final String nameSubTest;
 
-  const QuestionsPage({super.key, required this.idQuestion, required this.subTest});
+  const QuestionsPage({super.key, required this.idQuestion, required this.nameSubTest});
 
   @override
   State<QuestionsPage> createState() => _QuestionsPageState();
 }
 
-QuestionsModel? question;
+QuestionsModel? subtest;
 
 class _QuestionsPageState extends State<QuestionsPage> {
-  bool isLoading = false;
+  bool onLoading = false;
   OtherModel? otherModel;
 
   @override
@@ -38,7 +38,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
     return Stack(
       children: [
         page,
-        if (isLoading)
+        if (onLoading)
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
             height: tinggi(context),
@@ -54,38 +54,43 @@ class _QuestionsPageState extends State<QuestionsPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getDataTryOut(widget.idQuestion);
     getDataOther();
+    getDataQuestion(widget.idQuestion);
+    setState(() {});
   }
 
-  void getDataTryOut(String docId) async {
+  void getDataQuestion(String docId) async {
     try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('questions_v2').doc(docId);
+      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('subtest_v03').doc(docId);
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
       if (docSnapshot.exists) {
-        setState(() => question = QuestionsModel.fromSnapshot(docSnapshot));
-        print('Dokumen ditemukan');
+        subtest = QuestionsModel.fromSnapshot(docSnapshot);
+        print('Dokumen subtest ditemukan');
       } else {
         print('Dokumen tidak ditemukan');
       }
     } catch (e) {
       print('Error: $e');
     }
+    setState(() {});
   }
 
   void getDataOther() async {
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('other_v2');
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('other_v03');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
 
       var listAll = querySnapshot.docs.map((doc) => OtherModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      var idListAll = querySnapshot.docs.map((doc) => doc.id).toList();
-      otherModel = listAll.first;
-
-      setState(() {});
+      // var idListAll = querySnapshot.docs.map((doc) => doc.id).toList();
+      if (listAll.isNotEmpty) {
+        otherModel = listAll.first;
+      } else {
+        print('Tidak ada data TryOut');
+      }
     } catch (e) {
       print('salah home_page: $e');
     }
+    setState(() {});
   }
 
 //==============================================================================================================
@@ -125,7 +130,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                         focusNode: FocusNode(),
                         configurations: QuillEditorConfigurations(
                           controller: QuillController(
-                            document: Document.fromHtml(question!.listQuestions[index].question),
+                            document: Document.fromHtml(subtest!.listQuestions[index].question),
                             selection: const TextSelection(baseOffset: 0, extentOffset: 0),
                             readOnly: true,
                           ),
@@ -148,8 +153,8 @@ class _QuestionsPageState extends State<QuestionsPage> {
                       TextButton(
                         onPressed: () async {
                           setState(() => loading = true);
-                          await question!.listQuestions.removeAt(index);
-                          await QuestionsService.edit(id: widget.idQuestion, idTryOut: question!.idTryOut, listQuestions: question!.listQuestions);
+                          await subtest!.listQuestions.removeAt(index);
+                          await QuestionsService.edit(id: widget.idQuestion, idTryOut: subtest!.idTryOut, listQuestions: subtest!.listQuestions);
                           Navigator.of(context).pop();
                           Navigator.of(context).pop();
                         },
@@ -163,14 +168,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
     );
   }
 
-  Future<void> saveQuestion() async {
-    setState(() => isLoading = true);
+  Future<void> saveSubtest() async {
+    setState(() => onLoading = true);
 
-    await QuestionsService.edit(id: widget.idQuestion, idTryOut: question!.idTryOut, listQuestions: question!.listQuestions);
+    await QuestionsService.edit(id: widget.idQuestion, idTryOut: subtest!.idTryOut, listQuestions: subtest!.listQuestions);
 
-    await Future.delayed(const Duration(milliseconds: 500));
-    getDataTryOut(widget.idQuestion);
-    setState(() => isLoading = false);
+    await Future.delayed(const Duration(milliseconds: 200));
+    // getDataQuestion(widget.idQuestion);
+    setState(() => onLoading = false);
   }
 
 //==============================================================================================================
@@ -195,17 +200,17 @@ class _QuestionsPageState extends State<QuestionsPage> {
         title: TextButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
-          label: Text(widget.subTest, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+          label: Text(widget.nameSubTest, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
         ),
         actions: [
           OutlinedButton(
-            onPressed: () => saveQuestion(),
+            onPressed: () => saveSubtest(),
             child: Text('Simpan', style: TextStyle(color: Colors.black, fontSize: h4)),
           ),
           const SizedBox(width: 10),
         ],
       ),
-      body: (question != null)
+      body: (subtest != null)
           ? Center(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -261,15 +266,15 @@ class _QuestionsPageState extends State<QuestionsPage> {
                             },
                           ),
                         ),
-                        Text('Jumlah Soal ${question!.listQuestions.length}', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        Text('Jumlah Soal ${subtest!.listQuestions.length}', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Expanded(
-                      child: (question!.listQuestions.isNotEmpty)
+                      child: (subtest!.listQuestions.isNotEmpty)
                           ? ListView.builder(
-                              itemCount: question!.listQuestions.length,
+                              itemCount: subtest!.listQuestions.length,
                               itemBuilder: (context, indexQuest) {
-                                int rating = question!.listQuestions[indexQuest].rating;
+                                int rating = subtest!.listQuestions[indexQuest].rating;
                                 return Card(
                                   color: Colors.white,
                                   surfaceTintColor: Colors.white,
@@ -291,7 +296,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                     alignment: Alignment.center,
                                                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
                                                     child: Text(
-                                                      formatType(question!.listQuestions[indexQuest].type),
+                                                      formatType(subtest!.listQuestions[indexQuest].type),
                                                       style: TextStyle(color: Colors.white, fontSize: h4),
                                                       textAlign: TextAlign.justify,
                                                     ),
@@ -312,7 +317,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                             (index) => InkWell(
                                                               onTap: () => setState(() {
                                                                 rating = index + 1;
-                                                                question!.listQuestions[indexQuest].rating = rating;
+                                                                subtest!.listQuestions[indexQuest].rating = rating;
                                                               }),
                                                               child: Padding(
                                                                 padding: const EdgeInsets.all(3),
@@ -329,14 +334,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                     height: 30,
                                                     child: OutlinedButton(
                                                       onPressed: () {
-                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                          Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: question!.listQuestions[indexQuest])));
-                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                          Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: question!.listQuestions[indexQuest])));
-                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                          Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: question!.listQuestions[indexQuest])));
-                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                          Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: question!.listQuestions[indexQuest])));
+                                                        if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                          Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: subtest!.listQuestions[indexQuest])));
                                                         }
                                                       },
                                                       child: Text('Preview', style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
@@ -348,7 +353,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                 focusNode: FocusNode(),
                                                 configurations: QuillEditorConfigurations(
                                                   controller: QuillController(
-                                                    document: Document.fromHtml(question!.listQuestions[indexQuest].question),
+                                                    document: Document.fromHtml(subtest!.listQuestions[indexQuest].question),
                                                     selection: const TextSelection(baseOffset: 0, extentOffset: 0),
                                                     readOnly: true,
                                                   ),
@@ -374,8 +379,8 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                       value: _selectedOption,
                                                       padding: const EdgeInsets.only(left: 20, right: 10),
                                                       hint: Text(
-                                                        (question!.listQuestions[indexQuest].subjectRelevance != '')
-                                                            ? question!.listQuestions[indexQuest].subjectRelevance
+                                                        (subtest!.listQuestions[indexQuest].subjectRelevance != '')
+                                                            ? subtest!.listQuestions[indexQuest].subjectRelevance
                                                             : 'Pilih Mapel Terkait',
                                                         style: TextStyle(color: Colors.black, fontSize: h4),
                                                       ),
@@ -389,10 +394,10 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                       }).toList(),
                                                       onChanged: (String? newValue) async {
                                                         if (newValue != null) {
-                                                          if (question!.listQuestions[indexQuest].subjectRelevance == '') {
-                                                            question!.listQuestions[indexQuest].subjectRelevance = newValue;
+                                                          if (subtest!.listQuestions[indexQuest].subjectRelevance == '') {
+                                                            subtest!.listQuestions[indexQuest].subjectRelevance = newValue;
                                                           } else {
-                                                            question!.listQuestions[indexQuest].subjectRelevance = '';
+                                                            subtest!.listQuestions[indexQuest].subjectRelevance = '';
                                                           }
                                                           setState(() {});
                                                         }
@@ -405,24 +410,24 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                   IconButton(
                                                     onPressed: () async {
                                                       if (lebar(context) <= 700) {
-                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                          await editMultiJawabanDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                          await editPGDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                          await editIsianDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                          await editBenarSalahDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          await editMultiJawabanDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          await editPGDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                          await editIsianDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          await editBenarSalahDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
                                                         }
                                                       } else {
-                                                        if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                          await editMultiJawabanDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                          await editPGDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                          await editIsianDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                        } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                          await editBenarSalahDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                        if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                          await editMultiJawabanDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                          await editPGDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                          await editIsianDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                        } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                          await editBenarSalahDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
                                                         }
                                                       }
                                                       setState(() {});
@@ -431,7 +436,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                   ),
                                                   IconButton(
                                                     onPressed: () {
-                                                      print(question!.listQuestions[indexQuest]);
+                                                      // print(question!.listQuestions[indexQuest]);
                                                       deleteQuestion(indexQuest);
                                                     },
                                                     icon: const Icon(Icons.delete_outline),
@@ -478,17 +483,17 @@ class _QuestionsPageState extends State<QuestionsPage> {
         title: TextButton.icon(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
-          label: Text(widget.subTest, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+          label: Text(widget.nameSubTest, style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
         ),
         actions: [
           OutlinedButton(
-            onPressed: () => saveQuestion(),
+            onPressed: () => saveSubtest(),
             child: Text('Simpan', style: TextStyle(color: Colors.black, fontSize: h4)),
           ),
           const SizedBox(width: 10),
         ],
       ),
-      body: (question != null)
+      body: (subtest != null)
           ? Center(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -544,15 +549,15 @@ class _QuestionsPageState extends State<QuestionsPage> {
                             },
                           ),
                         ),
-                        Text('Jumlah Soal ${question!.listQuestions.length}', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        Text('Jumlah Soal ${subtest!.listQuestions.length}', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Expanded(
-                      child: (question!.listQuestions.isNotEmpty)
+                      child: (subtest!.listQuestions.isNotEmpty)
                           ? ListView.builder(
-                              itemCount: question!.listQuestions.length,
+                              itemCount: subtest!.listQuestions.length,
                               itemBuilder: (context, indexQuest) {
-                                int rating = question!.listQuestions[indexQuest].rating;
+                                int rating = subtest!.listQuestions[indexQuest].rating;
                                 return Card(
                                   color: Colors.white,
                                   surfaceTintColor: Colors.white,
@@ -572,7 +577,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                               alignment: Alignment.center,
                                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primary),
                                               child: Text(
-                                                formatType(question!.listQuestions[indexQuest].type),
+                                                formatType(subtest!.listQuestions[indexQuest].type),
                                                 style: TextStyle(color: Colors.white, fontSize: h4),
                                                 textAlign: TextAlign.justify,
                                               ),
@@ -593,7 +598,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                       (index) => InkWell(
                                                         onTap: () => setState(() {
                                                           rating = index + 1;
-                                                          question!.listQuestions[indexQuest].rating = rating;
+                                                          subtest!.listQuestions[indexQuest].rating = rating;
                                                         }),
                                                         child: Padding(
                                                           padding: const EdgeInsets.all(3),
@@ -610,14 +615,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                               height: 30,
                                               child: OutlinedButton(
                                                 onPressed: () {
-                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                    Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: question!.listQuestions[indexQuest])));
-                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                    Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: question!.listQuestions[indexQuest])));
-                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                    Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: question!.listQuestions[indexQuest])));
-                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                    Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: question!.listQuestions[indexQuest])));
+                                                  if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    Navigator.push(context, FadeRoute1(ViewCheckQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    Navigator.push(context, FadeRoute1(ViewPgQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                    Navigator.push(context, FadeRoute1(ViewStuffingQuestPage(question: subtest!.listQuestions[indexQuest])));
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    Navigator.push(context, FadeRoute1(ViewTruefalseQuestPage(question: subtest!.listQuestions[indexQuest])));
                                                   }
                                                 },
                                                 child: Text('Preview', style: TextStyle(color: Colors.black, fontSize: h4), textAlign: TextAlign.justify),
@@ -629,7 +634,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                           focusNode: FocusNode(),
                                           configurations: QuillEditorConfigurations(
                                             controller: QuillController(
-                                              document: Document.fromHtml(question!.listQuestions[indexQuest].question),
+                                              document: Document.fromHtml(subtest!.listQuestions[indexQuest].question),
                                               selection: const TextSelection(baseOffset: 0, extentOffset: 0),
                                               readOnly: true,
                                             ),
@@ -658,8 +663,8 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                   value: _selectedOption,
                                                   padding: const EdgeInsets.only(left: 20, right: 10),
                                                   hint: Text(
-                                                    (question!.listQuestions[indexQuest].subjectRelevance != '')
-                                                        ? question!.listQuestions[indexQuest].subjectRelevance
+                                                    (subtest!.listQuestions[indexQuest].subjectRelevance != '')
+                                                        ? subtest!.listQuestions[indexQuest].subjectRelevance
                                                         : 'Pilih Mapel Terkait',
                                                     style: TextStyle(color: Colors.black, fontSize: h4),
                                                   ),
@@ -673,10 +678,10 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                                   }).toList(),
                                                   onChanged: (String? newValue) async {
                                                     if (newValue != null) {
-                                                      if (question!.listQuestions[indexQuest].subjectRelevance == '') {
-                                                        question!.listQuestions[indexQuest].subjectRelevance = newValue;
+                                                      if (subtest!.listQuestions[indexQuest].subjectRelevance == '') {
+                                                        subtest!.listQuestions[indexQuest].subjectRelevance = newValue;
                                                       } else {
-                                                        question!.listQuestions[indexQuest].subjectRelevance = '';
+                                                        subtest!.listQuestions[indexQuest].subjectRelevance = '';
                                                       }
                                                       setState(() {});
                                                     }
@@ -687,24 +692,24 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                             IconButton(
                                               onPressed: () async {
                                                 if (lebar(context) <= 700) {
-                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                    await editMultiJawabanDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                    await editPGDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                    await editIsianDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                    await editBenarSalahDialogSmallDevice(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    await editMultiJawabanDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    await editPGDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                    await editIsianDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    await editBenarSalahDialogSmallDevice(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
                                                   }
                                                 } else {
-                                                  if (question!.listQuestions[indexQuest].type == 'banyak_pilihan') {
-                                                    await editMultiJawabanDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'pilihan_ganda') {
-                                                    await editPGDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'isian') {
-                                                    await editIsianDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
-                                                  } else if (question!.listQuestions[indexQuest].type == 'benar_salah') {
-                                                    await editBenarSalahDialog(soal: question!.listQuestions[indexQuest], index: indexQuest);
+                                                  if (subtest!.listQuestions[indexQuest].type == 'banyak_pilihan') {
+                                                    await editMultiJawabanDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'pilihan_ganda') {
+                                                    await editPGDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'isian') {
+                                                    await editIsianDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
+                                                  } else if (subtest!.listQuestions[indexQuest].type == 'benar_salah') {
+                                                    await editBenarSalahDialog(soal: subtest!.listQuestions[indexQuest], index: indexQuest);
                                                   }
                                                 }
                                                 setState(() {});
@@ -713,7 +718,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                                             ),
                                             IconButton(
                                               onPressed: () {
-                                                print(question!.listQuestions[indexQuest]);
+                                                // print(question!.listQuestions[indexQuest]);
                                                 deleteQuestion(indexQuest);
                                               },
                                               icon: const Icon(Icons.delete_outline),

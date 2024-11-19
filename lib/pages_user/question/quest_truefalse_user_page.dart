@@ -6,6 +6,7 @@ import 'package:da_administrator/model/questions/truefalse_model.dart';
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -35,9 +36,10 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     // TODO: implement initState
     super.initState();
-    question = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
+    question = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
     if (question != null) {
       if (question!.yourAnswer.isNotEmpty) {
         listJawaban = question!.yourAnswer;
@@ -119,7 +121,7 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
                               listJawaban[index0].trueAnswer = true;
                               // setState(() => idSelected = 0);
                               question!.yourAnswer = listJawaban;
-                              setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                              setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                             },
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
@@ -141,7 +143,7 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
                               listJawaban[index0].trueAnswer = false;
                               // setState(() => idSelected = 1);
                               question!.yourAnswer = listJawaban;
-                              setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                              setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                             },
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
@@ -243,7 +245,7 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
                                   listJawaban[index0] = TrueFalseOption(option: question!.trueAnswer[index0].option, trueAnswer: true);
                                   // setState(() => idSelected = 0);
                                   question!.yourAnswer = listJawaban;
-                                  setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                                  setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                                 },
                                 borderRadius: BorderRadius.circular(10),
                                 child: Container(
@@ -264,7 +266,7 @@ class _QuestTruefalseUserPageState extends State<QuestTruefalseUserPage> {
                                   listJawaban[index0] = TrueFalseOption(option: question!.trueAnswer[index0].option, trueAnswer: false);
                                   // setState(() => idSelected = 1);
                                   question!.yourAnswer = listJawaban;
-                                  setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                                  setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                                 },
                                 borderRadius: BorderRadius.circular(10),
                                 child: Container(

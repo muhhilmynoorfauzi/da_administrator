@@ -1,8 +1,10 @@
 import 'dart:html' as html;
 import 'package:da_administrator/pages/home_page.dart';
+import 'package:da_administrator/pages_user/home_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,9 +28,10 @@ class _LoginPageState extends State<LoginPage> {
     return loginDesk(context);
   }
 
-  void onReload(){
-    // html.window.location.reload();
+  void onReload() {
+    html.window.location.reload();
   }
+
   Widget loginDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,14 +52,14 @@ class _LoginPageState extends State<LoginPage> {
           SizedBox(
             height: lebar(context) <= 400 ? lebar(context) + 250 : 550,
             width: 380,
-            child: cardLogin(),
+            child: cardLogin(context),
           ),
         ],
       ),
     );
   }
 
-  Widget cardLogin() {
+  Widget cardLogin(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       color: Colors.white,
@@ -86,10 +89,18 @@ class _LoginPageState extends State<LoginPage> {
                     await provider.googleLogin();
 
                     setState(() => isLoading = !isLoading);
+                    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+                      if (user != null) {
+                        if (user.email == 'kikiamaliaaa725@gmail.com') {
+                          Navigator.pushAndRemoveUntil(context, FadeRoute1(const HomePage()), (Route<dynamic> route) => false);
+                        } else {
+                          Navigator.pushAndRemoveUntil(context, FadeRoute1(const HomeUserPage()), (Route<dynamic> route) => false);
+                        }
+                      }
+                    });
                   } catch (e) {
                     print(e);
                   }
-                  onReload();
                 },
                 child: (isLoading)
                     ? Center(child: Padding(padding: const EdgeInsets.all(5), child: AspectRatio(aspectRatio: 1, child: CircularProgressIndicator(color: primary, strokeWidth: 3))))

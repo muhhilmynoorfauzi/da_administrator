@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 Widget footerDesk({required BuildContext context}) => Container(
-      height: 200,
+      height: 220,
       width: lebar(context),
       color: secondaryWhite,
       child: Row(
         children: [
           Expanded(
             child: Container(
-              margin: const EdgeInsets.all(30),
+              margin: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,7 +46,7 @@ Widget footerDesk({required BuildContext context}) => Container(
           ),
           Expanded(
             child: Container(
-              margin: const EdgeInsets.all(30),
+              margin: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -133,28 +133,64 @@ Widget footerMo({required BuildContext context}) => Container(
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
                   ],
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
                   ],
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
-                    TextButton(onPressed: () {}, child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal))),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Topic', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.normal)),
+                    ),
                   ],
                 ),
               ],

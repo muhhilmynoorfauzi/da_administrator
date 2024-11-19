@@ -4,6 +4,7 @@ import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -32,13 +33,14 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     started();
     // TODO: implement initState
     super.initState();
   }
 
   void started() {
-    question = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
+    question = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
     if (question != null) {
       if (question!.yourAnswer.isNotEmpty) {
         listJawaban = question!.yourAnswer;
@@ -128,7 +130,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
                               listJawaban[index] = '';
                             }
                             question!.yourAnswer = listJawaban;
-                            setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                            setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                           },
                         ),
                       ),
@@ -223,7 +225,7 @@ class _QuestCheckUserPageState extends State<QuestCheckUserPage> {
                               listJawaban[index] = '';
                             }
                             question!.yourAnswer = listJawaban;
-                            setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                            setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                           },
                         ),
                       ),

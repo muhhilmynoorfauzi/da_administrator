@@ -1,3 +1,4 @@
+import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/component/nav_buttom.dart';
@@ -80,7 +81,9 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
                         Text('Tunggu apa lagi? Yuk, Daftar Dream Academy!', style: TextStyle(color: Colors.black, fontSize: h3)),
                         const SizedBox(height: 30),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(context, FadeRoute1(const LoginPage()));
+                          },
                           style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
                           child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h3, fontWeight: FontWeight.normal)),
                         )
@@ -149,7 +152,9 @@ class _RekomendasiUserPageState extends State<RekomendasiUserPage> {
                         SizedBox(
                           height: 40,
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(context, FadeRoute1(const LoginPage()));
+                            },
                             style: TextButton.styleFrom(backgroundColor: primary, padding: const EdgeInsets.symmetric(horizontal: 40)),
                             child: Text('Daftar Sekarang', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.normal)),
                           ),

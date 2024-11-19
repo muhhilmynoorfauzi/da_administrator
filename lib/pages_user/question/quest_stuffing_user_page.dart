@@ -4,6 +4,7 @@ import 'package:da_administrator/model/questions/stuffing_model.dart';
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -28,7 +29,8 @@ class _QuestStuffingUserPageState extends State<QuestStuffingUserPage> {
 
   @override
   void initState() {
-    question = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
+    final user = FirebaseAuth.instance.currentUser;
+    question = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest];
     if (question!.yourAnswer.isNotEmpty) {
       answerController.text = question!.yourAnswer.first;
     }
@@ -112,7 +114,7 @@ class _QuestStuffingUserPageState extends State<QuestStuffingUserPage> {
                     onChanged: (value) {
                       var listJawaban = [answerController.text];
                       question!.yourAnswer = listJawaban;
-                      setState(() => userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
+                      setState(() => userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[widget.indexQuest] = question!);
                     },
                     style: TextStyle(color: Colors.black, fontSize: h4),
                     decoration: InputDecoration(

@@ -22,13 +22,15 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DetailToPage extends StatefulWidget {
-  const DetailToPage({super.key});
+  const DetailToPage({super.key, required this.tryout});
+
+  final TryoutModel? tryout;
 
   @override
   State<DetailToPage> createState() => _DetailToPageState();
 }
 
-TryoutModel? tryout;
+TryoutModel? tryoutGlobal;
 
 class _DetailToPageState extends State<DetailToPage> {
   bool isLoading = false;
@@ -54,29 +56,16 @@ class _DetailToPageState extends State<DetailToPage> {
   @override
   void initState() {
     super.initState();
-
-    final profider = Provider.of<CounterProvider>(context, listen: false);
-    getDataTryOut(profider.getIdDetailPage!);
-  }
-
-  void getDataTryOut(String docId) async {
-    try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('tryout_v2').doc(docId);
-      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        setState(() => tryout = TryoutModel.fromSnapshot(docSnapshot));
-        print('Dokumen ditemukan');
-      } else {
-        print('Dokumen tidak ditemukan');
-      }
-    } catch (e) {
-      print('Error: $e');
+    if (widget.tryout != null) {
+      tryoutGlobal = widget.tryout;
+    } else {
+      print('Tidak ada data TryOut');
     }
+    setState(() {});
   }
 
   String formatDate(DateTime dateTime) {
     final DateFormat formatter = DateFormat('dd MMMM yyyy');
-
     return formatter.format(dateTime);
   }
 
@@ -113,15 +102,15 @@ class _DetailToPageState extends State<DetailToPage> {
     if (kIsWeb) {
       // Pada platform web, gunakan bytes untuk mengupload berkas
       final bytes = pickedFileTO!.bytes!;
-      final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileTO?.name}');
+      final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileTO?.name}');
       uploadTaskTO = ref.putData(bytes);
 
       final snapshot = await uploadTaskTO!.whenComplete(() {});
       final urlDownload = await snapshot.ref.getDownloadURL();
-      tryout!.image = urlDownload;
+      tryoutGlobal!.image = urlDownload;
     } else {
       // Pada platform native, gunakan path seperti biasa
-      final path = 'question_${tryout!.toName}/${pickedFileTO?.name}';
+      final path = 'question_${tryoutGlobal!.toName}/${pickedFileTO?.name}';
       final file = File(pickedFileTO!.path!);
       final ref = FirebaseStorage.instance.ref().child(path);
       uploadTaskTO = ref.putFile(file);
@@ -129,7 +118,7 @@ class _DetailToPageState extends State<DetailToPage> {
       final snapshot = await uploadTaskTO!.whenComplete(() {});
 
       final urlDownload = await snapshot.ref.getDownloadURL();
-      tryout!.image = urlDownload;
+      tryoutGlobal!.image = urlDownload;
     }
   }
 
@@ -137,34 +126,32 @@ class _DetailToPageState extends State<DetailToPage> {
 
   Future<void> btnSimpan(BuildContext context, String id) async {
     setState(() => isLoading = !isLoading);
-    final profider = Provider.of<CounterProvider>(context, listen: false);
     if (pickedFileTO != null) {
       await uploadImageTO();
     }
     await TryoutService.edit(
       id: id,
-      created: tryout!.created,
+      created: tryoutGlobal!.created,
       updated: DateTime.now(),
-      toCode: tryout!.toCode,
-      toName: tryout!.toName,
-      started: tryout!.started,
-      ended: tryout!.ended,
-      desk: tryout!.desk,
-      image: tryout!.image,
-      phase: tryout!.phase,
-      phaseIRT: tryout!.phaseIRT,
-      expired: tryout!.expired,
-      public: tryout!.public,
-      showFreeMethod: tryout!.showFreeMethod,
-      totalTime: tryout!.totalTime,
-      numberQuestions: tryout!.numberQuestions,
-      listTest: tryout!.listTest,
-      claimedUid: tryout!.claimedUid,
-      listPrice: tryout!.listPrice,
+      toCode: tryoutGlobal!.toCode,
+      toName: tryoutGlobal!.toName,
+      started: tryoutGlobal!.started,
+      ended: tryoutGlobal!.ended,
+      desk: tryoutGlobal!.desk,
+      image: tryoutGlobal!.image,
+      phase: tryoutGlobal!.phase,
+      phaseIRT: tryoutGlobal!.phaseIRT,
+      expired: tryoutGlobal!.expired,
+      public: tryoutGlobal!.public,
+      showFreeMethod: tryoutGlobal!.showFreeMethod,
+      totalTime: tryoutGlobal!.totalTime,
+      numberQuestions: tryoutGlobal!.numberQuestions,
+      listTest: tryoutGlobal!.listTest,
+      claimedUid: tryoutGlobal!.claimedUid,
+      listPrice: tryoutGlobal!.listPrice,
     );
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 200));
     setState(() => isLoading = !isLoading);
-    profider.setReload();
   }
 
 //----------------------------------------------------------------
@@ -172,7 +159,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController controller = TextEditingController(text: tryout!.totalTime.toString());
+        final TextEditingController controller = TextEditingController(text: tryoutGlobal!.totalTime.toString());
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -195,7 +182,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.totalTime = double.parse(controller.text));
+                setState(() => tryoutGlobal!.totalTime = double.parse(controller.text));
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -210,7 +197,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController controller = TextEditingController(text: tryout!.numberQuestions.toString());
+        final TextEditingController controller = TextEditingController(text: tryoutGlobal!.numberQuestions.toString());
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -233,7 +220,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.numberQuestions = int.parse(controller.text));
+                setState(() => tryoutGlobal!.numberQuestions = int.parse(controller.text));
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -245,37 +232,37 @@ class _DetailToPageState extends State<DetailToPage> {
   }
 
   Future<void> berakhir() async {
-    var date = await showDatePicker(context: context, initialDate: tryout!.ended, firstDate: DateTime(2000), lastDate: DateTime(3000));
+    var date = await showDatePicker(context: context, initialDate: tryoutGlobal!.ended, firstDate: DateTime(2000), lastDate: DateTime(3000));
     if (date != null) {
-      setState(() => tryout!.ended = date);
+      setState(() => tryoutGlobal!.ended = date);
     }
   }
 
   Future<void> berakhirTime() async {
-    final DateTime now = tryout!.ended;
+    final DateTime now = tryoutGlobal!.ended;
     var date = await showTimePicker(context: context, initialTime: TimeOfDay(hour: now.hour, minute: now.minute));
     if (date != null) {
-      setState(() => tryout!.ended = DateTime(tryout!.ended.year, tryout!.ended.month, tryout!.ended.day, date.hour, date.minute));
+      setState(() => tryoutGlobal!.ended = DateTime(tryoutGlobal!.ended.year, tryoutGlobal!.ended.month, tryoutGlobal!.ended.day, date.hour, date.minute));
     }
   }
 
   Future<void> mulai() async {
-    var date = await showDatePicker(context: context, initialDate: tryout!.created, firstDate: DateTime(2000), lastDate: DateTime(3000));
+    var date = await showDatePicker(context: context, initialDate: tryoutGlobal!.created, firstDate: DateTime(2000), lastDate: DateTime(3000));
     if (date != null) {
-      setState(() => tryout!.created = date);
+      setState(() => tryoutGlobal!.created = date);
     }
   }
 
   Future<void> mulaiTime() async {
-    final DateTime now = tryout!.created;
+    final DateTime now = tryoutGlobal!.created;
     var date = await showTimePicker(context: context, initialTime: TimeOfDay(hour: now.hour, minute: now.minute));
     if (date != null) {
-      setState(() => tryout!.created = DateTime(tryout!.created.year, tryout!.created.month, tryout!.created.day, date.hour, date.minute));
+      setState(() => tryoutGlobal!.created = DateTime(tryoutGlobal!.created.year, tryoutGlobal!.created.month, tryoutGlobal!.created.day, date.hour, date.minute));
     }
   }
 
 //----------------------------------------------------------------
-  void deleteTest({required int indexTest}) => setState(() => tryout!.listTest.removeAt(indexTest));
+  void deleteTest({required int indexTest}) => setState(() => tryoutGlobal!.listTest.removeAt(indexTest));
 
   Future<void> addTest() async {
     await showDialog(
@@ -314,7 +301,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.listTest.add(TestModel(nameTest: nameController.text, listSubtest: [])));
+                setState(() => tryoutGlobal!.listTest.add(TestModel(nameTest: nameController.text, listSubtest: [])));
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -329,7 +316,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController nameController = TextEditingController(text: tryout!.listTest[index].nameTest);
+        final TextEditingController nameController = TextEditingController(text: tryoutGlobal!.listTest[index].nameTest);
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -363,7 +350,7 @@ class _DetailToPageState extends State<DetailToPage> {
             TextButton(
               onPressed: () async {
                 setState(() {
-                  tryout!.listTest[index].nameTest = nameController.text;
+                  tryoutGlobal!.listTest[index].nameTest = nameController.text;
                 });
                 Navigator.of(context).pop();
               },
@@ -376,7 +363,7 @@ class _DetailToPageState extends State<DetailToPage> {
   }
 
 //----------------------------------------------------------------
-  void deleteSubtest({required int indexTest, required int indexSubtest}) => setState(() => tryout!.listTest[indexTest].listSubtest.removeAt(indexSubtest));
+  void deleteSubtest({required int indexTest, required int indexSubtest}) => setState(() => tryoutGlobal!.listTest[indexTest].listSubtest.removeAt(indexSubtest));
 
   Future<void> addSubtestDialog({required int i}) async {
     await showDialog(
@@ -432,7 +419,7 @@ class _DetailToPageState extends State<DetailToPage> {
               onPressed: () async {
                 setState(() {
                   SubtestModel test = SubtestModel(nameSubTest: nameController.text, timeMinute: double.parse(minuteController.text), idQuestions: '');
-                  tryout!.listTest[i].listSubtest.add(test);
+                  tryoutGlobal!.listTest[i].listSubtest.add(test);
                 });
                 Navigator.of(context).pop();
               },
@@ -448,8 +435,8 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController nameController = TextEditingController(text: tryout!.listTest[i].listSubtest[j].nameSubTest);
-        final TextEditingController minuteController = TextEditingController(text: tryout!.listTest[i].listSubtest[j].timeMinute.toString());
+        final TextEditingController nameController = TextEditingController(text: tryoutGlobal!.listTest[i].listSubtest[j].nameSubTest);
+        final TextEditingController minuteController = TextEditingController(text: tryoutGlobal!.listTest[i].listSubtest[j].timeMinute.toString());
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -495,8 +482,8 @@ class _DetailToPageState extends State<DetailToPage> {
             TextButton(
               onPressed: () async {
                 setState(() {
-                  tryout!.listTest[i].listSubtest[j].nameSubTest = nameController.text;
-                  tryout!.listTest[i].listSubtest[j].timeMinute = double.parse(minuteController.text);
+                  tryoutGlobal!.listTest[i].listSubtest[j].nameSubTest = nameController.text;
+                  tryoutGlobal!.listTest[i].listSubtest[j].timeMinute = double.parse(minuteController.text);
                 });
                 Navigator.of(context).pop();
               },
@@ -514,7 +501,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController controller = TextEditingController(text: tryout!.desk);
+        final TextEditingController controller = TextEditingController(text: tryoutGlobal!.desk);
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -546,7 +533,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.desk = controller.text);
+                setState(() => tryoutGlobal!.desk = controller.text);
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -561,7 +548,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController controller = TextEditingController(text: tryout!.toName);
+        final TextEditingController controller = TextEditingController(text: tryoutGlobal!.toName);
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -588,7 +575,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.toName = controller.text);
+                setState(() => tryoutGlobal!.toName = controller.text);
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -626,7 +613,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.listPrice[index] = int.parse(controller.text));
+                setState(() => tryoutGlobal!.listPrice[index] = int.parse(controller.text));
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -643,7 +630,7 @@ class _DetailToPageState extends State<DetailToPage> {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController controller = TextEditingController(text: tryout!.toCode);
+        final TextEditingController controller = TextEditingController(text: tryoutGlobal!.toCode);
         return AlertDialog(
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.white,
@@ -665,7 +652,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() => tryout!.toCode = controller.text);
+                setState(() => tryoutGlobal!.toCode = controller.text);
                 Navigator.of(context).pop();
               },
               child: Text('Selesai', style: TextStyle(color: Colors.black, fontSize: h4)),
@@ -682,16 +669,16 @@ class _DetailToPageState extends State<DetailToPage> {
     final profider = Provider.of<CounterProvider>(context, listen: false);
     var id = profider.getIdDetailPage!;
 
-    if (tryout != null) {
+    if (tryoutGlobal != null) {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
           shadowColor: Colors.black,
+          scrolledUnderElevation: 1,
           leading: IconButton(
             onPressed: () {
-              // profider.setPage(idPage: null, idDetailPage: null);
               Navigator.pop(context);
             },
             icon: const Icon(Icons.navigate_before_rounded, color: Colors.black),
@@ -701,7 +688,7 @@ class _DetailToPageState extends State<DetailToPage> {
             children: [
               Expanded(
                 child: Text(
-                  tryout!.toName,
+                  tryoutGlobal!.toName,
                   style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -743,7 +730,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                     child: kIsWeb ? Image.memory(pickedFileTO!.bytes!, fit: BoxFit.cover) : Image.file(File(pickedFileTO!.path!), fit: BoxFit.cover),
                                   ),
                                 )
-                              : (tryout!.image == '')
+                              : (tryoutGlobal!.image == '')
                                   ? AspectRatio(
                                       aspectRatio: 3 / 4,
                                       child: Container(
@@ -754,7 +741,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                   : AspectRatio(
                                       aspectRatio: 3 / 4,
                                       child: CachedNetworkImage(
-                                        imageUrl: tryout!.image,
+                                        imageUrl: tryoutGlobal!.image,
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                         errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -784,7 +771,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: Text(tryout!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(tryoutGlobal!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
                           IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                         ],
                       ),
@@ -806,11 +793,11 @@ class _DetailToPageState extends State<DetailToPage> {
                     return Row(
                       children: [
                         Text(
-                          NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(tryout!.listPrice[index]),
+                          NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(tryoutGlobal!.listPrice[index]),
                           style: TextStyle(color: Colors.black, fontSize: h4),
                         ),
                         const Expanded(child: SizedBox()),
-                        IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
+                        IconButton(onPressed: () => priceTO(tryoutGlobal!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                       ],
                     );
                   },
@@ -830,10 +817,10 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('Total Claim', style: TextStyle(color: Colors.black, fontSize: h4)),
                         OutlinedButton.icon(
-                          onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryout!.claimedUid, titleTo: tryout!.toName))),
+                          onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryoutGlobal!.claimedUid, titleTo: tryoutGlobal!.toName))),
                           style: OutlinedButton.styleFrom(padding: const EdgeInsets.only(left: 20, right: 10)),
                           iconAlignment: IconAlignment.end,
-                          label: Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                          label: Text('${tryoutGlobal!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.black),
                         ),
                       ],
@@ -851,7 +838,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Dibuat pada tanggal', style: TextStyle(color: Colors.black, fontSize: h4)),
-                        Text(formatDate(tryout!.created), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        Text(formatDate(tryoutGlobal!.created), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -867,7 +854,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Diedit pada tanggal ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                        Text(formatDate(tryout!.updated), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                        Text(formatDate(tryoutGlobal!.updated), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -891,12 +878,12 @@ class _DetailToPageState extends State<DetailToPage> {
                             child: Row(
                               children: [
                                 Text('Mulai pada ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                                Text('${formatDate(tryout!.started)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                Text('${formatDate(tryoutGlobal!.started)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                                 TextButton(
                                   style: TextButton.styleFrom(foregroundColor: Colors.black),
                                   onPressed: () => mulaiTime(),
                                   child: Text(
-                                    'Pukul ${formatTime(tryout!.started)} ${tryout!.started.timeZoneName}',
+                                    'Pukul ${formatTime(tryoutGlobal!.started)} ${tryoutGlobal!.started.timeZoneName}',
                                     style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold),
                                   ),
                                 ),
@@ -923,12 +910,12 @@ class _DetailToPageState extends State<DetailToPage> {
                           child: Row(
                             children: [
                               Text('Berakhir pada ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                              Text('${formatDate(tryout!.ended)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              Text('${formatDate(tryoutGlobal!.ended)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               TextButton(
                                 style: TextButton.styleFrom(foregroundColor: Colors.black),
                                 onPressed: () => berakhirTime(),
                                 child: Text(
-                                  'Pukul ${formatTime(tryout!.ended)} ${tryout!.ended.timeZoneName}',
+                                  'Pukul ${formatTime(tryoutGlobal!.ended)} ${tryoutGlobal!.ended.timeZoneName}',
                                   style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -959,14 +946,14 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('Publish Tryout', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                         Text(
-                          tryout!.public ? 'Published' : 'Not\nPublished',
+                          tryoutGlobal!.public ? 'Published' : 'Not\nPublished',
                           style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    value: tryout!.public,
-                    onChanged: (bool value) => setState(() => tryout!.public = value),
+                    value: tryoutGlobal!.public,
+                    onChanged: (bool value) => setState(() => tryoutGlobal!.public = value),
                   ),
                   Container(
                     color: Colors.black.withOpacity(.1),
@@ -981,14 +968,14 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('Free Methods Available', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                         Text(
-                          tryout!.showFreeMethod ? 'Free' : 'Not\nFree',
+                          tryoutGlobal!.showFreeMethod ? 'Free' : 'Not\nFree',
                           style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    value: tryout!.showFreeMethod,
-                    onChanged: (bool value) => setState(() => tryout!.showFreeMethod = value),
+                    value: tryoutGlobal!.showFreeMethod,
+                    onChanged: (bool value) => setState(() => tryoutGlobal!.showFreeMethod = value),
                   ),
                   Container(
                     color: Colors.black.withOpacity(.1),
@@ -1003,14 +990,14 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('Tryout Expire', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                         Text(
-                          tryout!.expired ? 'Expired' : 'Not\nExpired',
+                          tryoutGlobal!.expired ? 'Expired' : 'Not\nExpired',
                           style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    value: tryout!.expired,
-                    onChanged: (bool value) => setState(() => tryout!.expired = value),
+                    value: tryoutGlobal!.expired,
+                    onChanged: (bool value) => setState(() => tryoutGlobal!.expired = value),
                   ),
                   Container(
                     color: Colors.black.withOpacity(.1),
@@ -1022,7 +1009,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Text('Tryout Code', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
-                      Text(tryout!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
+                      Text(tryoutGlobal!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
                       IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
@@ -1043,14 +1030,14 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('Fase TryOut', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                         Text(
-                          tryout!.phase ? 'Selesai' : 'Belum\nSelesai',
+                          tryoutGlobal!.phase ? 'Selesai' : 'Belum\nSelesai',
                           style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    value: tryout!.phase,
-                    onChanged: (bool value) => setState(() => tryout!.phase = value),
+                    value: tryoutGlobal!.phase,
+                    onChanged: (bool value) => setState(() => tryoutGlobal!.phase = value),
                   ),
                   Container(
                     color: Colors.black.withOpacity(.1),
@@ -1065,14 +1052,14 @@ class _DetailToPageState extends State<DetailToPage> {
                       children: [
                         Text('IRT System', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                         Text(
-                          tryout!.phaseIRT ? 'Active' : 'Not\nActive',
+                          tryoutGlobal!.phaseIRT ? 'Active' : 'Not\nActive',
                           style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    value: tryout!.phaseIRT,
-                    onChanged: (bool value) => setState(() => tryout!.phaseIRT = value),
+                    value: tryoutGlobal!.phaseIRT,
+                    onChanged: (bool value) => setState(() => tryoutGlobal!.phaseIRT = value),
                   ),
                   Container(
                     color: Colors.black.withOpacity(.1),
@@ -1084,7 +1071,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
-                      Text('${formatMinutes(tryout!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
+                      Text('${formatMinutes(tryoutGlobal!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
                       IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
@@ -1098,7 +1085,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Text('Jumlah Soal', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                       const Expanded(child: SizedBox()),
-                      Text('${tryout!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
+                      Text('${tryoutGlobal!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
                       IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                     ],
                   ),
@@ -1122,7 +1109,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             Column(
               children: List.generate(
-                tryout!.listTest.length,
+                tryoutGlobal!.listTest.length,
                 (indexTest) => Container(
                   margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -1132,7 +1119,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Row(
                         children: [
-                          Text(tryout!.listTest[indexTest].nameTest, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                          Text(tryoutGlobal!.listTest[indexTest].nameTest, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                           const Expanded(child: SizedBox()),
                           IconButton(
                             onPressed: () => editTest(index: indexTest),
@@ -1150,7 +1137,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       ),
                       Column(
                         children: List.generate(
-                          tryout!.listTest[indexTest].listSubtest.length,
+                          tryoutGlobal!.listTest[indexTest].listSubtest.length,
                           (indexSubtest) {
                             bool questionsloading = false;
                             return StatefulBuilder(
@@ -1168,88 +1155,67 @@ class _DetailToPageState extends State<DetailToPage> {
                                       width: double.infinity,
                                       margin: const EdgeInsets.symmetric(vertical: 10),
                                     ),
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                    Column(
                                       children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
-                                                  style: TextStyle(color: Colors.black, fontSize: h4),
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                              Container(
-                                                height: 30,
-                                                width: 150,
-                                                decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(50)),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  '${formatMinutes(tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
-                                                  style: TextStyle(color: Colors.white, fontSize: h4),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                        Row(
                                           children: [
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                  onPressed: () => editSubtestDialog(i: indexTest, j: indexSubtest),
-                                                  icon: const Icon(Icons.edit_outlined, color: Colors.black),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () => deleteSubtest(indexSubtest: indexSubtest, indexTest: indexTest),
-                                                  icon: const Icon(Icons.delete_outline, color: Colors.black),
-                                                ),
-                                              ],
+                                            Text(
+                                              tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                              style: TextStyle(color: Colors.black, fontSize: h4),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const Expanded(child: SizedBox()),
+                                            IconButton(
+                                              onPressed: () => editSubtestDialog(i: indexTest, j: indexSubtest),
+                                              icon: const Icon(Icons.edit_outlined, color: Colors.black),
+                                            ),
+                                            IconButton(
+                                              onPressed: () => deleteSubtest(indexSubtest: indexSubtest, indexTest: indexTest),
+                                              icon: const Icon(Icons.delete_outline, color: Colors.black),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                              decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(50)),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                '${formatMinutes(tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
+                                                style: TextStyle(color: Colors.white, fontSize: h4),
+                                              ),
                                             ),
                                             SizedBox(
                                               height: 30,
                                               child: OutlinedButton(
                                                 onPressed: () async {
                                                   setState(() => questionsloading = true);
-
-                                                  if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
-                                                    await Future.delayed(const Duration(milliseconds: 500));
-                                                    Navigator.push(
-                                                      context,
-                                                      FadeRoute1(
-                                                        QuestionsPage(
-                                                          idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                          subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
-                                                        ),
-                                                      ),
-                                                    );
+                                                  if (tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
+                                                    var idSubTest = tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions;
+                                                    var nameSubTest = tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest;
+                                                    Navigator.push(context, FadeRoute1(QuestionsPage(idQuestion: idSubTest, nameSubTest: nameSubTest)));
                                                   } else {
                                                     String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
-
-                                                    tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
+                                                    tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
                                                     await btnSimpan(context, id);
                                                   }
-
+                                                  await Future.delayed(const Duration(milliseconds: 200));
                                                   setState(() => questionsloading = false);
                                                 },
                                                 child: questionsloading
                                                     ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary, strokeWidth: 3))
                                                     : Text(
-                                                        tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
+                                                        tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
                                                         style: TextStyle(color: Colors.black, fontSize: h4),
                                                       ),
                                               ),
                                             ),
                                           ],
-                                        )
+                                        ),
                                       ],
                                     ),
-                                    // if (indexSubtest != tryout!.listTest[indexTest].listSubtest.length - 1)
                                   ],
                                 ),
                               ),
@@ -1277,18 +1243,19 @@ class _DetailToPageState extends State<DetailToPage> {
     final profider = Provider.of<CounterProvider>(context, listen: false);
     var id = profider.getIdDetailPage!;
 
-    if (tryout != null) {
+    if (tryoutGlobal != null) {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
           shadowColor: Colors.black,
+          scrolledUnderElevation: 1,
           title: Row(
             children: [
               Expanded(
                 child: Text(
-                  tryout!.toName,
+                  tryoutGlobal!.toName,
                   style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1336,7 +1303,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                     child: kIsWeb ? Image.memory(pickedFileTO!.bytes!, fit: BoxFit.cover) : Image.file(File(pickedFileTO!.path!), fit: BoxFit.cover),
                                   ),
                                 )
-                              : (tryout!.image == '')
+                              : (tryoutGlobal!.image == '')
                                   ? AspectRatio(
                                       aspectRatio: 3 / 4,
                                       child: Container(
@@ -1347,7 +1314,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                   : AspectRatio(
                                       aspectRatio: 3 / 4,
                                       child: CachedNetworkImage(
-                                        imageUrl: tryout!.image,
+                                        imageUrl: tryoutGlobal!.image,
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
                                         errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -1377,7 +1344,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: Text(tryout!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(tryoutGlobal!.desk, style: TextStyle(color: Colors.black, fontSize: h4), maxLines: 10, overflow: TextOverflow.ellipsis)),
                           IconButton(onPressed: () => editDesk(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                         ],
                       ),
@@ -1396,11 +1363,11 @@ class _DetailToPageState extends State<DetailToPage> {
                           return Row(
                             children: [
                               Text(
-                                NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(tryout!.listPrice[index]),
+                                NumberFormat.currency(locale: 'id', decimalDigits: 0, name: 'Rp ').format(tryoutGlobal!.listPrice[index]),
                                 style: TextStyle(color: Colors.black, fontSize: h4),
                               ),
                               const Expanded(child: SizedBox()),
-                              IconButton(onPressed: () => priceTO(tryout!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
+                              IconButton(onPressed: () => priceTO(tryoutGlobal!.listPrice[index], index), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                             ],
                           );
                         },
@@ -1427,10 +1394,10 @@ class _DetailToPageState extends State<DetailToPage> {
                               Text('Total Claim', style: TextStyle(color: Colors.black, fontSize: h4)),
                               const Expanded(child: SizedBox()),
                               OutlinedButton.icon(
-                                onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryout!.claimedUid, titleTo: tryout!.toName))),
+                                onPressed: () => Navigator.push(context, FadeRoute1(DetailClaimed(claimedUid: tryoutGlobal!.claimedUid, titleTo: tryoutGlobal!.toName))),
                                 style: OutlinedButton.styleFrom(padding: const EdgeInsets.only(left: 20, right: 10)),
                                 iconAlignment: IconAlignment.end,
-                                label: Text('${tryout!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                label: Text('${tryoutGlobal!.claimedUid.length} Member', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                                 icon: const Icon(Icons.navigate_next_rounded, color: Colors.black),
                               ),
                             ],
@@ -1448,7 +1415,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Dibuat pada tanggal', style: TextStyle(color: Colors.black, fontSize: h4)),
-                              Text(formatDate(tryout!.created), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              Text(formatDate(tryoutGlobal!.created), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -1464,7 +1431,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Diedit pada tanggal ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                              Text(formatDate(tryout!.updated), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              Text(formatDate(tryoutGlobal!.updated), style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -1489,12 +1456,12 @@ class _DetailToPageState extends State<DetailToPage> {
                                   child: Row(
                                     children: [
                                       Text('Mulai pada ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                                      Text('${formatDate(tryout!.started)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                      Text('${formatDate(tryoutGlobal!.started)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                                       TextButton(
                                         style: TextButton.styleFrom(foregroundColor: Colors.black),
                                         onPressed: () => mulaiTime(),
                                         child: Text(
-                                          'Pukul ${formatTime(tryout!.started)} ${tryout!.started.timeZoneName}',
+                                          'Pukul ${formatTime(tryoutGlobal!.started)} ${tryoutGlobal!.started.timeZoneName}',
                                           style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold),
                                         ),
                                       ),
@@ -1521,12 +1488,12 @@ class _DetailToPageState extends State<DetailToPage> {
                                 child: Row(
                                   children: [
                                     Text('Berakhir pada ', style: TextStyle(color: Colors.black, fontSize: h4)),
-                                    Text('${formatDate(tryout!.ended)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                    Text('${formatDate(tryoutGlobal!.ended)},', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                                     TextButton(
                                       style: TextButton.styleFrom(foregroundColor: Colors.black),
                                       onPressed: () => berakhirTime(),
                                       child: Text(
-                                        'Pukul ${formatTime(tryout!.ended)} ${tryout!.ended.timeZoneName}',
+                                        'Pukul ${formatTime(tryoutGlobal!.ended)} ${tryoutGlobal!.ended.timeZoneName}',
                                         style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold),
                                       ),
                                     ),
@@ -1564,14 +1531,14 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Publish Tryout', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               Text(
-                                tryout!.public ? 'Published' : 'Not\nPublished',
+                                tryoutGlobal!.public ? 'Published' : 'Not\nPublished',
                                 style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
-                          value: tryout!.public,
-                          onChanged: (bool value) => setState(() => tryout!.public = value),
+                          value: tryoutGlobal!.public,
+                          onChanged: (bool value) => setState(() => tryoutGlobal!.public = value),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1586,14 +1553,14 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Free Methods Available', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               Text(
-                                tryout!.showFreeMethod ? 'Free' : 'Not\nFree',
+                                tryoutGlobal!.showFreeMethod ? 'Free' : 'Not\nFree',
                                 style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
-                          value: tryout!.showFreeMethod,
-                          onChanged: (bool value) => setState(() => tryout!.showFreeMethod = value),
+                          value: tryoutGlobal!.showFreeMethod,
+                          onChanged: (bool value) => setState(() => tryoutGlobal!.showFreeMethod = value),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1608,14 +1575,14 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Tryout Expire', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               Text(
-                                tryout!.expired ? 'Expired' : 'Not\nExpired',
+                                tryoutGlobal!.expired ? 'Expired' : 'Not\nExpired',
                                 style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
-                          value: tryout!.expired,
-                          onChanged: (bool value) => setState(() => tryout!.expired = value),
+                          value: tryoutGlobal!.expired,
+                          onChanged: (bool value) => setState(() => tryoutGlobal!.expired = value),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1627,7 +1594,7 @@ class _DetailToPageState extends State<DetailToPage> {
                           children: [
                             Text('Tryout Code', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             const Expanded(child: SizedBox()),
-                            Text(tryout!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
+                            Text(tryoutGlobal!.toCode, style: TextStyle(color: Colors.black, fontSize: h4)),
                             IconButton(onPressed: () => toCode(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                           ],
                         ),
@@ -1649,14 +1616,14 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Fase TryOut', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               Text(
-                                tryout!.phase ? 'Selesai' : 'Belum\nSelesai',
+                                tryoutGlobal!.phase ? 'Selesai' : 'Belum\nSelesai',
                                 style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
-                          value: tryout!.phase,
-                          onChanged: (bool value) => setState(() => tryout!.phase = value),
+                          value: tryoutGlobal!.phase,
+                          onChanged: (bool value) => setState(() => tryoutGlobal!.phase = value),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1671,14 +1638,14 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('IRT System', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               Text(
-                                tryout!.phaseIRT ? 'Active' : 'Not\nActive',
+                                tryoutGlobal!.phaseIRT ? 'Active' : 'Not\nActive',
                                 style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
-                          value: tryout!.phaseIRT,
-                          onChanged: (bool value) => setState(() => tryout!.phaseIRT = value),
+                          value: tryoutGlobal!.phaseIRT,
+                          onChanged: (bool value) => setState(() => tryoutGlobal!.phaseIRT = value),
                         ),
                         Container(
                           color: Colors.black.withOpacity(.1),
@@ -1692,7 +1659,7 @@ class _DetailToPageState extends State<DetailToPage> {
                             children: [
                               Text('Total Waktu', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                               const Expanded(child: SizedBox()),
-                              Text('${formatMinutes(tryout!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
+                              Text('${formatMinutes(tryoutGlobal!.totalTime)} Menit', style: TextStyle(color: Colors.black, fontSize: h4)),
                               IconButton(onPressed: () => totalWaktu(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                             ],
                           ),
@@ -1707,7 +1674,7 @@ class _DetailToPageState extends State<DetailToPage> {
                           children: [
                             Text('Jumlah Soal', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                             const Expanded(child: SizedBox()),
-                            Text('${tryout!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
+                            Text('${tryoutGlobal!.numberQuestions} Soal', style: TextStyle(color: Colors.black, fontSize: h4)),
                             IconButton(onPressed: () => jumlahSoal(), icon: const Icon(Icons.edit_outlined, color: Colors.black)),
                           ],
                         ),
@@ -1734,7 +1701,7 @@ class _DetailToPageState extends State<DetailToPage> {
             ),
             Column(
               children: List.generate(
-                tryout!.listTest.length,
+                tryoutGlobal!.listTest.length,
                 (indexTest) => Container(
                   margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -1744,7 +1711,7 @@ class _DetailToPageState extends State<DetailToPage> {
                     children: [
                       Row(
                         children: [
-                          Text(tryout!.listTest[indexTest].nameTest, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                          Text(tryoutGlobal!.listTest[indexTest].nameTest, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                           const Expanded(child: SizedBox()),
                           IconButton(
                             onPressed: () => editTest(index: indexTest),
@@ -1762,7 +1729,7 @@ class _DetailToPageState extends State<DetailToPage> {
                       ),
                       Column(
                         children: List.generate(
-                          tryout!.listTest[indexTest].listSubtest.length,
+                          tryoutGlobal!.listTest[indexTest].listSubtest.length,
                           (indexSubtest) {
                             bool questionsloading = false;
 
@@ -1784,7 +1751,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                               height: 50,
                                               alignment: Alignment.centerLeft,
                                               child: Text(
-                                                tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
                                                 style: TextStyle(color: Colors.black, fontSize: h4),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -1796,7 +1763,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                               alignment: Alignment.center,
                                               child: Text(
-                                                '${formatMinutes(tryout!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
+                                                '${formatMinutes(tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].timeMinute)} Menit',
                                                 style: TextStyle(color: Colors.white, fontSize: h4),
                                               ),
                                             ),
@@ -1809,21 +1776,21 @@ class _DetailToPageState extends State<DetailToPage> {
                                           onPressed: () async {
                                             setState(() => questionsloading = true);
 
-                                            if (tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
-                                              await Future.delayed(const Duration(milliseconds: 500));
+                                            if (tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '') {
+                                              await Future.delayed(const Duration(milliseconds: 200));
                                               Navigator.push(
                                                 context,
                                                 FadeRoute1(
                                                   QuestionsPage(
-                                                    idQuestion: tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
-                                                    subTest: tryout!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
+                                                    idQuestion: tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions,
+                                                    nameSubTest: tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].nameSubTest,
                                                   ),
                                                 ),
                                               );
                                             } else {
                                               String newDocId = await QuestionsService.addGetId(QuestionsModel(idTryOut: id, listQuestions: []));
 
-                                              tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
+                                              tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions = newDocId;
                                               await btnSimpan(context, id);
                                             }
 
@@ -1832,7 +1799,7 @@ class _DetailToPageState extends State<DetailToPage> {
                                           child: questionsloading
                                               ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: primary, strokeWidth: 3))
                                               : Text(
-                                                  tryout!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
+                                                  tryoutGlobal!.listTest[indexTest].listSubtest[indexSubtest].idQuestions != '' ? 'Soal Selengkapnya' : 'Tambah Soal',
                                                   style: TextStyle(color: Colors.black, fontSize: h4),
                                                 ),
                                         ),

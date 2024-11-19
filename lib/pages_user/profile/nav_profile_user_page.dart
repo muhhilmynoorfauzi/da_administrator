@@ -13,6 +13,7 @@ import 'package:da_administrator/pages_user/profile/detail_pribadi_user_page.dar
 import 'package:da_administrator/pages_user/profile/profile_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:da_administrator/service/component.dart';
@@ -28,124 +29,19 @@ class NavProfileUserPage extends StatefulWidget {
 }
 
 class _NavProfileUserPageState extends State<NavProfileUserPage> {
+  final user = FirebaseAuth.instance.currentUser;
   int idPage = 0;
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
   dynamic page = [];
 
   List<JurusanModel> allJurusan = [];
   List<String> univ = [];
 
-  List<ProfileUserModel> allProfile = [];
-  List<String> idAllProfile = [];
-
   ProfileUserModel? profile;
   String? idProfile;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    final profider = Provider.of<CounterProvider>(context, listen: false);
-    idPage = widget.idPage;
-    profile = profider.getProfile;
-    getDataJurusan();
-    getDataUniv();
-
-    if (profider.getProfile == null) {
-      getDataProfile();
-    }
-  }
-
-  void getDataProfile() async {
-    profile = null;
-    idProfile = null;
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-      allProfile = querySnapshot.docs.map((doc) => ProfileUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      idAllProfile = querySnapshot.docs.map((doc) => doc.id).toList();
-      bool userFound = false;
-
-      // print('dapat');
-      for (int i = 0; i < allProfile.length; i++) {
-        if (allProfile[i].userUID == userUid) {
-          profile = allProfile[i];
-          idProfile = idAllProfile[i];
-
-          userFound = true;
-
-          page = [
-            ProfileUserPage(idProfile: idProfile!, profile: profile!),
-            DetailPribadiUserPage(idProfile: idProfile!, profile: profile!, listJurusan: allJurusan, daftarUniv: univ),
-          ];
-
-          return;
-        }
-      }
-      if (!userFound) {
-        await ProfileUserService.add(
-          ProfileUserModel(
-            userUID: userUid,
-            imageProfile: '',
-            userName: 'Muh Hilmy Noor Fauzi',
-            uniqueUserName: 'muhhilmynoorfauzi',
-            asalSekolah: 'MAN',
-            listPlan: [
-              PlanOptions(universitas: '', jurusan: ''),
-              PlanOptions(universitas: '', jurusan: ''),
-              PlanOptions(universitas: '', jurusan: ''),
-              PlanOptions(universitas: '', jurusan: ''),
-            ],
-            email: 'fauzizaelano@gmail.com',
-            role: 'user',
-            koin: 0,
-            kontak: '082195012789',
-            motivasi: '-',
-            tempatTinggal: 'Makassar',
-            created: DateTime.now(),
-            update: DateTime.now(),
-          ),
-        );
-        getDataProfile();
-      }
-      setState(() {});
-    } catch (e) {
-      print('salah getDataProfile: $e');
-    }
-  }
-
-  void getDataJurusan() async {
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('jurusan_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-      allJurusan = querySnapshot.docs.map((doc) => JurusanModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-
-      setState(() {});
-    } catch (e) {
-      print('salah getDataJurusan: $e');
-    }
-  }
-
-  void getDataUniv() async {
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('univ_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-      List<UnivModel> allUniv = querySnapshot.docs.map((doc) => UnivModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      for (int i = 0; i < allUniv.length; i++) {
-        univ.add(allUniv[i].namaUniv);
-      }
-      setState(() {});
-    } catch (e) {
-      print('salah getDataUniv: $e');
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (profile != null) {
+    if (allJurusan.isNotEmpty && univ.isNotEmpty) {
       if (lebar(context) <= 700) {
         return onMo(context);
       } else {
@@ -156,13 +52,108 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
     }
   }
 
+  @override
+  void initState() {
+    final user = FirebaseAuth.instance.currentUser;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    idPage = widget.idPage;
+    profile = profider.getProfile;
+    idProfile = profider.getIdProfile;
+    // TODO: implement initState
+    super.initState();
+
+    if (user != null) {
+      getDataJurusan();
+      getDataUniv();
+      print('sudah didapat getDataUniv getDataJurusan');
+    } else {
+      print('Belum Login');
+    }
+    setState(() {});
+  }
+
+  void getDataJurusan() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('jurusan_v03');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      allJurusan = querySnapshot.docs.map((doc) => JurusanModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+    } catch (e) {
+      print('salah getDataJurusan: $e');
+    }
+    setState(() {});
+  }
+
+  void getDataUniv() async {
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('univ_v03');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
+
+      List<UnivModel> allUniv = querySnapshot.docs.map((doc) => UnivModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      for (int i = 0; i < allUniv.length; i++) {
+        univ.add(allUniv[i].namaUniv);
+      }
+    } catch (e) {
+      print('salah getDataUniv: $e');
+    }
+    setState(() {});
+  }
+
+  Future<void> getDataProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+
+    if (user == null) {
+      print('User belum login.');
+      return;
+    }
+
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v03');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.where('userUID', isEqualTo: user.uid).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        profile = ProfileUserModel.fromSnapshot(querySnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>);
+
+        profider.setProfile(profile);
+        profider.setIdProfile(querySnapshot.docs.first.id);
+        print('Data dengan userUID tersebut ditemukan.');
+      }
+    } catch (e) {
+      print('salah getDataProfile: $e');
+    }
+    setState(() {});
+  }
+
+  Future<void> onRefresh(BuildContext context) async {
+    allJurusan = [];
+    univ = [];
+    setState(() {});
+
+    getDataProfile();
+    getDataJurusan();
+    getDataUniv();
+    print('sudah didapat getDataUniv getDataJurusan');
+
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    setState(() {});
+    //
+  }
+
   Widget onDesk(BuildContext context) {
+    if (allJurusan.isNotEmpty && univ.isNotEmpty) {
+      page = [
+        ProfileUserPage(profile: profile!, idProfile: idProfile!),
+        DetailPribadiUserPage(profile: profile!, idProfile: idProfile!, allJurusan: allJurusan, namaUniv: univ),
+      ];
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: Row(
         children: [
           Container(
-            width: 200,
+            width: 300,
             height: tinggi(context),
             margin: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
@@ -186,7 +177,9 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
                             child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
                           ),
                         ),
-                        Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black))
+                        Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+                        const Expanded(child: SizedBox()),
+                        IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
                       ],
                     ),
                   ),
@@ -232,6 +225,12 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
   }
 
   Widget onMo(BuildContext context) {
+    if (allJurusan.isNotEmpty && univ.isNotEmpty) {
+      page = [
+        ProfileUserPage(profile: profile!, idProfile: idProfile!),
+        DetailPribadiUserPage(profile: profile!, idProfile: idProfile!, allJurusan: allJurusan, namaUniv: univ),
+      ];
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -256,7 +255,9 @@ class _NavProfileUserPageState extends State<NavProfileUserPage> {
                   child: const Icon(Icons.navigate_before_rounded, color: Colors.white),
                 ),
               ),
-              Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black))
+              Text('Kembali', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
+              const Expanded(child: SizedBox()),
+              IconButton(onPressed: () => onRefresh(context), icon: const Icon(Icons.refresh_rounded, color: Colors.black)),
             ],
           ),
         ),

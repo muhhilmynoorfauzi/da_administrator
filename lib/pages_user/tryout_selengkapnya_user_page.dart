@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:da_administrator/example.dart';
+import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/service/color.dart';
@@ -8,7 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:da_administrator/service/component.dart';
 
 class TryoutSelengkapnyaUserPage extends StatefulWidget {
-  const TryoutSelengkapnyaUserPage({super.key});
+  const TryoutSelengkapnyaUserPage({
+    super.key,
+    required this.allTryout,
+    required this.idAllTryout,
+  });
+
+  final List<TryoutModel> allTryout;
+  final List<String> idAllTryout;
 
   @override
   State<TryoutSelengkapnyaUserPage> createState() => _TryoutSelengkapnyaUserPageState();
@@ -16,6 +24,9 @@ class TryoutSelengkapnyaUserPage extends StatefulWidget {
 
 class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage> {
   // bool isLogin = true;
+
+  List<TryoutModel> allTryout = [];
+  List<String> idAllTryout = [];
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +93,10 @@ class _TryoutSelengkapnyaUserPageState extends State<TryoutSelengkapnyaUserPage>
   Widget onDesk(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarDesk(context: context, featureActive: true, ),
+      appBar: appbarDesk(
+        context: context,
+        featureActive: true,
+      ),
       body: ListView(
         children: [
           //Tryout Tersedia

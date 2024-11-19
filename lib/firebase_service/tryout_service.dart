@@ -5,9 +5,9 @@ import 'package:da_administrator/model/tryout/claimed_model.dart';
 
 
 class TryoutService {
-  static Future<void> add(TryoutModel tryout) async => await FirebaseFirestore.instance.collection('tryout_v2').add(tryout.toJson());
+  static Future<void> add(TryoutModel tryout) async => await FirebaseFirestore.instance.collection('tryout_v03').add(tryout.toJson());
 
-  static Future<void> delete(String id) async => await FirebaseFirestore.instance.collection('tryout_v2').doc(id).delete();
+  static Future<void> delete(String id) async => await FirebaseFirestore.instance.collection('tryout_v03').doc(id).delete();
 
   static Future<void> edit({
     required String id,
@@ -30,7 +30,7 @@ class TryoutService {
     required List<int> listPrice,
     required List<TestModel> listTest,
   }) async {
-    final docRef = FirebaseFirestore.instance.collection('tryout_v2').doc(id);
+    final docRef = FirebaseFirestore.instance.collection('tryout_v03').doc(id);
 
     final updates = <String, dynamic>{
       'created': created.toIso8601String(),

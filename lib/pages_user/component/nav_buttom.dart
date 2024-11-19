@@ -18,7 +18,6 @@ Widget NavBottomMo({
   VoidCallback? actionProfile,
 }) {
   final profider = Provider.of<CounterProvider>(context, listen: false);
-  bool isLogin = (/*profider.getCurrentUser != null*/true);
 
   final List<String> action = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return Container(

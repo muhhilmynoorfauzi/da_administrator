@@ -3,6 +3,7 @@ import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,7 @@ class _PayDoneUserPageState extends State<PayDoneUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
     remainingTime = widget.second;
     startTimer();

@@ -1,19 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:da_administrator/firebase_service/profile_user_service.dart';
 import 'package:da_administrator/firebase_service/tryout_service.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/model/tryout/claimed_model.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/pay_done_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PayCoinUserPage extends StatefulWidget {
-  const PayCoinUserPage({super.key, required this.docId, required this.tryoutUser});
+  const PayCoinUserPage({super.key, required this.idTryout, required this.tryoutUser});
 
-  final String docId;
+  final String idTryout;
   final TryoutModel? tryoutUser;
 
   @override
@@ -22,6 +25,12 @@ class PayCoinUserPage extends StatefulWidget {
 
 class _PayCoinUserPageState extends State<PayCoinUserPage> {
   // bool isLogin = true;
+  var totalCoin = 4;
+
+  final user = FirebaseAuth.instance.currentUser;
+  bool onLoading = false;
+  ProfileUserModel? profile;
+  String? idProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -31,23 +40,32 @@ class _PayCoinUserPageState extends State<PayCoinUserPage> {
       return onDesk(context);
     }
   }
-
+@override
+  void initState() {
+  final user = FirebaseAuth.instance.currentUser;
+    // TODO: implement initState
+    super.initState();
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    profile = profider.getProfile;
+    idProfile = profider.getIdProfile;
+  }
   Future<void> payment(BuildContext context) async {
+    setState(() => onLoading = true);
     var claimedUid = widget.tryoutUser!.claimedUid;
     claimedUid.add(
       ClaimedModel(
-        userUID: 'bBm35Y9GYcNR8YHu2bybB61lyEr1',
+        userUID: user!.uid,
         payment: 'Coin DA',
         created: DateTime.now(),
-        tryoutID: widget.docId,
+        tryoutID: widget.idTryout,
         approval: false,
-        name: 'Muh. Hilmy',
+        name: user!.uid,
         imgFollow: '',
         price: 4,
       ),
     );
     await TryoutService.edit(
-      id: widget.docId,
+      id: widget.idTryout,
       claimedUid: claimedUid,
       created: widget.tryoutUser!.created,
       updated: widget.tryoutUser!.updated,
@@ -67,7 +85,27 @@ class _PayCoinUserPageState extends State<PayCoinUserPage> {
       listTest: widget.tryoutUser!.listTest,
       listPrice: widget.tryoutUser!.listPrice,
     );
+    if (profile != null) {
+      await ProfileUserService.edit(
+        id: idProfile!,
+        userUID: profile!.userUID,
+        imageProfile: profile!.imageProfile,
+        userName: profile!.userName,
+        email: profile!.email,
+        role: profile!.role,
+        koin: profile!.koin,
+        uniqueUserName: profile!.uniqueUserName,
+        asalSekolah: profile!.asalSekolah,
+        listPlan: profile!.listPlan,
+        kontak: profile!.kontak,
+        motivasi: profile!.motivasi,
+        tempatTinggal: profile!.tempatTinggal,
+        update: profile!.update,
+        created: profile!.created,
+      );
+    }
     await Future.delayed(const Duration(milliseconds: 200));
+    setState(() => onLoading = false);
     Navigator.push(context, FadeRoute1(const PayDoneUserPage(second: 5)));
   }
 
@@ -141,7 +179,7 @@ class _PayCoinUserPageState extends State<PayCoinUserPage> {
                               ),
                             ),
                           ),
-                          Text('4 DA Coin', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
+                          Text('$totalCoin DA Coin', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),

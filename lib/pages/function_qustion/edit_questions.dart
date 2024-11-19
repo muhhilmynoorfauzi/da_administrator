@@ -49,7 +49,7 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -76,7 +76,7 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -395,7 +395,7 @@ Future<void> editMultiJawabanDialog({required CheckModel soal, required int inde
                         final htmlSoal = converterSoal.convert();
                         final htmlDesk = converterDesk.convert();
 
-                        question!.listQuestions[index] = CheckModel(
+                        subtest!.listQuestions[index] = CheckModel(
                           question: htmlSoal,
                           options: options,
                           trueAnswer: trueAnswer,
@@ -454,7 +454,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -482,7 +482,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -790,7 +790,7 @@ Future<void> editPGDialog({required PgModel soal, required int index}) async {
                         final htmlSoal = converterSoal.convert();
                         final htmlDesk = converterDesk.convert();
 
-                        question!.listQuestions[index] = PgModel(
+                        subtest!.listQuestions[index] = PgModel(
                           question: htmlSoal,
                           options: options,
                           trueAnswer: answer!,
@@ -849,7 +849,7 @@ Future<void> editIsianDialog({required StuffingModel soal, required int index}) 
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -1099,7 +1099,7 @@ Future<void> editIsianDialog({required StuffingModel soal, required int index}) 
                         final soalHtml = soalConverter.convert();
                         final deskHtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = StuffingModel(
+                        subtest!.listQuestions[index] = StuffingModel(
                           question: soalHtml,
                           trueAnswer: jawabanController.text,
                           type: 'isian',
@@ -1157,7 +1157,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -1182,7 +1182,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -1495,7 +1495,7 @@ Future<void> editBenarSalahDialog({required TrueFalseModel soal, required int in
                         final soalHtml = soalConverter.convert();
                         final deskHtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = TrueFalseModel(
+                        subtest!.listQuestions[index] = TrueFalseModel(
                           question: soalHtml,
                           trueAnswer: options,
                           type: 'benar_salah',
@@ -1556,7 +1556,7 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -1583,7 +1583,7 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -1895,7 +1895,7 @@ Future<void> editMultiJawabanDialogSmallDevice({required CheckModel soal, requir
                         final soalHtml = soalConverter.convert();
                         final deskhtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = CheckModel(
+                        subtest!.listQuestions[index] = CheckModel(
                           question: soalHtml,
                           options: options,
                           trueAnswer: trueAnswer,
@@ -1955,7 +1955,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -1983,7 +1983,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -2291,7 +2291,7 @@ Future<void> editPGDialogSmallDevice({required PgModel soal, required int index}
                         final soalHtml = soalConverter.convert();
                         final deskHtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = PgModel(
+                        subtest!.listQuestions[index] = PgModel(
                           question: soalHtml,
                           options: options,
                           trueAnswer: answer!,
@@ -2349,7 +2349,7 @@ Future<void> editIsianDialogSmallDevice({required StuffingModel soal, required i
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -2599,7 +2599,7 @@ Future<void> editIsianDialogSmallDevice({required StuffingModel soal, required i
                         final soalHtml = soalConverter.convert();
                         final deskHtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = StuffingModel(
+                        subtest!.listQuestions[index] = StuffingModel(
                           question: soalHtml,
                           trueAnswer: jawabanController.text,
                           type: 'isian',
@@ -2658,7 +2658,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
 
       Future<void> uploadImageQuest(int index) async {
         final bytes = pickedFileQuest!.bytes!;
-        final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFileQuest?.name}');
+        final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFileQuest?.name}');
         uploadTaskQuest = ref.putData(bytes);
 
         final snapshot = await uploadTaskQuest!.whenComplete(() {});
@@ -2683,7 +2683,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
 
             Future<void> uploadImage(int index) async {
               final bytes = pickedFile!.bytes!;
-              final ref = FirebaseStorage.instance.ref().child('question_${tryout!.toName}/${pickedFile?.name}');
+              final ref = FirebaseStorage.instance.ref().child('question_${tryoutGlobal!.toName}/${pickedFile?.name}');
               uploadTask = ref.putData(bytes);
 
               final snapshot = await uploadTask!.whenComplete(() {});
@@ -2996,7 +2996,7 @@ Future<void> editBenarSalahDialogSmallDevice({required TrueFalseModel soal, requ
                         final soalHtml = soalConverter.convert();
                         final deskHtml = deskConverter.convert();
 
-                        question!.listQuestions[index] = TrueFalseModel(
+                        subtest!.listQuestions[index] = TrueFalseModel(
                           question: soalHtml,
                           trueAnswer: options,
                           type: 'benar_salah',

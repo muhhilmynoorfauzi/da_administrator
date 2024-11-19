@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/firebase_service/profile_user_service.dart';
+import 'package:da_administrator/pages/login_page.dart';
 import 'package:da_administrator/pages_user/bank_user_page.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
@@ -8,15 +11,17 @@ import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-
-// import 'dart:html' as html;
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
+
+import '../model/user_profile/profile_user_model.dart';
 
 class HomeUserPage extends StatefulWidget {
   const HomeUserPage({super.key});
@@ -34,6 +39,9 @@ class _HomeUserPageState extends State<HomeUserPage> {
   bool scrollingDown1 = true; // Flag untuk menentukan arah scroll
   bool scrollingUp2 = true; // Flag untuk menentukan arah scroll
 
+  final user = FirebaseAuth.instance.currentUser;
+  ProfileUserModel? profile;
+
   @override
   Widget build(BuildContext context) {
     if (lebar(context) <= 800) {
@@ -45,12 +53,69 @@ class _HomeUserPageState extends State<HomeUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
     youtubeController = YoutubePlayerController(
       initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
       params: const YoutubePlayerParams(color: 'red', strictRelatedVideos: true, showFullscreenButton: true, autoPlay: false),
     );
-    // WidgetsBinding.instance.addPostFrameCallback((_) {});
+    if (user != null) {
+      getDataProfile();
+    }
+  }
+
+  Future<void> getDataProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+
+    if (user == null) {
+      print('User belum login.');
+      return;
+    }
+
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v03');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.where('userUID', isEqualTo: user.uid).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        profile = ProfileUserModel.fromSnapshot(querySnapshot.docs.first as DocumentSnapshot<Map<String, dynamic>>);
+
+        profider.setProfile(profile);
+        profider.setIdProfile(querySnapshot.docs.first.id);
+        print('Data dengan userUID tersebut ditemukan.');
+      } else {
+        print('Data dengan userUID tersebut tidak ditemukan.');
+
+        var profileBaru = ProfileUserModel(
+          userUID: user.uid,
+          imageProfile: '',
+          userName: user.displayName!,
+          uniqueUserName: 'user@${user.uid}',
+          asalSekolah: '',
+          listPlan: [
+            PlanOptions(universitas: '', jurusan: ''),
+            PlanOptions(universitas: '', jurusan: ''),
+            PlanOptions(universitas: '', jurusan: ''),
+            PlanOptions(universitas: '', jurusan: ''),
+          ],
+          email: user.email!,
+          role: 'user',
+          koin: 0,
+          kontak: '',
+          motivasi: '-',
+          tempatTinggal: '',
+          created: DateTime.now(),
+          update: DateTime.now(),
+        );
+        String idProfileBaru = await ProfileUserService.addGetId(profileBaru);
+        profider.setProfile(profileBaru);
+        profider.setIdProfile(idProfileBaru);
+        print('Data dengan userUID telah dibuat.');
+      }
+    } catch (e) {
+      print('salah getDataProfile: $e');
+    }
+    setState(() {});
   }
 
   void autoScroll1() async {
@@ -90,12 +155,12 @@ class _HomeUserPageState extends State<HomeUserPage> {
   }
 
   void openNewTab(String contact) {
-    // html.window.open('https://wa.me/+62$contact', '_blank');
+    html.window.open('https://wa.me/+62$contact', '_blank');
   }
 
   Widget onDesk(BuildContext context) {
     final profider = Provider.of<CounterProvider>(context, listen: false);
-    bool isLogin = (/*profider.getCurrentUser != null*/true);
+    bool isLogin = (user != null);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarDesk(
@@ -329,7 +394,9 @@ class _HomeUserPageState extends State<HomeUserPage> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 20),
                                       child: TextButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(context, FadeRoute1(const LoginPage()));
+                                        },
                                         style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
                                         child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
                                       ),
@@ -506,10 +573,12 @@ class _HomeUserPageState extends State<HomeUserPage> {
 
   Widget onMo(BuildContext context) {
     final profider = Provider.of<CounterProvider>(context, listen: false);
-    bool isLogin = (/*profider.getCurrentUser != null*/true);
+    bool isLogin = (user != null);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, ),
+      appBar: appbarMo(
+        context: context,
+      ),
       floatingActionButton: SizedBox(
         width: 50,
         height: 50,
@@ -582,7 +651,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
                       autoScroll2();
                     });
                     return Container(
-                      height: 700,
+                      height: 800,
                       width: lebar(context),
                       decoration: BoxDecoration(gradient: primaryGradient),
                       padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -742,7 +811,9 @@ class _HomeUserPageState extends State<HomeUserPage> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 20),
                                       child: TextButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(context, FadeRoute1(const LoginPage()));
+                                        },
                                         style: TextButton.styleFrom(backgroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 30)),
                                         child: Text('Daftar sekarang', style: TextStyle(color: Colors.black, fontSize: h4)),
                                       ),
@@ -917,7 +988,7 @@ class _HomeUserPageState extends State<HomeUserPage> {
           ),
         ],
       ),
-      bottomNavigationBar: NavBottomMo(context: context,homeActive: true),
+      bottomNavigationBar: NavBottomMo(context: context, homeActive: true),
     );
   }
 }

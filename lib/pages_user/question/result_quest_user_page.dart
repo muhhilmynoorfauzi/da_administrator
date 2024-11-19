@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/firebase_service/rationalization_user_service.dart';
 import 'package:da_administrator/firebase_service/user_to_service.dart';
 import 'package:da_administrator/model/questions/check_model.dart';
 import 'package:da_administrator/model/questions/pg_model.dart';
@@ -6,7 +8,10 @@ import 'package:da_administrator/model/questions/questions_model.dart';
 import 'package:da_administrator/model/questions/stuffing_model.dart';
 import 'package:da_administrator/model/questions/truefalse_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
+import 'package:da_administrator/model/user_profile/rationalization_user_model.dart';
 import 'package:da_administrator/model/user_to/leaderboard_model.dart';
+import 'package:da_administrator/model/user_to/rationalization_model.dart';
 import 'package:da_administrator/model/user_to/user_to_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
@@ -20,28 +25,38 @@ import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ResultQuestUserPage extends StatefulWidget {
-  const ResultQuestUserPage({super.key, required this.userIndex, required this.idUserTo, required this.allUserTo, required this.allQuestion, required this.myTryout});
+  const ResultQuestUserPage({
+    super.key,
+    required this.userIndex,
+    required this.idUserTo,
+    required this.allUserTo,
+    required this.allQuestion,
+    required this.myTryout,
+    required this.rationalUser,
+  });
 
   final List<QuestionsModel> allQuestion;
   final List<UserToModel> allUserTo;
   final int userIndex;
   final TryoutModel myTryout;
   final String idUserTo;
+  final List<RationalizationUserModel> rationalUser;
 
   @override
   _ResultQuestUserPageState createState() => _ResultQuestUserPageState();
 }
 
 class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  final user = FirebaseAuth.instance.currentUser;
 
-  // bool isLogin = true;
+  List<RationalizationUserModel> rationalUser = [];
   var onLoading = true;
-
+  ProfileUserModel? profile;
   late int userIndex;
   late List<UserToModel?> allUserTo;
   late String idUserTo;
@@ -85,42 +100,57 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
+    final profider = Provider.of<CounterProvider>(context, listen: false);
 
     allUserTo = widget.allUserTo;
     idUserTo = widget.idUserTo;
     userIndex = widget.userIndex;
+    profile = profider.getProfile;
+    rationalUser = widget.rationalUser;
 
     counting();
   }
 
   Future<void> counting() async {
     await Future.delayed(const Duration(milliseconds: 300));
-    if (allUserTo[userIndex]!.correctAnswer == 0 &&
-        allUserTo[userIndex]!.unanswered == 0 &&
-        allUserTo[userIndex]!.wrongAnswer == 0 &&
-        allUserTo[userIndex]!.valuesDiscussion == 0 &&
-        allUserTo[userIndex]!.average == 0) {
-      if (widget.myTryout.phaseIRT) {
-        calculateIRT();
-      } else {
-        calculateNoIRT();
+    try {
+      if (allUserTo[userIndex]!.correctAnswer == 0 &&
+          allUserTo[userIndex]!.unanswered == 0 &&
+          allUserTo[userIndex]!.wrongAnswer == 0 &&
+          allUserTo[userIndex]!.valuesDiscussion == 0 &&
+          allUserTo[userIndex]!.average == 0) {
+        if (widget.myTryout.phaseIRT) {
+          calculateIRT();
+          // calculateNoIRT();
+        } else {
+          // calculateIRT();
+          calculateNoIRT();
+        }
       }
+      onSave();
+    } catch (e) {
+      print(e);
     }
     onLoading = false;
-
     await Future.delayed(const Duration(milliseconds: 300));
-    onSave();
     setState(() {});
     return;
   }
 
   //============================================= NoIRT =============================================
   void calculateNoIRT() {
+    print("\n============================================= NoIRT =============================================\n\n");
     int totalScore = 0;
     int totalQuestions = 0;
 
-    // print("=============== Nilai setelah di hitung ===============");
+    // print("nilai rationalization jurusan 0 ${rationalUser.first.jurusan[0].namaJurusan}: ${rationalUser.first.jurusan[0].value}");
+    // print("nilai rationalization jurusan 1 ${rationalUser.first.jurusan[1].namaJurusan}: ${rationalUser.first.jurusan[1].value}");
+    // print("nilai rationalization jurusan 2 ${rationalUser.first.jurusan[2].namaJurusan}: ${rationalUser.first.jurusan[2].value}");
+    // print("nilai rationalization jurusan 3 ${rationalUser.first.jurusan[3].namaJurusan}: ${rationalUser.first.jurusan[3].value}");
+
+    print("\n=============== Nilai setelah di hitung ===============\n\n");
     for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
       var test = allUserTo[userIndex]!.listTest[i];
 
@@ -135,11 +165,19 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
             if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.toSet().containsAll(question.trueAnswer)) {
+              for (int l = 0; l < rationalUser.first.jurusan.length; l++) {
+                for (int m = 0; m < rationalUser.first.jurusan[l].relevance.length; m++) {
+                  if (question.subjectRelevance == rationalUser.first.jurusan[l].relevance[m]) {
+                    rationalUser.first.jurusan[l].value = rationalUser.first.jurusan[l].value + 1;
+                  }
+                }
+              }
+
               allUserTo[userIndex]!.correctAnswer++;
               if (question.rating == 1) {
                 question.value = 1;
               } else if (question.rating == 2) {
-                question.value = 1;
+                question.value = 2;
               } else if (question.rating == 3) {
                 question.value = 3;
               }
@@ -153,11 +191,19 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
             if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              for (int l = 0; l < rationalUser.first.jurusan.length; l++) {
+                for (int m = 0; m < rationalUser.first.jurusan[l].relevance.length; m++) {
+                  if (question.subjectRelevance == rationalUser.first.jurusan[l].relevance[m]) {
+                    rationalUser.first.jurusan[l].value = rationalUser.first.jurusan[l].value + 1;
+                  }
+                }
+              }
+
               allUserTo[userIndex]!.correctAnswer++;
               if (question.rating == 1) {
                 question.value = 1;
               } else if (question.rating == 2) {
-                question.value = 1;
+                question.value = 2;
               } else if (question.rating == 3) {
                 question.value = 3;
               }
@@ -171,11 +217,19 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
             if (question.yourAnswer.isEmpty || question.yourAnswer.first == '') {
               allUserTo[userIndex]!.unanswered++;
             } else if (question.yourAnswer.contains(question.trueAnswer)) {
+              for (int l = 0; l < rationalUser.first.jurusan.length; l++) {
+                for (int m = 0; m < rationalUser.first.jurusan[l].relevance.length; m++) {
+                  if (question.subjectRelevance == rationalUser.first.jurusan[l].relevance[m]) {
+                    rationalUser.first.jurusan[l].value = rationalUser.first.jurusan[l].value + 1;
+                  }
+                }
+              }
+
               allUserTo[userIndex]!.correctAnswer++;
               if (question.rating == 1) {
                 question.value = 1;
               } else if (question.rating == 2) {
-                question.value = 1;
+                question.value = 2;
               } else if (question.rating == 3) {
                 question.value = 3;
               }
@@ -197,11 +251,19 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                 }
               }
               if (isCorrect) {
+                for (int l = 0; l < rationalUser.first.jurusan.length; l++) {
+                  for (int m = 0; m < rationalUser.first.jurusan[l].relevance.length; m++) {
+                    if (question.subjectRelevance == rationalUser.first.jurusan[l].relevance[m]) {
+                      rationalUser.first.jurusan[l].value = rationalUser.first.jurusan[l].value + 1;
+                    }
+                  }
+                }
+
                 allUserTo[userIndex]!.correctAnswer++;
                 if (question.rating == 1) {
                   question.value = 1;
                 } else if (question.rating == 2) {
-                  question.value = 1;
+                  question.value = 2;
                 } else if (question.rating == 3) {
                   question.value = 3;
                 }
@@ -222,12 +284,25 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
     allUserTo[userIndex]!.valuesDiscussion = totalScore;
 
-    // print("Total Questions: $totalQuestions");
-    // print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
-    // print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
-    // print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
-    // print("Average Score: ${allUserTo[userIndex]!.average}");
+    allUserTo[userIndex]!.rationalization = List.generate(
+      rationalUser.first.jurusan.length,
+      (index) => RationalizationModel(
+        value: rationalUser.first.jurusan[index].value,
+        jurusan: rationalUser.first.jurusan[index].namaJurusan,
+        universitas: profile!.listPlan[index].universitas,
+      ),
+    );
 
+    print("Total Questions: $totalQuestions");
+    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    print("Average Score: ${allUserTo[userIndex]!.average}");
+
+    // print("nilai rationalization jurusan 0 ${rationalUser.first.jurusan[0].namaJurusan}: ${rationalUser.first.jurusan[0].value}");
+    // print("nilai rationalization jurusan 1 ${rationalUser.first.jurusan[1].namaJurusan}: ${rationalUser.first.jurusan[1].value}");
+    // print("nilai rationalization jurusan 2 ${rationalUser.first.jurusan[2].namaJurusan}: ${rationalUser.first.jurusan[2].value}");
+    // print("nilai rationalization jurusan 3 ${rationalUser.first.jurusan[3].namaJurusan}: ${rationalUser.first.jurusan[3].value}");
     //=============== cari peringakat keseluruhan ===============
     List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
     int position = sortedList.indexWhere((user) => user!.userUID == allUserTo[userIndex]!.userUID);
@@ -252,12 +327,17 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
   //============================================= IRT =============================================
   void calculateIRT() {
+    print("\n============================================= IRT =============================================\n\n");
     int totalScore = 0;
     int totalQuestions = 0;
 
     List<UserToModel?> sameTryoutUsers = allUserTo.where((user) => user!.toName == allUserTo[userIndex]!.toName).toList();
 
-    // print("=============== Nilai setelah di hitung dengan IRT ===============");
+    // print("nilai rationalization jurusan 0 ${rationalUser.first.jurusan[0].namaJurusan}: ${rationalUser.first.jurusan[0].value}");
+    // print("nilai rationalization jurusan 1 ${rationalUser.first.jurusan[1].namaJurusan}: ${rationalUser.first.jurusan[1].value}");
+    // print("nilai rationalization jurusan 2 ${rationalUser.first.jurusan[2].namaJurusan}: ${rationalUser.first.jurusan[2].value}");
+    // print("nilai rationalization jurusan 3 ${rationalUser.first.jurusan[3].namaJurusan}: ${rationalUser.first.jurusan[3].value}");
+    print("\n=============== Nilai setelah di hitung dengan IRT ===============\n\n");
     for (int i = 0; i < allUserTo[userIndex]!.listTest.length; i++) {
       var test = allUserTo[userIndex]!.listTest[i];
 
@@ -290,7 +370,17 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
               userCorrect = false;
             }
 
-            if (userCorrect) correctAnswersCount++;
+            if (userCorrect) {
+              correctAnswersCount++;
+
+              for (int l = 0; l < rationalUser.first.jurusan.length; l++) {
+                for (int m = 0; m < rationalUser.first.jurusan[l].relevance.length; m++) {
+                  if (question.subjectRelevance == rationalUser.first.jurusan[l].relevance[m]) {
+                    rationalUser.first.jurusan[l].value = rationalUser.first.jurusan[l].value + 1;
+                  }
+                }
+              }
+            }
           }
 
           double correctPercentage = correctAnswersCount / sameTryoutUsers.length;
@@ -352,11 +442,24 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
     allUserTo[userIndex]!.average = totalQuestions > 0 ? totalScore / totalQuestions : 0;
     allUserTo[userIndex]!.valuesDiscussion = totalScore;
 
-    // print("Total Questions: $totalQuestions");
-    // print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
-    // print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
-    // print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
-    // print("Average Score: ${allUserTo[userIndex]!.average}");
+    allUserTo[userIndex]!.rationalization = List.generate(
+      rationalUser.first.jurusan.length,
+      (index) => RationalizationModel(
+        value: rationalUser.first.jurusan[index].value,
+        jurusan: rationalUser.first.jurusan[index].namaJurusan,
+        universitas: profile!.listPlan[index].universitas,
+      ),
+    );
+    print("nilai rationalization jurusan 0 ${rationalUser.first.jurusan[0].namaJurusan}: ${rationalUser.first.jurusan[0].value}");
+    print("nilai rationalization jurusan 1 ${rationalUser.first.jurusan[1].namaJurusan}: ${rationalUser.first.jurusan[1].value}");
+    print("nilai rationalization jurusan 2 ${rationalUser.first.jurusan[2].namaJurusan}: ${rationalUser.first.jurusan[2].value}");
+    print("nilai rationalization jurusan 3 ${rationalUser.first.jurusan[3].namaJurusan}: ${rationalUser.first.jurusan[3].value}");
+
+    print("Total Questions: $totalQuestions");
+    print("Correct Answers: ${allUserTo[userIndex]!.correctAnswer}");
+    print("Wrong Answers: ${allUserTo[userIndex]!.wrongAnswer}");
+    print("Unanswered: ${allUserTo[userIndex]!.unanswered}");
+    print("Average Score: ${allUserTo[userIndex]!.average}");
 
     //=============== cari peringakat keseluruhan ===============
     List<UserToModel?> sortedList = List.from(allUserTo)..sort((a, b) => b!.average.compareTo(a!.average));
@@ -381,6 +484,13 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
   }
 
   Future<void> onSave() async {
+    RationalizationUserModel newRationalization = RationalizationUserModel(
+      jurusan: rationalUser.first.jurusan,
+      created: DateTime.now(),
+      userUID: rationalUser.first.userUID,
+      idTryout: rationalUser.first.idTryout,
+      idUserTo: rationalUser.first.idUserTo,
+    );
     try {
       await UserToService.edit(
         id: idUserTo,
@@ -399,6 +509,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
         rationalization: allUserTo[userIndex]!.rationalization,
         listTest: allUserTo[userIndex]!.listTest,
       );
+      await RationalizationUserService.add(newRationalization);
     } catch (e) {
       print('ada salah di save result user page,\n$e');
     }
@@ -437,7 +548,9 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
 
   Widget onMo(BuildContext context) => Scaffold(
         backgroundColor: Colors.white,
-        appBar: appbarMo(context: context, ),
+        appBar: appbarMo(
+          context: context,
+        ),
         body: sideInfo(context),
       );
 
@@ -585,7 +698,7 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
                 child: Column(
                   children: List.generate(
-                    4,
+                    profile!.listPlan.length,
                     (index) => Container(
                       padding: const EdgeInsets.symmetric(vertical: 3),
                       decoration: BoxDecoration(
@@ -597,11 +710,23 @@ class _ResultQuestUserPageState extends State<ResultQuestUserPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('STEI', style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.start),
-                              Text('Institute Teknologi Bandung', style: TextStyle(fontSize: h5 + 2, color: Colors.black), textAlign: TextAlign.start),
+                              Text(
+                                profile!.listPlan[index].jurusan,
+                                style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.start,
+                              ),
+                              Text(
+                                profile!.listPlan[index].universitas,
+                                style: TextStyle(fontSize: h5 + 2, color: Colors.black),
+                                textAlign: TextAlign.start,
+                              ),
                             ],
                           ),
-                          Text('50/1000', style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.start),
+                          Text(
+                            rationalUser.first.jurusan[index].value.toString(),
+                            style: TextStyle(fontSize: h5 + 2, color: Colors.black, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.start,
+                          ),
                         ],
                       ),
                     ),

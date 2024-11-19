@@ -1,20 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:da_administrator/firebase_service/profile_user_service.dart';
 import 'package:da_administrator/firebase_service/tryout_service.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/model/tryout/claimed_model.dart';
+import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/pages_user/pay_done_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PayEwalletUserPage extends StatefulWidget {
-  const PayEwalletUserPage({super.key, required this.docId, required this.tryoutUser});
+  const PayEwalletUserPage({super.key, required this.idTryout, required this.tryoutUser});
 
-  final String docId;
+  final String idTryout;
   final TryoutModel? tryoutUser;
 
   @override
@@ -22,41 +25,53 @@ class PayEwalletUserPage extends StatefulWidget {
 }
 
 class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
-  // bool isLogin = true;
   var total = 0;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    total = widget.tryoutUser!.listPrice.first;
-  }
+  ProfileUserModel? profile;
+  String? idProfile;
+  final user = FirebaseAuth.instance.currentUser;
+  bool onLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    if (lebar(context) <= 800) {
-      return onMo(context);
+    if (!onLoading) {
+      if (lebar(context) <= 700) {
+        return onMo(context);
+      } else {
+        return onDesk(context);
+      }
     } else {
-      return onDesk(context);
+      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
     }
   }
 
+  @override
+  void initState() {
+    final user = FirebaseAuth.instance.currentUser;
+    // TODO: implement initState
+    super.initState();
+    total = widget.tryoutUser!.listPrice.first;
+    final profider = Provider.of<CounterProvider>(context, listen: false);
+    profile = profider.getProfile;
+    idProfile = profider.getIdProfile;
+  }
+
   Future<void> payment(BuildContext context) async {
+    setState(() => onLoading = true);
     var claimedUid = widget.tryoutUser!.claimedUid;
     claimedUid.add(
       ClaimedModel(
-        userUID: 'bBm35Y9GYcNR8YHu2bybB61lyEr1',
+        userUID: user!.uid,
         payment: 'Gopay',
         created: DateTime.now(),
-        tryoutID: widget.docId,
+        tryoutID: widget.idTryout,
         approval: false,
-        name: 'Muh. Hilmy',
+        name: user!.displayName!,
         imgFollow: '',
         price: widget.tryoutUser!.listPrice.first,
       ),
     );
     await TryoutService.edit(
-      id: widget.docId,
+      id: widget.idTryout,
       claimedUid: claimedUid,
       created: widget.tryoutUser!.created,
       updated: widget.tryoutUser!.updated,
@@ -76,7 +91,9 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
       listTest: widget.tryoutUser!.listTest,
       listPrice: widget.tryoutUser!.listPrice,
     );
+
     await Future.delayed(const Duration(milliseconds: 200));
+    setState(() => onLoading = false);
     Navigator.push(context, FadeRoute1(const PayDoneUserPage(second: 5)));
   }
 
@@ -278,7 +295,9 @@ class _PayEwalletUserPageState extends State<PayEwalletUserPage> {
   Widget onMo(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: appbarMo(context: context, ),
+      appBar: appbarMo(
+        context: context,
+      ),
       body: ListView(
         children: [
           //tombol kembali

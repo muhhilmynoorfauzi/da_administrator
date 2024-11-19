@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:46737009702:android:d5b6a757f49e050ca6cae7",
+        "mobilesdk_app_id": "1:46737009702:android:d1f649ff133a308da6cae7",
         "android_client_info": {
-          "package_name": "com.example.da_administrator"
+          "package_name": "com.dreamacademy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "46737009702-5ujnsv8d56147n4l6m7p0tlqpvs9eaq4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dreamacademy",
+            "certificate_hash": "15e8fa90e54b3880946f9b9f561d2dfe0aef8fdb"
+          }
+        },
+        {
+          "client_id": "46737009702-32gs99q7b73q67h8lm2luq5osh6spf0a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyArb3QRzBI2aeMZkqo5Gb66PB_AjzRM2ZM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46737009702-32gs99q7b73q67h8lm2luq5osh6spf0a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "46737009702-nde1bf4ame7q1cqer0s2buarr9s6o923.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.daAdministrator"
+              }
+            }
+          ]
         }
       }
     }

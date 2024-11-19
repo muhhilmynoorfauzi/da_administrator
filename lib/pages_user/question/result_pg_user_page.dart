@@ -5,6 +5,7 @@ import 'package:da_administrator/model/questions/pg_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
@@ -27,9 +28,10 @@ class _ResultPgUserPageState extends State<ResultPgUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
     _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayerController.convertUrlToId('https://www.youtube.com/watch?v=VVarRhSsznY')!,
+      initialVideoId: YoutubePlayerController.convertUrlToId(widget.question.urlVideoExplanation)!,
       params: const YoutubePlayerParams(color: 'red', strictRelatedVideos: true, showFullscreenButton: true, autoPlay: false),
     );
   }

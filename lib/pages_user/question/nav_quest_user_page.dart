@@ -14,19 +14,21 @@ import 'package:da_administrator/pages_user/question/waiting_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:provider/provider.dart';
 
-UserToModel? userTo;
+UserToModel? userToGlobal;
 int testKe = 0;
 int subTestKe = 0;
 
 class NavQuestUserPage extends StatefulWidget {
   final String idUserTo;
+  final UserToModel userTo;
 
-  const NavQuestUserPage({super.key, required this.idUserTo});
+  const NavQuestUserPage({super.key, required this.idUserTo, required this.userTo});
 
   @override
   _NavQuestUserPageState createState() => _NavQuestUserPageState();
@@ -37,14 +39,14 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   late double _remainingTime; // Menyimpan waktu yang tersisa dalam detik
   double _progress = 1.0; // Progres untuk LinearProgressIndicator (0 hingga 1)
 
-  bool loadingQuest = false;
+  bool onLoading = false;
 
   dynamic page;
   int soalKe = 0;
 
   @override
   Widget build(BuildContext context) {
-    if (userTo != null) {
+    if (userToGlobal != null) {
       if (lebar(context) <= 900) {
         return onMo(context);
       } else {
@@ -57,49 +59,41 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
-    getDataUserTo();
+    setDataUserTo();
   }
 
-  void getDataUserTo() async {
-    userTo = null;
-    try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('user_to_v2').doc(widget.idUserTo);
-      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        userTo = UserToModel.fromSnapshot(docSnapshot);
-        if (userTo != null) {
-          for (testKe = 0; testKe < userTo!.listTest.length; testKe++) {
-            bool testSelesai = userTo!.listTest[testKe].done;
-            if (testSelesai) {
-              print('test ke $testKe telah selesai');
-              break;
+  void setDataUserTo() async {
+    userToGlobal = widget.userTo;
+    if (userToGlobal != null) {
+      for (testKe = 0; testKe < userToGlobal!.listTest.length; testKe++) {
+        bool testSelesai = userToGlobal!.listTest[testKe].done;
+        if (testSelesai) {
+          print('test ke $testKe telah selesai');
+          break;
+        }
+        for (subTestKe = 0; subTestKe < userToGlobal!.listTest[testKe].listSubtest.length; subTestKe++) {
+          bool subTestSelesai = userToGlobal!.listTest[testKe].listSubtest[subTestKe].done;
+          if (subTestSelesai) {
+            print('test ke $testKe, sub test ke $subTestKe telah selesai');
+          } else {
+            if (userToGlobal!.listTest[testKe].listSubtest[subTestKe].remainingTime != 0) {
+              _remainingTime = userToGlobal!.listTest[testKe].listSubtest[subTestKe].remainingTime;
+            } else {
+              _remainingTime = userToGlobal!.listTest[testKe].listSubtest[subTestKe].timeMinute;
             }
-            for (subTestKe = 0; subTestKe < userTo!.listTest[testKe].listSubtest.length; subTestKe++) {
-              bool subTestSelesai = userTo!.listTest[testKe].listSubtest[subTestKe].done;
-              if (subTestSelesai) {
-                print('test ke $testKe, sub test ke $subTestKe telah selesai');
-              } else {
-                if (userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime != 0) {
-                  _remainingTime = userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime;
-                } else {
-                  _remainingTime = userTo!.listTest[testKe].listSubtest[subTestKe].timeMinute;
-                }
 
-                print('sekarang kerja soal test ke $testKe, sub test ke $subTestKe');
-                setQuestion(soalKe);
-                startTimer();
+            print('sekarang kerja soal test ke $testKe, sub test ke $subTestKe');
+            setQuestion(soalKe);
+            startTimer();
 
-                return; // Menghentikan seluruh perulangan setelah menemukan nilai false
-              }
-            }
+            return; // Menghentikan seluruh perulangan setelah menemukan nilai false
           }
         }
       }
-      setState(() {});
-    } catch (e) {
-      print('salah nav quest: $e');
     }
+    setState(() {});
   }
 
   String formatMinute(double seconds) {
@@ -118,7 +112,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     _timer = Timer.periodic(const Duration(milliseconds: interval), (timer) {
       setState(() {
         _remainingTime -= 1; // Kurangi 1 detik setiap interval
-        _progress = _remainingTime / userTo!.listTest[testKe].listSubtest[subTestKe].timeMinute;
+        _progress = _remainingTime / userToGlobal!.listTest[testKe].listSubtest[subTestKe].timeMinute;
 
         if (_remainingTime <= 0) {
           timer.cancel();
@@ -132,23 +126,23 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
 
   Future<void> timeOut(BuildContext context) async {
     await onClickQust(soalKe, onSave: true);
-    if (testKe == (userTo!.listTest.length - 1)) {
+    if (testKe == (userToGlobal!.listTest.length - 1)) {
       Navigator.pushAndRemoveUntil(
         context,
-        FadeRoute1(WaitingUserPage(second: 30, isLast: true, idUserTo: widget.idUserTo)),
+        FadeRoute1(WaitingUserPage(second: 30, isLast: true, idUserTo: widget.idUserTo, userTo: userToGlobal!)),
         (Route<dynamic> route) => false,
       );
     } else {
       Navigator.pushAndRemoveUntil(
         context,
-        FadeRoute1(WaitingUserPage(second: 30, isLast: false, idUserTo: widget.idUserTo)),
+        FadeRoute1(WaitingUserPage(second: 30, isLast: false, idUserTo: widget.idUserTo, userTo: userToGlobal!)),
         (Route<dynamic> route) => false,
       );
     }
   }
 
   void setQuestion(int indexQuest) {
-    switch (userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[indexQuest].type) {
+    switch (userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[indexQuest].type) {
       case 'banyak_pilihan':
         page = QuestCheckUserPage(indexQuest: indexQuest);
       case 'pilihan_ganda':
@@ -163,33 +157,34 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   }
 
   Future<void> onClickQust(int indexQuest, {bool onSave = false}) async {
-    setState(() => loadingQuest = !loadingQuest);
+    setState(() => onLoading = !onLoading);
     soalKe = indexQuest;
-    userTo!.listTest[testKe].listSubtest[subTestKe].remainingTime = _remainingTime;
+    userToGlobal!.listTest[testKe].listSubtest[subTestKe].remainingTime = _remainingTime;
     setQuestion(soalKe);
-    //save
+
+    // Ketika di simpan
     if (onSave) {
-      if (userTo != null) {
+      if (userToGlobal != null) {
         await UserToService.edit(
           id: widget.idUserTo,
-          userUID: userTo!.userUID,
-          idTryOut: userTo!.idTryOut,
-          toName: userTo!.toName,
-          valuesDiscussion: userTo!.valuesDiscussion,
-          average: userTo!.average,
-          unanswered: userTo!.unanswered,
-          correctAnswer: userTo!.correctAnswer,
-          wrongAnswer: userTo!.wrongAnswer,
-          startWork: userTo!.startWork,
-          endWork: userTo!.endWork,
-          created: userTo!.created,
-          leaderBoard: userTo!.leaderBoard,
-          rationalization: userTo!.rationalization,
-          listTest: userTo!.listTest,
+          userUID: userToGlobal!.userUID,
+          idTryOut: userToGlobal!.idTryOut,
+          toName: userToGlobal!.toName,
+          valuesDiscussion: userToGlobal!.valuesDiscussion,
+          average: userToGlobal!.average,
+          unanswered: userToGlobal!.unanswered,
+          correctAnswer: userToGlobal!.correctAnswer,
+          wrongAnswer: userToGlobal!.wrongAnswer,
+          startWork: userToGlobal!.startWork,
+          endWork: userToGlobal!.endWork,
+          created: userToGlobal!.created,
+          leaderBoard: userToGlobal!.leaderBoard,
+          rationalization: userToGlobal!.rationalization,
+          listTest: userToGlobal!.listTest,
         );
       }
     }
-    setState(() => loadingQuest = !loadingQuest);
+    setState(() => onLoading = !onLoading);
   }
 
   Future<void> markAsDoneAndNavigate({
@@ -201,16 +196,16 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     required bool isLastSubTest,
   }) async {
     // Mark subtest as done
-    userTo!.listTest[testKe].listSubtest[subTestKe].done = true;
+    userToGlobal!.listTest[testKe].listSubtest[subTestKe].done = true;
 
     // Check if test should also be marked as done
     if (isLastSubTest) {
-      userTo!.listTest[testKe].done = true;
+      userToGlobal!.listTest[testKe].done = true;
     }
 
     // If it's the very last test and subtest, mark the entire work as done
     if (isLastTest && isLastSubTest) {
-      userTo!.endWork = DateTime.now();
+      userToGlobal!.endWork = DateTime.now();
     }
 
     // Save the question
@@ -219,7 +214,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
     // Navigate to the next page
     Navigator.pushAndRemoveUntil(
       context,
-      FadeRoute1(WaitingUserPage(second: 30, isLast: isLastTest && isLastSubTest, idUserTo: widget.idUserTo)),
+      FadeRoute1(WaitingUserPage(second: 30, isLast: isLastTest && isLastSubTest, idUserTo: widget.idUserTo, userTo: userToGlobal!)),
       (Route<dynamic> route) => false,
     );
   }
@@ -242,8 +237,8 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    int lastTest = (userTo!.listTest.length - 1);
-                    int lastSubTest = (userTo!.listTest[testKe].listSubtest.length - 1);
+                    int lastTest = (userToGlobal!.listTest.length - 1);
+                    int lastSubTest = (userToGlobal!.listTest[testKe].listSubtest.length - 1);
 
                     bool isLastTest = testKe == lastTest;
                     bool isLastSubTest = subTestKe == lastSubTest;
@@ -271,7 +266,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
-    int jmlSoal = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
+    int jmlSoal = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -287,9 +282,9 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(userTo!.toName, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h3)),
+            Text(userToGlobal!.toName, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h3)),
             Text(
-              '${userTo!.listTest[testKe].nameTest} - ${userTo!.listTest[testKe].listSubtest[subTestKe].nameSubTest}',
+              '${userToGlobal!.listTest[testKe].nameTest} - ${userToGlobal!.listTest[testKe].listSubtest[subTestKe].nameSubTest}',
               style: TextStyle(color: Colors.black, fontSize: h4),
             ),
           ],
@@ -328,7 +323,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
               margin: const EdgeInsets.only(left: 10),
               height: tinggi(context),
               alignment: Alignment.center,
-              child: loadingQuest ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
+              child: onLoading ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
             ),
           ),
           SizedBox(
@@ -359,13 +354,13 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                           (index0) {
                             List<String> yourAnswer = [];
                             // bool isNotTrueFalse;
-                            if (userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].type == 'benar_salah') {
+                            if (userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].type == 'benar_salah') {
                               // isNotTrueFalse = true;
-                              List<TrueFalseOption> yourAnswerTrueFalse = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                              List<TrueFalseOption> yourAnswerTrueFalse = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
                               yourAnswer = List.generate(yourAnswerTrueFalse.length, (i) => yourAnswerTrueFalse[i].option);
                             } else {
                               // isNotTrueFalse = false;
-                              yourAnswer = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                              yourAnswer = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
                             }
                             bool isiKosong = yourAnswer.every((element) => element.isEmpty);
                             return InkWell(
@@ -397,7 +392,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: 30,
+                              height: 40,
                               width: double.infinity,
                               child: TextButton.icon(
                                 onPressed: () {
@@ -413,7 +408,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                             ),
                             const SizedBox(height: 5),
                             SizedBox(
-                              height: 30,
+                              height: 40,
                               width: double.infinity,
                               child: TextButton.icon(
                                 onPressed: () async {
@@ -447,7 +442,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
   }
 
   Widget onMo(BuildContext context) {
-    int jmlSoal = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
+    int jmlSoal = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions.length;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -463,9 +458,9 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(userTo!.toName, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h3)),
+            Text(userToGlobal!.toName, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h3)),
             Text(
-              '${userTo!.listTest[testKe].nameTest} - ${userTo!.listTest[testKe].listSubtest[subTestKe].nameSubTest}',
+              '${userToGlobal!.listTest[testKe].nameTest} - ${userToGlobal!.listTest[testKe].listSubtest[subTestKe].nameSubTest}',
               style: TextStyle(color: Colors.black, fontSize: h4),
             ),
           ],
@@ -503,7 +498,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
             height: tinggi(context),
             width: lebar(context),
             alignment: Alignment.center,
-            child: loadingQuest ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
+            child: onLoading ? CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3) : page,
           ),
           Center(
             child: Container(
@@ -531,13 +526,13 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                           (index0) {
                             List<String> yourAnswer = [];
                             // bool isNotTrueFalse;
-                            if (userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].type == 'benar_salah') {
+                            if (userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].type == 'benar_salah') {
                               // isNotTrueFalse = true;
-                              List<TrueFalseOption> yourAnswerTrueFalse = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                              List<TrueFalseOption> yourAnswerTrueFalse = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
                               yourAnswer = List.generate(yourAnswerTrueFalse.length, (i) => yourAnswerTrueFalse[i].option);
                             } else {
                               // isNotTrueFalse = false;
-                              yourAnswer = userTo!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
+                              yourAnswer = userToGlobal!.listTest[testKe].listSubtest[subTestKe].listQuestions[index0].yourAnswer;
                             }
                             bool isiKosong = yourAnswer.every((element) => element.isEmpty);
                             return InkWell(
@@ -574,13 +569,13 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
       ),
       bottomNavigationBar: Container(
         height: 50,
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(5),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
               SizedBox(
-                height: 30,
+                height: 40,
                 child: TextButton.icon(
                   onPressed: () {
                     if (soalKe >= 1) {
@@ -595,7 +590,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
               ),
               const SizedBox(width: 5),
               SizedBox(
-                height: 30,
+                height: 40,
                 child: TextButton.icon(
                   onPressed: () async {
                     if (soalKe + 1 < jmlSoal) {
@@ -608,7 +603,7 @@ class _NavQuestUserPageState extends State<NavQuestUserPage> {
                   icon: const Icon(Icons.keyboard_double_arrow_right_rounded, color: Colors.white),
                   iconAlignment: IconAlignment.end,
                   label: Text(
-                    (soalKe + 1 == jmlSoal) ? 'Selesaikan' : 'Selanjutnya',
+                    (soalKe + 1 == jmlSoal) ? ' Selesaikan' : ' Selanjutnya',
                     style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.normal),
                   ),
                 ),

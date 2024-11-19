@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/model/questions/questions_model.dart';
+import 'package:da_administrator/model/review/tryout_review_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/example.dart';
 import 'package:da_administrator/model/user_profile/rationalization_user_model.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/detail_mytryout_user_page.dart';
+import 'package:da_administrator/pages_user/profile/nav_profile_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:da_administrator/service/component.dart';
@@ -15,14 +19,32 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TryoutSayaUserPage extends StatefulWidget {
-  const TryoutSayaUserPage({super.key});
+  final List<TryoutModel> allTryout;
+  final List<String> idAllTryout;
+
+  final List<QuestionsModel> allSubtest;
+  final List<String> idAllSubtest;
+
+  final List<TryoutReviewModel> allReview;
+  final List<String> idAllReview;
+
+  const TryoutSayaUserPage({
+    super.key,
+    required this.idAllTryout,
+    required this.allTryout,
+    required this.idAllSubtest,
+    required this.allSubtest,
+    required this.allReview,
+    required this.idAllReview,
+  });
 
   @override
   State<TryoutSayaUserPage> createState() => _TryoutSayaUserPageState();
 }
 
 class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  final user = FirebaseAuth.instance.currentUser;
+
   TextEditingController foundController = TextEditingController();
 
   List<RationalizationUserModel> rationalUser = [];
@@ -39,7 +61,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (rationalUser.isNotEmpty) {
+    if (allTryout.isNotEmpty) {
       if (lebar(context) <= 800) {
         return onMo(context);
       } else {
@@ -52,30 +74,31 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
 
   @override
   void initState() {
-    // final profider = Provider.of<CounterProvider>(context, listen: false);
+    final user = FirebaseAuth.instance.currentUser;
     super.initState();
-    getDataRational();
-    getDataProduct();
-    /*profider.addListener(() {
-      getDataProduct();
-    });*/
+    if (user != null) {
+      getDataRational();
+      setDataTryout();
+    }
+    setState(() {});
   }
 
   void getDataRational() async {
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('rationalization_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: true).get();
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('rationalization_v03');
+      QuerySnapshot<Object?> querySnapshot = await collectionRef.where('userUID', isEqualTo: user!.uid).get();
 
-      List<RationalizationUserModel> allRationalUser = querySnapshot.docs.map((doc) {
-        return RationalizationUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>);
-      }).toList();
+      var allRationalUser = querySnapshot.docs.map((doc) => RationalizationUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
+      // var idAllRationalUser = querySnapshot.docs.map((doc) => doc.id).toList();
+
+      // Sorting berdasarkan created
+      allRationalUser.sort((a, b) => a.created.compareTo(b.created));
+      allRationalUser = allRationalUser.reversed.toList();
 
       //mencari yang punya user
       for (int i = 0; i < allRationalUser.length; i++) {
-        if (allRationalUser[i].userUID == userUid) {
-          if (allRationalUser[i].created.year == DateTime.now().year) {
-            rationalUser.add(allRationalUser[i]);
-          }
+        if (allRationalUser[i].created.year == DateTime.now().year) {
+          rationalUser.add(allRationalUser[i]);
         }
       }
 
@@ -84,52 +107,36 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
           onlyValue.add(rationalUser[i].jurusan[j].value);
         }
       }
-      setState(() {});
     } catch (e) {
       print('salah getDataRational : $e');
     }
+    setState(() {});
   }
 
-  void getDataProduct() async {
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
-      allTryout = [];
-      idAllTryout = [];
+  void setDataTryout() async {
+    allTryout = widget.allTryout;
+    idAllTryout = widget.idAllTryout;
 
-      myTryout = [];
-      idMyTryout = [];
-
-      doneTryout = [];
-      idDoneTryout = [];
-
-      allTryout = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      idAllTryout = querySnapshot.docs.map((doc) => doc.id).toList();
-
-      for (int i = 0; i < allTryout.length; i++) {
-        if (allTryout[i].claimedUid.isNotEmpty) {
-          for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
-            if (allTryout[i].claimedUid[j].userUID == userUid) {
-              if (!(allTryout[i].phase)) {
-                myTryout.add(allTryout[i]);
-                idMyTryout.add(idAllTryout[i]);
-              } else if (allTryout[i].phase) {
-                doneTryout.add(allTryout[i]);
-                idDoneTryout.add(idAllTryout[i]);
-              }
+    for (int i = 0; i < allTryout.length; i++) {
+      if (allTryout[i].claimedUid.isNotEmpty) {
+        for (int j = 0; j < allTryout[i].claimedUid.length; j++) {
+          if (allTryout[i].claimedUid[j].userUID == user!.uid) {
+            if (!(allTryout[i].phase)) {
+              myTryout.add(allTryout[i]);
+              idMyTryout.add(idAllTryout[i]);
+            } else if (allTryout[i].phase) {
+              doneTryout.add(allTryout[i]);
+              idDoneTryout.add(idAllTryout[i]);
             }
           }
         }
       }
-
-      setState(() {});
-    } catch (e) {
-      print('salah home_page: $e');
     }
+    setState(() {});
   }
 
-  void selengkapnya(BuildContext context) {
-    Navigator.push(context, FadeRoute1(const TryoutSelengkapnyaUserPage()));
+  void selengkapnya(BuildContext context, {required List<TryoutModel> allTryout, required List<String> idAllTryout}) {
+    Navigator.push(context, FadeRoute1(TryoutSelengkapnyaUserPage(allTryout: allTryout, idAllTryout: idAllTryout)));
   }
 
   String formatDateTime(DateTime dateTime) {
@@ -246,54 +253,55 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                     child: Row(
                       children: [
                         Expanded(child: _LineChart(rationalUser: rationalUser, onlyValue: onlyValue)),
-                        SizedBox(
-                          width: 150,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Text('Jurusan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
-                              ),
-                              Row(
-                                children: [
-                                  Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                  Expanded(
-                                    child: Text(rationalUser.first.jurusan[0].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                  ),
-                                  const SizedBox(height: 30)
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                  Expanded(
-                                    child: Text(rationalUser.first.jurusan[1].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                  ),
-                                  const SizedBox(height: 30)
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                  Expanded(
-                                    child: Text(rationalUser.first.jurusan[2].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                  ),
-                                  const SizedBox(height: 30)
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                  Expanded(
-                                    child: Text(rationalUser.first.jurusan[3].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                  ),
-                                  const SizedBox(height: 30)
-                                ],
-                              ),
-                            ],
+                        if (rationalUser.isNotEmpty)
+                          SizedBox(
+                            width: 150,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text('Jurusan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text(rationalUser.first.jurusan[0].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text(rationalUser.first.jurusan[1].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text(rationalUser.first.jurusan[2].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                    Expanded(
+                                      child: Text(rationalUser.first.jurusan[3].namaJurusan, style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(height: 30)
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -319,7 +327,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         SizedBox(
                           height: 30,
                           child: OutlinedButton.icon(
-                            onPressed: () => selengkapnya(context),
+                            onPressed: () => selengkapnya(context, idAllTryout: idMyTryout, allTryout: myTryout),
                             style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -338,7 +346,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                       (index) {
                         var approval = false;
                         for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
-                          if (myTryout[index].claimedUid[i].userUID == userUid) {
+                          if (myTryout[index].claimedUid[i].userUID == user!.uid) {
                             approval = myTryout[index].claimedUid[i].approval;
                           }
                         }
@@ -352,7 +360,21 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailMytryoutUserPage(
+                                  idMyTryout: idMyTryout[index],
+                                  myTryout: myTryout[index],
+                                  approval: approval,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                  rationalUser: rationalUser,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -380,7 +402,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         SizedBox(
                           height: 30,
                           child: OutlinedButton.icon(
-                            onPressed: () => selengkapnya(context),
+                            onPressed: () => selengkapnya(context, allTryout: doneTryout, idAllTryout: idDoneTryout),
                             style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -400,7 +422,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         var approval = false;
 
                         for (int i = 0; i < doneTryout[index].claimedUid.length; i++) {
-                          if (doneTryout[index].claimedUid[i].userUID == userUid) {
+                          if (doneTryout[index].claimedUid[i].userUID == user!.uid) {
                             approval = doneTryout[index].claimedUid[i].approval;
                           }
                         }
@@ -414,7 +436,21 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailMytryoutUserPage(
+                                  idMyTryout: idDoneTryout[index],
+                                  myTryout: doneTryout[index],
+                                  approval: approval,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                  rationalUser: rationalUser,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -457,61 +493,74 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Container(
-                      width: 1000,
+                      width: 700,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
                       child: Row(
                         children: [
                           Expanded(child: _LineChart(rationalUser: rationalUser, onlyValue: onlyValue)),
-                          SizedBox(
-                            width: 150,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Text('Jurusan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
-                                ),
-                                Row(
-                                  children: [
-                                    Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                    Expanded(
-                                      child: Text('Teknik Informatika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                    ),
-                                    const SizedBox(height: 30)
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                    Expanded(
-                                      child: Text('Matematika', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                    ),
-                                    const SizedBox(height: 30)
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                    Expanded(
-                                      child: Text('Sasta Inggris', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                    ),
-                                    const SizedBox(height: 30)
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
-                                    Expanded(
-                                      child: Text('Desain Komunikasi Visual', style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold)),
-                                    ),
-                                    const SizedBox(height: 30)
-                                  ],
-                                ),
-                              ],
+                          if (rationalUser.isNotEmpty)
+                            SizedBox(
+                              width: 150,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text('Jurusan', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(height: 10, width: 10, color: Colors.pink, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                      Expanded(
+                                        child: Text(
+                                          rationalUser.first.jurusan[0].namaJurusan,
+                                          style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(height: 10, width: 10, color: Colors.green, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                      Expanded(
+                                        child: Text(
+                                          rationalUser.first.jurusan[1].namaJurusan,
+                                          style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(height: 10, width: 10, color: Colors.yellow, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                      Expanded(
+                                        child: Text(
+                                          rationalUser.first.jurusan[2].namaJurusan,
+                                          style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(height: 10, width: 10, color: Colors.blue, margin: const EdgeInsets.symmetric(horizontal: 10)),
+                                      Expanded(
+                                        child: Text(
+                                          rationalUser.first.jurusan[3].namaJurusan,
+                                          style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30)
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -538,7 +587,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         SizedBox(
                           height: 30,
                           child: OutlinedButton.icon(
-                            onPressed: () => selengkapnya(context),
+                            onPressed: () => selengkapnya(context, allTryout: myTryout, idAllTryout: idMyTryout),
                             style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -557,7 +606,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                       (index) {
                         var approval = false;
                         for (int i = 0; i < myTryout[index].claimedUid.length; i++) {
-                          if (myTryout[index].claimedUid[i].userUID == userUid) {
+                          if (myTryout[index].claimedUid[i].userUID == user!.uid) {
                             approval = myTryout[index].claimedUid[i].approval;
                           }
                         }
@@ -571,7 +620,21 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           ended: myTryout[index].ended,
                           started: myTryout[index].started,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idMyTryout[index], myTryout: myTryout[index], approval: approval)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailMytryoutUserPage(
+                                  idMyTryout: idMyTryout[index],
+                                  myTryout: myTryout[index],
+                                  approval: approval,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                  rationalUser: rationalUser,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -598,7 +661,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         SizedBox(
                           height: 30,
                           child: OutlinedButton.icon(
-                            onPressed: () => selengkapnya(context),
+                            onPressed: () => selengkapnya(context, idAllTryout: idDoneTryout, allTryout: doneTryout),
                             style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                             iconAlignment: IconAlignment.end,
                             icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -618,7 +681,7 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                         var approval = false;
 
                         for (int i = 0; i < doneTryout[index].claimedUid.length; i++) {
-                          if (doneTryout[index].claimedUid[i].userUID == userUid) {
+                          if (doneTryout[index].claimedUid[i].userUID == user!.uid) {
                             approval = doneTryout[index].claimedUid[i].approval;
                           }
                         }
@@ -632,7 +695,21 @@ class _TryoutSayaUserPageState extends State<TryoutSayaUserPage> {
                           started: doneTryout[index].started,
                           ended: doneTryout[index].ended,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailMytryoutUserPage(idTryOut: idDoneTryout[index], myTryout: doneTryout[index], approval: approval)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailMytryoutUserPage(
+                                  idMyTryout: idDoneTryout[index],
+                                  myTryout: doneTryout[index],
+                                  approval: approval,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                  rationalUser: rationalUser,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -660,10 +737,12 @@ class _LineChart extends StatefulWidget {
 }
 
 class _LineChartState extends State<_LineChart> {
+  final imageVec4 = 'assets/vec4.png';
   List<RationalizationUserModel> rationalUser = [];
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     // TODO: implement initState
     super.initState();
     rationalUser = widget.rationalUser;
@@ -671,13 +750,39 @@ class _LineChartState extends State<_LineChart> {
 
   @override
   Widget build(BuildContext context) {
+    // if (false) {
     if (rationalUser.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 10),
         child: LineChart(sampleData1, duration: const Duration(milliseconds: 200)),
       );
     } else {
-      return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 150,
+                width: 150,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(imageVec4, fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text('Anda belum mengatur target Jurusan Anda', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h4)),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () => Navigator.push(context, FadeRoute1(const NavProfileUserPage())),
+                child: Text('Ubah Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: h4)),
+              )
+            ],
+          ),
+        ),
+      );
     }
   }
 

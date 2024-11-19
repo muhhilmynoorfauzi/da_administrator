@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RationalizationModel {
-  int value;
+  double value;
   String jurusan;
   String universitas;
 
@@ -18,7 +18,7 @@ class RationalizationModel {
       };
 
   factory RationalizationModel.fromJson(Map<String, dynamic> json) => RationalizationModel(
-        value: json['value'],
+        value: (json['value']as num).toDouble(),
         jurusan: json['jurusan'],
         universitas: json['univ'],
       );

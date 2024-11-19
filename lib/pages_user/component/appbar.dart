@@ -9,6 +9,7 @@ import 'package:da_administrator/pages_user/tryout_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -25,10 +26,11 @@ AppBar appbarDesk({
   VoidCallback? actionProfile,
 }) {
   void onReload() {
-    // html.window.location.reload();
+    html.window.location.reload();
   }
+  final user = FirebaseAuth.instance.currentUser;
   final profider = Provider.of<CounterProvider>(context, listen: false);
-  bool isLogin = (/*profider.getCurrentUser != null*/true);
+  bool isLogin = (user != null);
   final List<String> action = ['Bank Soal', 'TryOut', 'Rekomendasi Belajar'];
   return AppBar(
     backgroundColor: Colors.white,
@@ -155,9 +157,9 @@ AppBar appbarMo({
   double elevation = 1,
   VoidCallback? actionProfile,
 }) {
-  final profider = Provider.of<CounterProvider>(context, listen: false);
+  final user = FirebaseAuth.instance.currentUser;
 
-  bool isLogin = (/*profider.getCurrentUser != null*/true);
+  bool isLogin = (user != null);
 
   return AppBar(
     backgroundColor: Colors.white,
@@ -169,19 +171,12 @@ AppBar appbarMo({
     toolbarHeight: 40,
     title: SvgPicture.asset('assets/logo1.svg', width: 120),
     actions: [
-      isLogin
+      (isLogin)
           ? InkWell(
               onTap: () async {
                 if (actionProfile != null) {
                   actionProfile();
                 }
-                /*
-                  1. get data user
-                  2. jika collection sudah ada isinya, cari berdasarkan uid yang sudah di collection
-                  3. jika ditemukan yang sesuai dengan uid, masukkan id collection dan data ke parameter NavProfileUserPage
-                  4. jika tidak ditemukan yang sesuai dengan uid, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
-                  3. jika collection belum ada isinya, maka buat baru dan ambil id collectionnya dan data ke parameter NavProfileUserPage
-                */
                 Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
               },
               borderRadius: BorderRadius.circular(100),
@@ -203,28 +198,18 @@ AppBar appbarMo({
             )
           : Container(
               height: 50,
-              // width: 200,
-              margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(5),
+              decoration: BoxDecoration(border: Border.all(color: primary, width: 2), borderRadius: BorderRadius.circular(100)),
               child: Row(
                 children: [
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
                     ),
-                    onPressed: () {},
+                    onPressed: () => Navigator.push(context, SlideTransition1(const LoginPage())),
                     child: Text('Login', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                    ),
-                    onPressed: () {},
-                    child: Text('Register', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),

@@ -5,6 +5,7 @@ import 'package:da_administrator/model/tryout/subtest_model.dart';
 import 'package:da_administrator/model/tryout/test_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/pages/detail_to_page.dart';
+import 'package:da_administrator/pages/setting/nav_set_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   bool onLoading = false;
   bool onLoadingAll = false;
   final List<String> menuOptions = ['Delete'];
+
   List<TryoutModel>? listTryOut;
   List<String> idListTryOut = [];
 
@@ -50,14 +52,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    final profider = Provider.of<CounterProvider>(context, listen: false);
-    profider.addListener(() => getDataTryout());
     getDataTryout();
   }
 
   void getDataTryout() async {
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v03');
       QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
 
       listTryOut = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
@@ -65,11 +65,10 @@ class _HomePageState extends State<HomePage> {
 
       listAll = listTryOut!;
       idListAll = idListTryOut;
-
-      setState(() {});
     } catch (e) {
-      print('salah home_page: $e');
+      print('salah home_page getDataTryout: $e');
     }
+    setState(() {});
   }
 
   Widget categories(int id, String title) {
@@ -139,8 +138,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> tambahTryout() async {
-    var nowTime = DateTime.now();
-    var img = 'https://firebasestorage.googleapis.com/v0/b/dreamacademy-example.appspot.com/o/assets%2Fdefault_image.png?alt=media&token=93c29a79-0819-4dc7-a04b-3816503d2242';
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -165,6 +162,9 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () async {
+                var nowTime = DateTime.now();
+                var img =
+                    'https://firebasestorage.googleapis.com/v0/b/dreamacademy-example.appspot.com/o/assets%2Fdefault_image.png?alt=media&token=93c29a79-0819-4dc7-a04b-3816503d2242';
                 if (controller.text.isNotEmpty) {
                   await TryoutService.add(
                     TryoutModel(
@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
                       listPrice: [200000, 400000, 700000, 1000000],
                     ),
                   );
-                  getDataTryout();
+                  onRefresh();
                 }
                 Navigator.of(context).pop();
               },
@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> deleteTryout({required String title, required String id}) async {
+  Future<void> deleteTryout({required String id, required TryoutModel tryout}) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -211,7 +211,7 @@ class _HomePageState extends State<HomePage> {
           surfaceTintColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          title: Text(title, style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
+          title: Text("Hapus ${tryout.toName}?", style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
           contentPadding: const EdgeInsets.all(10),
           actionsPadding: const EdgeInsets.all(10),
           actions: [
@@ -223,11 +223,11 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 final profider = Provider.of<CounterProvider>(context, listen: false);
                 setState(() => onLoading = true);
-                tryout?.listTest.forEach(
-                  (test) => test.listSubtest.where((subTest) => subTest.idQuestions.isNotEmpty).forEach(
+                for (var test in tryout.listTest) {
+                  test.listSubtest.where((subTest) => subTest.idQuestions.isNotEmpty).forEach(
                         (subTest) async => await QuestionsService.delete(subTest.idQuestions),
-                      ),
-                );
+                      );
+                }
                 await TryoutService.delete(id);
                 expiredID = 0;
                 profider.setPage(idPage: null, idDetailPage: null);
@@ -242,39 +242,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> logout() async => await showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          titlePadding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          title: Text('Yakin ingin Logout?', style: TextStyle(color: Colors.black, fontSize: h3, fontWeight: FontWeight.bold)),
-          actionsPadding: const EdgeInsets.all(10),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Batal', style: TextStyle(color: Colors.black, fontSize: h4)),
-            ),
-            TextButton(
-              onPressed: () async {
-                final provider = Provider.of<CounterProvider>(context, listen: false);
-                provider.logout();
-                Navigator.of(context).pop();
-              },
-              child: Text('Logout', style: TextStyle(color: Colors.black, fontSize: h4)),
-            ),
-          ],
-        ),
-      );
+  Future<void> setting(BuildContext context) async {
+    Navigator.push(context, FadeRoute1(const NavSetPage()));
+  }
 
-  void refresh() async {
+  void onRefresh() async {
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     setState(() => onLoadingAll = true);
 
-    await Future.delayed(const Duration(milliseconds: 200));
     expiredID = 0;
-    final profider = Provider.of<CounterProvider>(context, listen: false);
     profider.setPage(idPage: null, idDetailPage: null);
+    getDataTryout();
     await Future.delayed(const Duration(milliseconds: 200));
 
     setState(() => onLoadingAll = false);
@@ -300,8 +278,8 @@ class _HomePageState extends State<HomePage> {
                   floating: true,
                   snap: true,
                   actions: [
-                    IconButton(onPressed: () => refresh(), icon: const Icon(Icons.refresh, color: Colors.black)),
-                    OutlinedButton(onPressed: () => logout(), child: Text('Logout', style: TextStyle(color: Colors.black, fontSize: h4))),
+                    IconButton(onPressed: () => onRefresh(), icon: const Icon(Icons.refresh, color: Colors.black)),
+                    IconButton(onPressed: () => setting(context), icon: const Icon(Icons.settings, color: Colors.black)),
                     const SizedBox(width: 10),
                   ],
                 ),
@@ -319,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                             delegate: SliverChildBuilderDelegate(
                               childCount: listTryOut!.length,
                               (BuildContext context, int index) {
-                                var tryOut = listTryOut![index];
+                                var tryOutMo = listTryOut![index];
                                 var id = idListTryOut[index];
                                 return Column(
                                   children: [
@@ -348,7 +326,7 @@ class _HomePageState extends State<HomePage> {
                                         onPressed: () async {
                                           profider.setPage(idPage: index, idDetailPage: id);
 
-                                          Navigator.push(context, SlideTransition1(const DetailToPage()));
+                                          Navigator.push(context, SlideTransition1(DetailToPage(tryout: tryOutMo)));
                                         },
                                         child: Column(
                                           children: [
@@ -359,25 +337,25 @@ class _HomePageState extends State<HomePage> {
                                                 Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(tryOut.toName, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                                                    Text(tryOutMo.toName, style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                       children: [
-                                                        if (tryOut.public)
+                                                        if (tryOutMo.public)
                                                           Container(
                                                             margin: const EdgeInsets.only(right: 5),
                                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                             decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
                                                             child: Text('Public', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
                                                           ),
-                                                        if (tryOut.phaseIRT)
+                                                        if (tryOutMo.phaseIRT)
                                                           Container(
                                                             margin: const EdgeInsets.only(right: 5),
                                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                             decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
                                                             child: Text('IRT', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
                                                           ),
-                                                        if (tryOut.phase)
+                                                        if (tryOutMo.phase)
                                                           Container(
                                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                             decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
@@ -392,7 +370,7 @@ class _HomePageState extends State<HomePage> {
                                                     if (value == 'Delete') {
                                                       profider.setPage(idPage: index, idDetailPage: id);
 
-                                                      deleteTryout(title: "Hapus ${tryOut.toName}?", id: id);
+                                                      deleteTryout(id: id, tryout: tryOutMo);
                                                     }
                                                   },
                                                   color: Colors.white,
@@ -408,8 +386,8 @@ class _HomePageState extends State<HomePage> {
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text('${tryOut.claimedUid.length} member', style: TextStyle(color: Colors.black, fontSize: h5)),
-                                                Text(formatDateTime(tryOut.created), style: TextStyle(color: Colors.black, fontSize: h5)),
+                                                Text('${tryOutMo.claimedUid.length} member', style: TextStyle(color: Colors.black, fontSize: h5)),
+                                                Text(formatDateTime(tryOutMo.created), style: TextStyle(color: Colors.black, fontSize: h5)),
                                               ],
                                             ),
                                           ],
@@ -480,7 +458,7 @@ class _HomePageState extends State<HomePage> {
   Widget onDesk(BuildContext context) {
     final profider = Provider.of<CounterProvider>(context, listen: false);
     bool onTablet = (lebar(context) >= 700 && lebar(context) <= 1200);
-
+    TryoutModel? tryOutDesk;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Row(
@@ -503,14 +481,8 @@ class _HomePageState extends State<HomePage> {
                         floating: true,
                         snap: true,
                         actions: [
-                          IconButton(
-                            onPressed: () => refresh(),
-                            icon: const Icon(Icons.refresh, color: Colors.black),
-                          ),
-                          OutlinedButton(
-                            onPressed: () => logout(),
-                            child: Text('Logout', style: TextStyle(color: Colors.black, fontSize: h4)),
-                          ),
+                          IconButton(onPressed: () => onRefresh(), icon: const Icon(Icons.refresh, color: Colors.black)),
+                          IconButton(onPressed: () => setting(context), icon: const Icon(Icons.settings, color: Colors.black)),
                           const SizedBox(width: 10),
                         ],
                       ),
@@ -528,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                                   delegate: SliverChildBuilderDelegate(
                                     childCount: listTryOut!.length,
                                     (BuildContext context, int index) {
-                                      var tryOut = listTryOut![index];
+                                      tryOutDesk = listTryOut![index];
                                       var id = idListTryOut[index];
                                       return Column(
                                         children: [
@@ -552,6 +524,7 @@ class _HomePageState extends State<HomePage> {
                                             height: 100,
                                             width: double.infinity,
                                             decoration: BoxDecoration(
+                                              color: Colors.white,
                                               borderRadius: BorderRadius.circular(10),
                                               gradient: profider.getPage == index ? primaryGradient : null,
                                             ),
@@ -564,7 +537,7 @@ class _HomePageState extends State<HomePage> {
                                                 profider.setPage(idPage: index, idDetailPage: id);
                                                 if (profider.getPage != null) {
                                                   setState(() => onLoading = true);
-                                                  await Future.delayed(const Duration(milliseconds: 500));
+                                                  await Future.delayed(const Duration(milliseconds: 200));
                                                   setState(() => onLoading = false);
                                                 }
                                               },
@@ -578,7 +551,7 @@ class _HomePageState extends State<HomePage> {
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                           Text(
-                                                            tryOut.toName,
+                                                            tryOutDesk!.toName,
                                                             style: TextStyle(
                                                               color: profider.getPage == index ? Colors.white : Colors.black,
                                                               fontSize: h4,
@@ -588,21 +561,21 @@ class _HomePageState extends State<HomePage> {
                                                           Row(
                                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
-                                                              if (tryOut.public)
+                                                              if (tryOutDesk!.public)
                                                                 Container(
                                                                   margin: const EdgeInsets.only(right: 5),
                                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                                   decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
                                                                   child: Text('Public', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
                                                                 ),
-                                                              if (tryOut.phaseIRT)
+                                                              if (tryOutDesk!.phaseIRT)
                                                                 Container(
                                                                   margin: const EdgeInsets.only(right: 5),
                                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                                   decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
                                                                   child: Text('IRT', style: TextStyle(fontSize: h5, fontWeight: FontWeight.bold, color: Colors.white)),
                                                                 ),
-                                                              if (tryOut.phase)
+                                                              if (tryOutDesk!.phase)
                                                                 Container(
                                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                                                   decoration: BoxDecoration(color: secondary, borderRadius: BorderRadius.circular(50)),
@@ -616,8 +589,7 @@ class _HomePageState extends State<HomePage> {
                                                         onSelected: (String value) async {
                                                           if (value == "Delete") {
                                                             profider.setPage(idPage: index, idDetailPage: id);
-
-                                                            deleteTryout(title: "Hapus ${tryOut.toName}?", id: id);
+                                                            deleteTryout(id: id, tryout: tryOutDesk!);
                                                           }
                                                         },
                                                         color: Colors.white,
@@ -641,11 +613,11 @@ class _HomePageState extends State<HomePage> {
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
                                                       Text(
-                                                        '${tryOut.claimedUid.length} member',
+                                                        '${tryOutDesk!.claimedUid.length} member',
                                                         style: TextStyle(color: profider.getPage == index ? Colors.white : Colors.black, fontSize: h5),
                                                       ),
                                                       Text(
-                                                        formatDateTime(tryOut.created),
+                                                        formatDateTime(tryOutDesk!.created),
                                                         style: TextStyle(color: profider.getPage == index ? Colors.white : Colors.black, fontSize: h5),
                                                       ),
                                                     ],
@@ -666,16 +638,13 @@ class _HomePageState extends State<HomePage> {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                          child: SingleChildScrollView(
-                                            scrollDirection: Axis.horizontal,
-                                            child: Row(
-                                              children: [
-                                                categories(0, 'All'),
-                                                categories(1, 'Expired'),
-                                                categories(2, 'Publish'),
-                                                categories(3, 'On-Going'),
-                                              ],
-                                            ),
+                                          child: Row(
+                                            children: [
+                                              categories(0, 'All'),
+                                              categories(1, 'Expired'),
+                                              categories(2, 'Publish'),
+                                              categories(3, 'On-Going'),
+                                            ],
                                           ),
                                         ),
                                         Container(
@@ -721,12 +690,12 @@ class _HomePageState extends State<HomePage> {
               final profider = Provider.of<CounterProvider>(context, listen: false);
               profider.addListener(() async {
                 setState(() => onLoading = true);
-                await Future.delayed(const Duration(milliseconds: 500));
+                await Future.delayed(const Duration(milliseconds: 200));
                 setState(() => onLoading = false);
               });
               return Expanded(
                 flex: 6,
-                child: profider.getPage == null
+                child: (profider.getPage == null)
                     ? Scaffold(
                         backgroundColor: Colors.white,
                         body: Center(
@@ -752,9 +721,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       )
-                    : onLoading
+                    : (onLoading && tryOutDesk != null)
                         ? Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3))
-                        : const DetailToPage(),
+                        : DetailToPage(tryout: tryOutDesk),
               );
             },
           ),

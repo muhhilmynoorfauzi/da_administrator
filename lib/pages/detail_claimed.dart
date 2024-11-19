@@ -61,26 +61,26 @@ class _DetailClaimedState extends State<DetailClaimed> {
     setState(() => isLoading = !isLoading);
     await TryoutService.edit(
       id: id,
-      created: tryout!.created,
+      created: tryoutGlobal!.created,
       updated: DateTime.now(),
-      toCode: tryout!.toCode,
-      toName: tryout!.toName,
-      started: tryout!.started,
-      ended: tryout!.ended,
-      desk: tryout!.desk,
-      image: tryout!.image,
-      phase: tryout!.phase,
-      phaseIRT: tryout!.phaseIRT,
-      expired: tryout!.expired,
-      public: tryout!.public,
-      showFreeMethod: tryout!.showFreeMethod,
-      totalTime: tryout!.totalTime,
-      numberQuestions: tryout!.numberQuestions,
-      listTest: tryout!.listTest,
+      toCode: tryoutGlobal!.toCode,
+      toName: tryoutGlobal!.toName,
+      started: tryoutGlobal!.started,
+      ended: tryoutGlobal!.ended,
+      desk: tryoutGlobal!.desk,
+      image: tryoutGlobal!.image,
+      phase: tryoutGlobal!.phase,
+      phaseIRT: tryoutGlobal!.phaseIRT,
+      expired: tryoutGlobal!.expired,
+      public: tryoutGlobal!.public,
+      showFreeMethod: tryoutGlobal!.showFreeMethod,
+      totalTime: tryoutGlobal!.totalTime,
+      numberQuestions: tryoutGlobal!.numberQuestions,
+      listTest: tryoutGlobal!.listTest,
       claimedUid: listClaimedUid,
-      listPrice: tryout!.listPrice,
+      listPrice: tryoutGlobal!.listPrice,
     );
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 200));
     setState(() => isLoading = !isLoading);
     profider.setReload();
   }
@@ -122,7 +122,7 @@ class _DetailClaimedState extends State<DetailClaimed> {
         children: List.generate(
           listClaimedUid.length,
           (index0) => Container(
-            height: 250,
+            height: listClaimedUid[index0].imgFollow != '' ? 320 : 250,
             alignment: Alignment.center,
             margin: const EdgeInsets.only(bottom: 10),
             child: SizedBox(
@@ -131,31 +131,21 @@ class _DetailClaimedState extends State<DetailClaimed> {
                 builder: (BuildContext context, StateSetter setState) {
                   //
                   return Card(
-                    color: Colors.white,
+                    color: secondaryWhite,
                     surfaceTintColor: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              OutlinedButton.icon(
-                                onPressed: () => deleteClaimed(index0),
-                                label: Text('Hapus User Claimed'.toString(), style: TextStyle(fontSize: h4, color: Colors.black)),
-                                icon: const Icon(Icons.delete, color: Colors.black),
-                              ),
-                            ],
-                          ),
                           SwitchListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Setujui Pembelian'.toString(), style: TextStyle(fontSize: h4, color: Colors.black)),
+                                Text('Setujui Pembelian'.toString(), style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
                                 Text(
                                   listClaimedUid[index0].approval ? 'Disetujui' : 'Belum\nDisetujui',
-                                  style: TextStyle(color: Colors.black, fontSize: h5, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.black, fontSize: h5),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -166,52 +156,84 @@ class _DetailClaimedState extends State<DetailClaimed> {
                           Expanded(
                             child: Row(
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Name User', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    Text('userUID', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    if (listClaimedUid[index0].imgFollow != '') Text('Bukti Follow', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    Text('Metode Pembayaran', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    Text('Harga', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                    Text('Tanggal pembelian', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                  ],
+                                SizedBox(
+                                  width: 150,
+                                  // color: Colors.blue,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Name User', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                        Text('userUID', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                        if (listClaimedUid[index0].imgFollow != '')
+                                          Container(
+                                            height: 60,
+                                            alignment: Alignment.centerLeft,
+                                            child: Text('Bukti Follow', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                          ),
+                                        Text('Metode Pembayaran', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                        Text('Harga', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                        Text('Tanggal pembelian', style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(width: 30),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(': ${listClaimedUid[index0].name}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    Text(': ${listClaimedUid[index0].userUID}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    if (listClaimedUid[index0].imgFollow != '')
-                                      InkWell(
-                                        onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: listClaimedUid[index0].imgFollow))),
-                                        child: SizedBox(
-                                          height: 60,
-                                          width: 60,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
-                                            child: CachedNetworkImage(
-                                              imageUrl: listClaimedUid[index0].imgFollow,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeWidth: 3)),
-                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                // const SizedBox(width: 30),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(': ${listClaimedUid[index0].name}', style: TextStyle(fontSize: h4 - 2, fontWeight: FontWeight.bold, color: Colors.black)),
+                                        Text(': ${listClaimedUid[index0].userUID}', style: TextStyle(fontSize: h4 - 2, fontWeight: FontWeight.bold, color: Colors.black)),
+                                        if (listClaimedUid[index0].imgFollow != '')
+                                          InkWell(
+                                            onTap: () => Navigator.push(context, FadeRoute1(ShowImagePage(image: listClaimedUid[index0].imgFollow))),
+                                            child: SizedBox(
+                                              height: 60,
+                                              width: 60,
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: CachedNetworkImage(
+                                                  imageUrl: listClaimedUid[index0].imgFollow,
+                                                  fit: BoxFit.cover,
+                                                  placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeWidth: 3)),
+                                                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                ),
+                                              ),
                                             ),
                                           ),
+                                        Text(': ${listClaimedUid[index0].payment}', style: TextStyle(fontSize: h4 - 2, fontWeight: FontWeight.bold, color: Colors.black)),
+                                        Text(
+                                          NumberFormat.currency(locale: 'id', decimalDigits: 0, name: ': Rp ').format(listClaimedUid[index0].price),
+                                          style: TextStyle(fontSize: h4 - 2, fontWeight: FontWeight.bold, color: Colors.black),
                                         ),
-                                      ),
-                                    Text(': ${listClaimedUid[index0].payment}', style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                    Text(
-                                      NumberFormat.currency(locale: 'id', decimalDigits: 0, name: ': Rp ').format(listClaimedUid[index0].price),
-                                      style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black),
+                                        Text(": ${formatDate(listClaimedUid[index0].created)}",
+                                            style: TextStyle(fontSize: h4 - 2, fontWeight: FontWeight.bold, color: Colors.black)),
+                                      ],
                                     ),
-                                    Text(": ${formatDate(listClaimedUid[index0].created)}", style: TextStyle(fontSize: h4, fontWeight: FontWeight.bold, color: Colors.black)),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 40,
+                                child: OutlinedButton.icon(
+                                  onPressed: () => deleteClaimed(index0),
+                                  label: Text('Hapus User Claimed'.toString(), style: TextStyle(fontSize: h4 - 2, color: Colors.black)),
+                                  icon: const Icon(Icons.delete, color: Colors.black),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

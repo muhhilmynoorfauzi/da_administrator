@@ -10,10 +10,13 @@ import 'package:da_administrator/model/user_profile/rationalization_user_model.d
 import 'package:da_administrator/pages_user/question/nav_quest_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
+import 'package:da_administrator/service/state_manajement.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProfileUserPage extends StatefulWidget {
   const ProfileUserPage({super.key, required this.profile, required this.idProfile});
@@ -28,13 +31,15 @@ class ProfileUserPage extends StatefulWidget {
 class _ProfileUserPageState extends State<ProfileUserPage> {
   bool onLoading = false;
   ProfileUserModel? profile;
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  final user = FirebaseAuth.instance.currentUser;
+
   late TextEditingController controllerUniqueUserName;
   late TextEditingController controllerUserName;
   late TextEditingController controllerEmail;
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     // TODO: implement initState
     super.initState();
     profile = widget.profile;
@@ -52,7 +57,6 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
     controllerUserName.dispose();
     controllerEmail.dispose();
   }
-
 
   Future<void> onSave(BuildContext context) async {
     setState(() => onLoading = true);
@@ -121,7 +125,7 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
     if (kIsWeb) {
       // Pada platform web, gunakan bytes untuk mengupload berkas
       final bytes = pickedFile!.bytes!;
-      final ref = FirebaseStorage.instance.ref().child('userProfile_$userUid/${pickedFile?.name}');
+      final ref = FirebaseStorage.instance.ref().child('userProfile_${user!.uid}/${pickedFile?.name}');
       uploadTask = ref.putData(bytes);
 
       final snapshot = await uploadTask!.whenComplete(() {});
@@ -129,7 +133,7 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
       profile!.imageProfile = urlDownload;
     } else {
       // Pada platform native, gunakan path seperti biasa
-      final path = 'userProfile_$userUid/${pickedFile?.name}';
+      final path = 'userProfile_${user!.uid}/${pickedFile?.name}';
       final file = File(pickedFile!.path!);
       final ref = FirebaseStorage.instance.ref().child(path);
       uploadTask = ref.putFile(file);
@@ -143,138 +147,134 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!onLoading) {
-      if (profile != null) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: ListView(
-            children: [
-              if (lebar(context) > 900) SizedBox(height: tinggi(context) * .1),
-              Center(
-                child: Container(
-                  width: 700,
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 200,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: CircleAvatar(
-                            radius: 80,
-                            backgroundColor: Colors.grey,
-                            child: (pickedFile != null)
-                                ? Container(
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.grey),
-                                    child: kIsWeb ? Image.memory(pickedFile!.bytes!, fit: BoxFit.cover) : Image.file(File(pickedFile!.path!), fit: BoxFit.cover),
-                                  )
-                                : (profile!.imageProfile == '')
-                                    ? const Icon(Icons.person_rounded, color: Colors.white, size: 120)
-                                    : CachedNetworkImage(
-                                        imageUrl: profile!.imageProfile,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
-                                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                                      ),
-                          ),
+    if (!onLoading && profile != null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: ListView(
+          children: [
+            if (lebar(context) > 900) SizedBox(height: tinggi(context) * .1),
+            Center(
+              child: Container(
+                width: 700,
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundColor: Colors.grey,
+                          child: (pickedFile != null)
+                              ? Container(
+                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.grey),
+                                  child: kIsWeb ? Image.memory(pickedFile!.bytes!, fit: BoxFit.cover) : Image.file(File(pickedFile!.path!), fit: BoxFit.cover),
+                                )
+                              : (profile!.imageProfile == '')
+                                  ? const Icon(Icons.person_rounded, color: Colors.white, size: 120)
+                                  : CachedNetworkImage(
+                                      imageUrl: profile!.imageProfile,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                                    ),
                         ),
                       ),
-                      Center(
-                        child: Column(
-                          children: [
+                    ),
+                    Center(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 30,
+                            child: OutlinedButton(
+                              onPressed: () async => await selectedImageUser(),
+                              child: Text('Pilih Gambar', style: TextStyle(fontSize: h5 + 2, color: Colors.black)),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          if (pickedFile == null)
                             SizedBox(
                               height: 30,
                               child: OutlinedButton(
-                                onPressed: () async => await selectedImageUser(),
-                                child: Text('Pilih Gambar', style: TextStyle(fontSize: h5 + 2, color: Colors.black)),
+                                onPressed: () {},
+                                child: Text('Hapus Gambar', style: TextStyle(fontSize: h5 + 2, color: Colors.black)),
                               ),
                             ),
-                            const SizedBox(height: 5),
-                            if (pickedFile == null)
-                              SizedBox(
-                                height: 30,
-                                child: OutlinedButton(
-                                  onPressed: () {},
-                                  child: Text('Hapus Gambar', style: TextStyle(fontSize: h5 + 2, color: Colors.black)),
-                                ),
-                              ),
-                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+                    Text('Nama (Maks. 50 Karakter)', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
+                    SizedBox(
+                      height: 40,
+                      child: TextFormField(
+                        controller: controllerUserName,
+                        style: TextStyle(color: Colors.black, fontSize: h4),
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
                         ),
                       ),
-                      const SizedBox(height: 50),
-                      Text('Nama (Maks. 50 Karakter)', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
-                      SizedBox(
-                        height: 40,
-                        child: TextFormField(
-                          controller: controllerUserName,
-                          style: TextStyle(color: Colors.black, fontSize: h4),
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
-                          ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Nama pengguna (Maks. 50 Karakter)', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
+                    SizedBox(
+                      height: 40,
+                      child: TextFormField(
+                        controller: controllerUniqueUserName,
+                        style: TextStyle(color: Colors.black, fontSize: h4),
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text('Nama pengguna (Maks. 50 Karakter)', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
-                      SizedBox(
-                        height: 40,
-                        child: TextFormField(
-                          controller: controllerUniqueUserName,
-                          style: TextStyle(color: Colors.black, fontSize: h4),
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
-                          ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Email Address', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
+                    SizedBox(
+                      height: 40,
+                      child: TextFormField(
+                        controller: controllerEmail,
+                        style: TextStyle(color: Colors.black, fontSize: h4),
+                        maxLines: 1,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text('Email Address', style: TextStyle(fontSize: h5 + 2, fontWeight: FontWeight.normal, color: Colors.black)),
-                      SizedBox(
-                        height: 40,
-                        child: TextFormField(
-                          controller: controllerEmail,
-                          style: TextStyle(color: Colors.black, fontSize: h4),
-                          maxLines: 1,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Center(
-                child: Container(
-                  width: 700,
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  height: 40,
-                  child: TextButton(
-                    onPressed: () => onSave(context),
-                    style: TextButton.styleFrom(backgroundColor: primary),
-                    child: Text('Simpan Pembaharuan', style: TextStyle(fontSize: h4, fontWeight: FontWeight.normal, color: Colors.white)),
-                  ),
+            ),
+            Center(
+              child: Container(
+                width: 700,
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                height: 40,
+                child: TextButton(
+                  onPressed: () => onSave(context),
+                  style: TextButton.styleFrom(backgroundColor: primary),
+                  child: Text('Simpan Pembaharuan', style: TextStyle(fontSize: h4, fontWeight: FontWeight.normal, color: Colors.white)),
                 ),
               ),
-              const SizedBox(height: 100),
-            ],
-          ),
-        );
-      } else {
-        return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
-      }
+            ),
+            const SizedBox(height: 100),
+          ],
+        ),
+      );
     } else {
       return Scaffold(backgroundColor: Colors.white, body: Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)));
     }

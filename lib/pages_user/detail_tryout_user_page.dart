@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:da_administrator/model/questions/questions_model.dart';
+import 'package:da_administrator/model/review/tryout_review_model.dart';
 import 'package:da_administrator/model/tryout/tryout_model.dart';
 import 'package:da_administrator/model/user_profile/profile_user_model.dart';
 import 'package:da_administrator/pages_user/component/appbar.dart';
@@ -14,14 +15,28 @@ import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/show_image_page.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DetailTryoutUserPage extends StatefulWidget {
-  final String docId;
+  final String idTryout;
+  final TryoutModel tryoutUser;
+  final List<QuestionsModel> allSubtest;
+  final List<String> idAllSubtest;
+  final List<TryoutReviewModel> allReview;
+  final List<String> idAllReview;
 
-  const DetailTryoutUserPage({super.key, required this.docId});
+  const DetailTryoutUserPage({
+    super.key,
+    required this.idTryout,
+    required this.tryoutUser,
+    required this.allSubtest,
+    required this.idAllSubtest,
+    required this.allReview,
+    required this.idAllReview,
+  });
 
   @override
   State<DetailTryoutUserPage> createState() => _DetailTryoutUserPageState();
@@ -32,12 +47,15 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   final imageVec2 = 'assets/vec2.png';
   final imageVec4 = 'assets/vec4.png';
   var claimed = false;
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  final user = FirebaseAuth.instance.currentUser;
 
   ProfileUserModel? profile;
+
   TryoutModel? tryoutUser;
-  List<QuestionsModel> allQuestion = [];
-  List<String> idAllQuestion = [];
+  List<QuestionsModel> allSubtest = [];
+  List<String> idAllSubtest = [];
+
+  List<TryoutReviewModel> listReviewThisTryout = [];
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +72,29 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
 
   @override
   void initState() {
-    final profider = Provider.of<CounterProvider>(context, listen: false);
+    final user = FirebaseAuth.instance.currentUser;
     // TODO: implement initState
     super.initState();
-    getDataQuestion();
-    getDataTryOut(widget.docId);
+    final profider = Provider.of<CounterProvider>(context, listen: false);
     profile = profider.getProfile;
-    if (profider.getProfile == null) {
-      getDataProfile();
+    setDataQuestion();
+    setDataReview();
+    allSubtest = widget.allSubtest;
+    idAllSubtest = widget.idAllSubtest;
+    tryoutUser = widget.tryoutUser;
+  }
+
+  void setDataReview() async {
+    List<TryoutReviewModel> listAll = widget.allReview;
+    var idListAll = widget.idAllReview;
+
+    for (int i = 0; i < listAll.length; i++) {
+      if (listAll[i].idTryOut == widget.idTryout) {
+        listReviewThisTryout.add(listAll[i]);
+      }
     }
+
+    setState(() {});
   }
 
   String formatMinutes(double seconds) {
@@ -70,58 +102,8 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
     return minutes.toStringAsFixed(1); // Mengembalikan nilai string dengan 1 angka di belakang koma
   }
 
-  void getDataProfile() async {
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('profile_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-      var allProfile = querySnapshot.docs.map((doc) => ProfileUserModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-
-      for (int i = 0; i < allProfile.length; i++) {
-        if (allProfile[i].listPlan != []) {
-          profile = allProfile[i];
-        }
-      }
-      setState(() {});
-    } catch (e) {
-      print('salah nav quest: $e');
-    }
-  }
-
-  void getDataTryOut(String docId) async {
-    tryoutUser = null;
-    try {
-      DocumentReference<Map<String, dynamic>> docRef = FirebaseFirestore.instance.collection('tryout_v2').doc(docId);
-      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-      if (docSnapshot.exists) {
-        tryoutUser = TryoutModel.fromSnapshot(docSnapshot);
-        for (int i = 0; i < tryoutUser!.claimedUid.length; i++) {
-          if (tryoutUser?.claimedUid[i].userUID == userUid) {
-            claimed = true;
-          }
-        }
-      }
-
-      setState(() {});
-    } catch (e) {
-      print('salah detail_tryout_user_page getDataTryOut : $e');
-    }
-  }
-
-  void getDataQuestion() async {
-    allQuestion = [];
-    idAllQuestion = [];
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('questions_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.get();
-
-      allQuestion = querySnapshot.docs.map((doc) => QuestionsModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      idAllQuestion = querySnapshot.docs.map((doc) => doc.id).toList();
-
-      setState(() {});
-    } catch (e) {
-      print('salah detail_tryout_user_page getDataQuestion : $e');
-    }
+  void setDataQuestion() async {
+    setState(() {});
   }
 
   String formatDateTime(DateTime dateTime) {
@@ -139,52 +121,6 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   }
 
   Widget onDesk(BuildContext context) {
-//widget belum isi plan jurusan profile
-    Widget planEmpty() => Center(
-          child: Container(
-            height: 150,
-            width: 700,
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Anda belum mengatur target Jurusan Anda',
-                        style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Expanded(child: SizedBox(width: 10)),
-                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 30,
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.push(context, FadeRoute1(const NavProfileUserPage()));
-                          },
-                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarDesk(context: context, featureActive: true),
@@ -359,9 +295,9 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                             (index1) {
                               String jumlahSoal = '0';
                               var subTest = test.listSubtest[index1];
-                              for (int i = 0; i < idAllQuestion.length; i++) {
-                                if (idAllQuestion[i] == subTest.idQuestions) {
-                                  jumlahSoal = '${allQuestion[i].listQuestions.length}';
+                              for (int i = 0; i < idAllSubtest.length; i++) {
+                                if (idAllSubtest[i] == subTest.idQuestions) {
+                                  jumlahSoal = '${allSubtest[i].listQuestions.length}';
                                 }
                               }
                               return Container(
@@ -404,104 +340,9 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                   children: [
                     (profile != null)
                         ? (profile!.listPlan.every((element) => element.jurusan.isEmpty))
-                            ? planEmpty()
-                            : Container(
-                                height: 300,
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 10),
-                                          Wrap(
-                                            children: List.generate(
-                                              4,
-                                              (index) {
-                                                var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
-                                                var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
-                                                return Container(
-                                                  width: 300,
-                                                  padding: const EdgeInsets.all(3),
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        (jurusan[index].isEmpty) ? Icons.cancel : Icons.check_circle,
-                                                        color: (jurusan[index].isEmpty) ? secondary : primary,
-                                                        size: 30,
-                                                      ),
-                                                      const SizedBox(width: 10),
-                                                      Expanded(
-                                                        child: Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Text(
-                                                              (jurusan[index].isEmpty) ? '-' : jurusan[index],
-                                                              style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines: 1,
-                                                            ),
-                                                            Text(
-                                                              (univ[index].isEmpty) ? '-' : univ[index],
-                                                              style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines: 1,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          const Expanded(child: SizedBox()),
-                                          Container(
-                                            width: 450,
-                                            padding: const EdgeInsets.all(3),
-                                            decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.info, color: primary),
-                                                const SizedBox(width: 10),
-                                                Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
-                                              ],
-                                            ),
-                                          ),
-                                          const Expanded(child: SizedBox()),
-                                          Column(
-                                            children: [
-                                              Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                              const SizedBox(height: 10),
-                                              SizedBox(
-                                                height: 30,
-                                                width: double.infinity,
-                                                child: OutlinedButton(
-                                                  onPressed: () {},
-                                                  style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                                  child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                        : planEmpty(),
+                            ? JurusanEmpty(context)
+                            : JurusanNotEmpty(context)
+                        : JurusanEmpty(context),
                     if (profile != null)
                       SizedBox(
                         width: double.infinity,
@@ -516,6 +357,88 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                 ),
               ),
             ),
+
+          //
+          if (listReviewThisTryout.isNotEmpty)
+            Center(
+              child: SizedBox(
+                width: 1000,
+                child: Text('Review Tryout', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          if (listReviewThisTryout.isNotEmpty)
+            Center(
+              child: SizedBox(
+                height: 200,
+                width: 1000,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: listReviewThisTryout.length,
+                  itemBuilder: (context, index) => SizedBox(
+                    width: 350,
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      color: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: SizedBox(
+                                    height: 40,
+                                    width: 40,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: CachedNetworkImage(
+                                        imageUrl: listReviewThisTryout[index].image,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: primary, strokeAlign: 10, strokeWidth: 3)),
+                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      listReviewThisTryout[index].userName,
+                                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: h4),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      formatDateTime(listReviewThisTryout[index].created),
+                                      style: TextStyle(color: Colors.black, fontSize: h4 - 2),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: List.generate(listReviewThisTryout[index].rating, (index) => const Icon(Icons.star, color: Colors.orange, size: 15)),
+                            ),
+                            Text(
+                              listReviewThisTryout[index].text,
+                              style: TextStyle(color: Colors.black, fontSize: h4),
+                              textAlign: TextAlign.justify,
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           //footer
           footerDesk(context: context),
         ],
@@ -524,49 +447,6 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
   }
 
   Widget onMo(BuildContext context) {
-    //
-    Widget planEmpty() => Center(
-          child: Container(
-            height: 180,
-            width: 700,
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Anda belum mengatur target Jurusan Anda',
-                        style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Expanded(child: SizedBox(width: 10)),
-                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 30,
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appbarMo(
@@ -724,9 +604,9 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                             (index1) {
                               String jumlahSoal = '0';
                               var subTest = test.listSubtest[index1];
-                              for (int i = 0; i < idAllQuestion.length; i++) {
-                                if (idAllQuestion[i] == subTest.idQuestions) {
-                                  jumlahSoal = '${allQuestion[i].listQuestions.length}';
+                              for (int i = 0; i < idAllSubtest.length; i++) {
+                                if (idAllSubtest[i] == subTest.idQuestions) {
+                                  jumlahSoal = '${allSubtest[i].listQuestions.length}';
                                 }
                               }
                               return Container(
@@ -769,100 +649,9 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                   children: [
                     (profile != null)
                         ? (profile!.listPlan.every((element) => element.jurusan.isEmpty))
-                            ? planEmpty()
-                            : Container(
-                                height: 300,
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 10),
-                                          Wrap(
-                                            children: List.generate(
-                                              4,
-                                              (index) {
-                                                var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
-                                                var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
-                                                return Container(
-                                                  width: 300,
-                                                  padding: const EdgeInsets.all(3),
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.check_circle, color: primary, size: 30),
-                                                      const SizedBox(width: 10),
-                                                      Expanded(
-                                                        child: Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Text(
-                                                              jurusan[index],
-                                                              style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines: 1,
-                                                            ),
-                                                            Text(
-                                                              univ[index],
-                                                              style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines: 1,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          const Expanded(child: SizedBox()),
-                                          Container(
-                                            width: 450,
-                                            padding: const EdgeInsets.all(3),
-                                            decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.info, color: primary),
-                                                const SizedBox(width: 10),
-                                                Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
-                                              ],
-                                            ),
-                                          ),
-                                          const Expanded(child: SizedBox()),
-                                          Column(
-                                            children: [
-                                              Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
-                                              const SizedBox(height: 10),
-                                              SizedBox(
-                                                height: 30,
-                                                width: double.infinity,
-                                                child: OutlinedButton(
-                                                  onPressed: () {},
-                                                  style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
-                                                  child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                        : planEmpty(),
+                            ? JurusanEmpty(context)
+                            : JurusanNotEmpty(context)
+                        : JurusanEmpty(context),
                     SizedBox(
                       width: double.infinity,
                       height: 40,
@@ -881,6 +670,282 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
         ],
       ),
     );
+  }
+
+  Widget JurusanNotEmpty(BuildContext context) {
+    bool onMo = (lebar(context) <= 700);
+    if (onMo) {
+      return Container(
+        // height: 500,
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(imageVec2, fit: BoxFit.cover, width: lebar(context) * .7),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Wrap(
+              children: List.generate(
+                4,
+                (index) {
+                  var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
+                  var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
+                  return Container(
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      children: [
+                        Icon(
+                          (jurusan[index].isEmpty) ? Icons.cancel : Icons.check_circle,
+                          color: (jurusan[index].isEmpty) ? secondary : primary,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                (jurusan[index].isEmpty) ? '-' : jurusan[index],
+                                style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              Text(
+                                (univ[index].isEmpty) ? '-' : univ[index],
+                                style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 30),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                // width: 450,
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                child: Row(
+                  children: [
+                    Icon(Icons.info, color: primary),
+                    const SizedBox(width: 10),
+                    Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black), textAlign: TextAlign.center),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 40,
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        height: 350,
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec2, fit: BoxFit.cover)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Target yang diinginkan', style: TextStyle(fontSize: h4, color: Colors.black, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    children: List.generate(
+                      4,
+                      (index) {
+                        var jurusan = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].jurusan);
+                        var univ = List.generate(profile!.listPlan.length, (index) => profile!.listPlan[index].universitas);
+                        return Container(
+                          width: 300,
+                          padding: const EdgeInsets.all(3),
+                          child: Row(
+                            children: [
+                              Icon(
+                                (jurusan[index].isEmpty) ? Icons.cancel : Icons.check_circle,
+                                color: (jurusan[index].isEmpty) ? secondary : primary,
+                                size: 30,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      (jurusan[index].isEmpty) ? '-' : jurusan[index],
+                                      style: TextStyle(fontSize: h4, color: primary, fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    Text(
+                                      (univ[index].isEmpty) ? '-' : univ[index],
+                                      style: TextStyle(fontSize: h5, color: Colors.black, fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Expanded(child: SizedBox()),
+                  Container(
+                    width: 450,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(color: primary.withOpacity(.1), borderRadius: BorderRadius.circular(50)),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info, color: primary),
+                        const SizedBox(width: 10),
+                        Text('Jurusan yang kamu pilih akan mempengaruhi progressmu loh', style: TextStyle(fontSize: h5 + 3, color: Colors.black)),
+                      ],
+                    ),
+                  ),
+                  const Expanded(child: SizedBox()),
+                  Column(
+                    children: [
+                      Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 30,
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                          child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget JurusanEmpty(BuildContext context) {
+    bool onMo = (lebar(context) <= 700);
+    if (onMo) {
+      return Center(
+        child: Container(
+          // height: 180,
+          width: 700,
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(imageVec4, fit: BoxFit.cover, width: lebar(context) * .7),
+              ),
+              const SizedBox(height: 30),
+              Text(
+                'Anda belum mengatur target Jurusan Anda',
+                style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black), textAlign: TextAlign.center),
+              SizedBox(
+                height: 40,
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                  child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Center(
+        child: Container(
+          height: 180,
+          width: 700,
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: secondaryWhite, borderRadius: BorderRadius.circular(10)),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: AspectRatio(aspectRatio: 1, child: Image.asset(imageVec4, fit: BoxFit.cover)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Anda belum mengatur target Jurusan Anda',
+                      style: TextStyle(fontSize: h2, color: Colors.black, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Expanded(child: SizedBox(width: 10)),
+                    Text('Ingin mengubah target yang kamu atur sebelumnya?', style: TextStyle(fontSize: h4, color: Colors.black)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 30,
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
+                        child: Text('Ubah Sekarang', style: TextStyle(fontSize: h4, color: primary)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> showDaftarSekarang({required BuildContext context}) async {
@@ -991,35 +1056,36 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                         ),
                       ],
                     ),
-                    // Pilihan Pembayaran
-                    Center(
-                      child: Container(
-                        height: 110,
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Pakai TryOut Gratis', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
-                            Text('(Syarat dan ketentuan berlaku)', style: TextStyle(color: Colors.black, fontSize: h4)),
-                            SizedBox(
-                              height: 35,
-                              width: 250,
-                              child: TextButton(
-                                onPressed: () {
-                                  profider.setTitleUserPage('Dream Academy - Payment');
-                                  Navigator.push(context, FadeRoute1(PayFreeUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
-                                },
-                                style: TextButton.styleFrom(backgroundColor: primary),
-                                child: Text('Daftar', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
+                    // Pilihan Pembayaran Gratis
+                    if (tryoutUser!.showFreeMethod)
+                      Center(
+                        child: Container(
+                          height: 110,
+                          padding: const EdgeInsets.all(10),
+                          margin: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Pakai TryOut Gratis', style: TextStyle(color: Colors.black, fontSize: h4, fontWeight: FontWeight.bold)),
+                              Text('(Syarat dan ketentuan berlaku)', style: TextStyle(color: Colors.black, fontSize: h4)),
+                              SizedBox(
+                                height: 35,
+                                width: 250,
+                                child: TextButton(
+                                  onPressed: () {
+                                    profider.setTitleUserPage('Dream Academy - Payment');
+                                    Navigator.push(context, FadeRoute1(PayFreeUserPage(idTryout: widget.idTryout, tryoutUser: tryoutUser)));
+                                  },
+                                  style: TextButton.styleFrom(backgroundColor: primary),
+                                  child: Text('Daftar', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     if (lebar(context) <= 700)
                       Center(
                         child: Container(
@@ -1039,7 +1105,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                 child: TextButton(
                                   onPressed: () {
                                     profider.setTitleUserPage('Dream Academy - Payment');
-                                    Navigator.push(context, FadeRoute1(PayCoinUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
+                                    Navigator.push(context, FadeRoute1(PayCoinUserPage(idTryout: widget.idTryout, tryoutUser: tryoutUser)));
                                   },
                                   style: TextButton.styleFrom(backgroundColor: primary),
                                   child: Text('Gunakan', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
@@ -1071,7 +1137,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                 child: TextButton(
                                   onPressed: () {
                                     profider.setTitleUserPage('Dream Academy - Payment');
-                                    Navigator.push(context, FadeRoute1(PayEwalletUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
+                                    Navigator.push(context, FadeRoute1(PayEwalletUserPage(idTryout: widget.idTryout, tryoutUser: tryoutUser)));
                                   },
                                   style: TextButton.styleFrom(backgroundColor: primary),
                                   child: Text('Bayar', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
@@ -1102,7 +1168,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                   child: TextButton(
                                     onPressed: () {
                                       profider.setTitleUserPage('Dream Academy - Payment');
-                                      Navigator.push(context, FadeRoute1(PayCoinUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
+                                      Navigator.push(context, FadeRoute1(PayCoinUserPage(idTryout: widget.idTryout, tryoutUser: tryoutUser)));
                                     },
                                     style: TextButton.styleFrom(backgroundColor: primary),
                                     child: Text('Gunakan', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),
@@ -1131,7 +1197,7 @@ class _DetailTryoutUserPageState extends State<DetailTryoutUserPage> {
                                   child: TextButton(
                                     onPressed: () {
                                       profider.setTitleUserPage('Dream Academy - Payment');
-                                      Navigator.push(context, FadeRoute1(PayEwalletUserPage(docId: widget.docId, tryoutUser: tryoutUser)));
+                                      Navigator.push(context, FadeRoute1(PayEwalletUserPage(idTryout: widget.idTryout, tryoutUser: tryoutUser)));
                                     },
                                     style: TextButton.styleFrom(backgroundColor: primary),
                                     child: Text('Bayar', style: TextStyle(color: Colors.white, fontSize: h4, fontWeight: FontWeight.bold)),

@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:da_administrator/model/questions/questions_model.dart';
+import 'package:da_administrator/model/review/tryout_review_model.dart';
 import 'package:da_administrator/pages_user/component/footer.dart';
 import 'package:da_administrator/pages_user/detail_tryout_user_page.dart';
 import 'package:da_administrator/pages_user/tryout_selengkapnya_user_page.dart';
 import 'package:da_administrator/service/color.dart';
 import 'package:da_administrator/service/component.dart';
 import 'package:da_administrator/service/state_manajement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,14 +18,30 @@ import 'package:provider/provider.dart';
 import '../model/tryout/tryout_model.dart';
 
 class TryoutPublicUserPage extends StatefulWidget {
-  const TryoutPublicUserPage({super.key});
+  final List<TryoutModel> allTryout;
+  final List<String> idAllTryout;
+  final List<QuestionsModel> allSubtest;
+  final List<String> idAllSubtest;
+  final List<TryoutReviewModel> allReview;
+  final List<String> idAllReview;
+
+  const TryoutPublicUserPage({
+    super.key,
+    required this.idAllTryout,
+    required this.allTryout,
+    required this.allSubtest,
+    required this.idAllSubtest,
+    required this.allReview,
+    required this.idAllReview,
+  });
 
   @override
   State<TryoutPublicUserPage> createState() => _TryoutPublicUserPageState();
 }
 
 class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
-  String userUid = 'bBm35Y9GYcNR8YHu2bybB61lyEr1';
+  final user = FirebaseAuth.instance.currentUser;
+
   TextEditingController foundController = TextEditingController();
   List<TryoutModel> allTryout = [];
   List<String> idAllTryout = [];
@@ -47,46 +66,30 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
 
   @override
   void initState() {
+    final user = FirebaseAuth.instance.currentUser;
     // TODO: implement initState
     super.initState();
-
-    getDataProduct();
+    if (user != null) {
+      setDataTryout();
+    }
   }
 
-  void getDataProduct() async {
-    allTryout = [];
-    idAllTryout = [];
+  void setDataTryout() async {
+    allTryout = widget.allTryout;
+    idAllTryout = widget.idAllTryout;
 
-    ongoingTryout = [];
-    idOngoingTryout = [];
-
-    filteredTryout = [];
-    idFilteredTryout = [];
-
-    foundTryout = null;
-    idFoundTryout = null;
-    try {
-      CollectionReference collectionRef = FirebaseFirestore.instance.collection('tryout_v2');
-      QuerySnapshot<Object?> querySnapshot = await collectionRef.orderBy('created', descending: false).get();
-
-      allTryout = querySnapshot.docs.map((doc) => TryoutModel.fromSnapshot(doc as DocumentSnapshot<Map<String, dynamic>>)).toList();
-      idAllTryout = querySnapshot.docs.map((doc) => doc.id).toList();
-
-      for (int i = 0; i < allTryout.length; i++) {
-        if (allTryout[i].public) {
-          filteredTryout.add(allTryout[i]);
-          idFilteredTryout.add(idAllTryout[i]);
-          if (DateTime.now().isAfter(allTryout[i].started) && DateTime.now().isBefore(allTryout[i].ended)) {
-            ongoingTryout.add(allTryout[i]);
-            idOngoingTryout.add(idAllTryout[i]);
-          }
+    for (int i = 0; i < allTryout.length; i++) {
+      if (allTryout[i].public) {
+        filteredTryout.add(allTryout[i]);
+        idFilteredTryout.add(idAllTryout[i]);
+        if (DateTime.now().isAfter(allTryout[i].started) && DateTime.now().isBefore(allTryout[i].ended)) {
+          ongoingTryout.add(allTryout[i]);
+          idOngoingTryout.add(idAllTryout[i]);
         }
       }
-
-      setState(() {});
-    } catch (e) {
-      print('salah public user: $e');
     }
+
+    setState(() {});
   }
 
   String formatDateTime(DateTime dateTime) {
@@ -94,8 +97,8 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
     return formatter.format(dateTime);
   }
 
-  void selengkapnya(BuildContext context) {
-    Navigator.push(context, FadeRoute1(const TryoutSelengkapnyaUserPage()));
+  void selengkapnya(BuildContext context, {required List<TryoutModel> allTryout, required List<String> idAllTryout}) {
+    Navigator.push(context, FadeRoute1(TryoutSelengkapnyaUserPage(allTryout: allTryout, idAllTryout: idAllTryout)));
   }
 
   Widget onDesk(BuildContext context) {
@@ -171,7 +174,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                       builder: (BuildContext context, StateSetter setState) {
                         var claimed = false;
                         for (int i = 0; i < foundTryout!.claimedUid.length; i++) {
-                          if (foundTryout?.claimedUid[i].userUID == userUid) {
+                          if (foundTryout?.claimedUid[i].userUID == user!.uid) {
                             claimed = true;
                           }
                         }
@@ -185,7 +188,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                           ended: foundTryout!.ended,
                           claimed: claimed,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idFoundTryout!)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailTryoutUserPage(
+                                  tryoutUser: foundTryout!,
+                                  idTryout: idFoundTryout!,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -203,7 +218,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                         (index) {
                           var claimed = false;
                           for (int i = 0; i < ongoingTryout[index].claimedUid.length; i++) {
-                            if (ongoingTryout[index].claimedUid[i].userUID == userUid) {
+                            if (ongoingTryout[index].claimedUid[i].userUID == user!.uid) {
                               claimed = true;
                             }
                           }
@@ -217,7 +232,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                             ended: ongoingTryout[index].ended,
                             claimed: claimed,
                             onTap: () {
-                              Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idOngoingTryout[index])));
+                              Navigator.push(
+                                context,
+                                FadeRoute1(
+                                  DetailTryoutUserPage(
+                                    tryoutUser: ongoingTryout[index],
+                                    idTryout: idOngoingTryout[index],
+                                    allSubtest: widget.allSubtest,
+                                    idAllSubtest: widget.idAllSubtest,
+                                    allReview: widget.allReview,
+                                    idAllReview: widget.idAllReview,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
@@ -233,7 +260,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                       SizedBox(
                         height: 30,
                         child: OutlinedButton.icon(
-                          onPressed: () => selengkapnya(context),
+                          onPressed: () => selengkapnya(context, allTryout: ongoingTryout, idAllTryout: idOngoingTryout),
                           style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                           iconAlignment: IconAlignment.end,
                           icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -253,7 +280,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                         (index) {
                           var claimed = false;
                           for (int i = 0; i < filteredTryout[index].claimedUid.length; i++) {
-                            if (filteredTryout[index].claimedUid[i].userUID == userUid) {
+                            if (filteredTryout[index].claimedUid[i].userUID == user!.uid) {
                               claimed = true;
                             }
                           }
@@ -267,7 +294,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                             ended: filteredTryout[index].ended,
                             claimed: claimed,
                             onTap: () {
-                              Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idFilteredTryout[index])));
+                              Navigator.push(
+                                context,
+                                FadeRoute1(
+                                  DetailTryoutUserPage(
+                                    tryoutUser: filteredTryout[index],
+                                    idTryout: idFilteredTryout[index],
+                                    allSubtest: widget.allSubtest,
+                                    idAllSubtest: widget.idAllSubtest,
+                                    allReview: widget.allReview,
+                                    idAllReview: widget.idAllReview,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
@@ -358,7 +397,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                       builder: (BuildContext context, StateSetter setState) {
                         var claimed = false;
                         for (int i = 0; i < foundTryout!.claimedUid.length; i++) {
-                          if (foundTryout?.claimedUid[i].userUID == userUid) {
+                          if (foundTryout?.claimedUid[i].userUID == user!.uid) {
                             claimed = true;
                           }
                         }
@@ -372,7 +411,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                           ended: foundTryout!.ended,
                           claimed: claimed,
                           onTap: () {
-                            Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idFoundTryout!)));
+                            Navigator.push(
+                              context,
+                              FadeRoute1(
+                                DetailTryoutUserPage(
+                                  tryoutUser: foundTryout!,
+                                  idTryout: idFoundTryout!,
+                                  allSubtest: widget.allSubtest,
+                                  idAllSubtest: widget.idAllSubtest,
+                                  allReview: widget.allReview,
+                                  idAllReview: widget.idAllReview,
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -390,7 +441,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                         (index) {
                           var claimed = false;
                           for (int i = 0; i < ongoingTryout[index].claimedUid.length; i++) {
-                            if (ongoingTryout[index].claimedUid[i].userUID == userUid) {
+                            if (ongoingTryout[index].claimedUid[i].userUID == user!.uid) {
                               claimed = true;
                             }
                           }
@@ -404,7 +455,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                             ended: ongoingTryout[index].ended,
                             claimed: claimed,
                             onTap: () {
-                              Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idOngoingTryout[index])));
+                              Navigator.push(
+                                context,
+                                FadeRoute1(
+                                  DetailTryoutUserPage(
+                                    tryoutUser: ongoingTryout[index],
+                                    idTryout: idOngoingTryout[index],
+                                    allSubtest: widget.allSubtest,
+                                    idAllSubtest: widget.idAllSubtest,
+                                    allReview: widget.allReview,
+                                    idAllReview: widget.idAllReview,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
@@ -420,7 +483,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                       SizedBox(
                         height: 30,
                         child: OutlinedButton.icon(
-                          onPressed: () => selengkapnya(context),
+                          onPressed: () => selengkapnya(context, idAllTryout: idOngoingTryout, allTryout: ongoingTryout),
                           style: OutlinedButton.styleFrom(side: BorderSide(color: primary)),
                           iconAlignment: IconAlignment.end,
                           icon: Icon(Icons.keyboard_double_arrow_right, color: primary, size: 20),
@@ -440,7 +503,7 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                         (index) {
                           var claimed = false;
                           for (int i = 0; i < filteredTryout[index].claimedUid.length; i++) {
-                            if (filteredTryout[index].claimedUid[i].userUID == userUid) {
+                            if (filteredTryout[index].claimedUid[i].userUID == user!.uid) {
                               claimed = true;
                             }
                           }
@@ -454,7 +517,19 @@ class _TryoutPublicUserPageState extends State<TryoutPublicUserPage> {
                             ended: filteredTryout[index].ended,
                             claimed: claimed,
                             onTap: () {
-                              Navigator.push(context, FadeRoute1(DetailTryoutUserPage(docId: idFilteredTryout[index])));
+                              Navigator.push(
+                                context,
+                                FadeRoute1(
+                                  DetailTryoutUserPage(
+                                    tryoutUser: filteredTryout[index],
+                                    idTryout: idFilteredTryout[index],
+                                    allSubtest: widget.allSubtest,
+                                    idAllSubtest: widget.idAllSubtest,
+                                    allReview: widget.allReview,
+                                    idAllReview: widget.idAllReview,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },

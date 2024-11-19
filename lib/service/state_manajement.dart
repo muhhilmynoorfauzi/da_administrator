@@ -25,13 +25,13 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
 
 //-------------------------------------------------
 
-  User? _currentUser;
+  /*User? _currentUser;
 
   User? get getCurrentUser => _currentUser;
 
   void setCurrentUser(User? user) {
     _currentUser = user;
-  }
+  }*/
 
 //-------------------------------------------------
 
@@ -77,14 +77,19 @@ class CounterProvider with ChangeNotifier, DiagnosticableTreeMixin {
     _titleUserPage = value;
     notifyListeners();
   }
-//-------------------------------------------------
 
+//-------------------------------------------------
   ProfileUserModel? _profile;
+  String? _idProfile;
 
   ProfileUserModel? get getProfile => _profile;
+  String? get getIdProfile => _idProfile;
 
   void setProfile(ProfileUserModel? profile) {
     _profile = profile;
+  }
+  void setIdProfile(String? idProfile) {
+    _idProfile = idProfile;
   }
 
 // final profider = Provider.of<CounterProvider>(context, listen: false);

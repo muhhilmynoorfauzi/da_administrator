@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyArb3QRzBI2aeMZkqo5Gb66PB_AjzRM2ZM',
-    appId: '1:46737009702:android:d5b6a757f49e050ca6cae7',
+    appId: '1:46737009702:android:d1f649ff133a308da6cae7',
     messagingSenderId: '46737009702',
     projectId: 'dreamacademy-example',
     storageBucket: 'dreamacademy-example.appspot.com',
@@ -70,6 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '46737009702',
     projectId: 'dreamacademy-example',
     storageBucket: 'dreamacademy-example.appspot.com',
+    androidClientId: '46737009702-0h15l8tv9n2fm9ellakmq5u199lh24li.apps.googleusercontent.com',
+    iosClientId: '46737009702-nde1bf4ame7q1cqer0s2buarr9s6o923.apps.googleusercontent.com',
     iosBundleId: 'com.example.daAdministrator',
   );
 
